@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Record</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Create New Facility Record</h1>
+        <div class="btn-group">
+            <a href="index.html" class="btn">Home</a>
+            <a href="search.html" class="btn">Search</a>
+            <a href="update.html" class="btn">Update</a>
+            <a href="delete.html" class="btn">Delete</a>
+        </div>
+    </header>
+
+    <section class="card">
+        <form id="newForm">
+            <div class="form-grid">
+                <div class="input-group">
+                    <label for="newCode">Facility Code</label>
+                    <input type="text" id="newCode" required>
+                </div>
+                <div class="input-group">
+                    <label for="newName">Facility Name</label>
+                    <input type="text" id="newName" required>
+                </div>
+                <div class="input-group">
+                    <label for="newSite">Site</label>
+                    <input type="text" id="newSite" required>
+                </div>
+                <div class="input-group">
+                    <label for="newSubmitter">Submitter</label>
+                    <input type="text" id="newSubmitter" required>
+                </div>
+            </div>
+            <button type="submit" class="btn">Create</button>
+            <button type="reset" class="btn secondary">Clear</button>
+        </form>
+    </section>
+</div>
+
+<script>
+document.getElementById('newForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const code = document.getElementById('newCode').value.trim();
+    const name = document.getElementById('newName').value.trim();
+    const site = document.getElementById('newSite').value.trim();
+    const submitter = document.getElementById('newSubmitter').value.trim();
+
+    if (!code || !name || !site || !submitter) {
+        alert('Please fill out all fields.');
+        return;
+    }
+
+    let records = JSON.parse(localStorage.getItem('facilities')) || [];
+
+    const exists = records.some(r => r.code === code);
+    if (exists) {
+        alert('Facility code already exists.');
+        return;
+    }
+
+    const newRecord = {
+        code,
+        name,
+        site,
+        submitter,
+        updated: new Date().toLocaleDateString()
+    };
+
+    records.push(newRecord);
+    localStorage.setItem('facilities', JSON.stringify(records));
+
+    alert('Record added successfully.');
+    this.reset();
+});
+</script>
+</body>
+</html>
