@@ -16,12 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const users = JSON.parse(localStorage.getItem("rms_users") || "[]");
       const user = users.find((u) => u.email === email && u.password === password);
 
-      if (user) {
-        localStorage.setItem("rms_user", JSON.stringify({ name: user.name, email: user.email }));
-        window.location.href = " new.html";
-      } else {
-        msg.textContent = "Invalid credentials. Please try again or register.";
-      }
+     
     });
   }
 
