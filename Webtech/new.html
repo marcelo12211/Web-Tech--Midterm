@@ -8,6 +8,10 @@
 </head>
 <body>
 <div class="container">
+    <div class="topbar-right">
+    <span id="userName" class="user-name"></span>
+    <button id="logoutBtn" class="btn subtle">Logout</button>
+  </div>
     <header>
         <h1>Create New Facility Record</h1>
         <div class="btn-group">
@@ -80,6 +84,29 @@ document.getElementById('newForm').addEventListener('submit', function(e) {
     alert('Record added successfully.');
     this.reset();
 });
+
+function setupLogout() {
+  const logoutBtn = document.getElementById('logoutBtn');
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('rms_user');
+    window.location.href = 'login.html';
+  });
+}
+
+function showUser() {
+  const user = JSON.parse(localStorage.getItem('rms_user'));
+  const userNameSpan = document.getElementById('userName');
+  if (user && user.name) {
+    userNameSpan.textContent = `Welcome, ${user.name}`;
+  } else {
+    window.location.href = 'login.html';
+  }
+}
+
+window.onload = function() {
+  showUser();
+  setupLogout();
+};
 </script>
 </body>
 </html>

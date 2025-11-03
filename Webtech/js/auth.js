@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (user) {
         localStorage.setItem("rms_user", JSON.stringify({ name: user.name, email: user.email }));
-        window.location.href = "dashboard.html";
+        window.location.href = " new.html";
       } else {
         msg.textContent = "Invalid credentials. Please try again or register.";
       }
