@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       msg.style.color = "green";
       msg.textContent = "Registered successfully. Redirecting to login...";
-      setTimeout(() => (window.location.href = "index.html"), 1000);
+      setTimeout(() => (window.location.href = "new.html"), 1000);
     });
   }
 });
