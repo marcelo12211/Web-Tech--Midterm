@@ -30,6 +30,33 @@
       .listbox div:hover {
         background: #eee;
       }
+      .interview-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      .interview-table th,
+      .interview-table td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: center;
+      }
+      .interview-table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+      }
+      .interview-table input,
+      .interview-table select {
+        width: 95%;
+        padding: 4px;
+        font-size: 14px;
+      }
+      .button-group {
+        margin-top: 15px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
     </style>
   </head>
   <body>
@@ -51,6 +78,7 @@
 
       <section class="card">
         <form id="newForm">
+          <!-- PAGE 1 -->
           <div id="page1">
             <div class="form-grid">
               <div class="input-group">
@@ -107,13 +135,95 @@
                 <input type="text" id="newNumOfHouseholdMem" required />
               </div>
             </div>
-            <button type="button" id="nextBtn" class="btn">Next</button>
             <button type="reset" class="btn secondary">Clear</button>
+            <button type="button" id="nextBtn" class="btn">Next</button>
           </div>
 
+          <!-- PAGE 2 -->
           <div id="page2" class="hidden">
-            <p>Second page is currently empty.</p>
-            <button type="button" id="backBtn" class="btn">Back</button>
+            <h2>B. Interview Information</h2>
+            <table class="interview-table">
+              <thead>
+                <tr>
+                  <th>Visit</th>
+                  <th>Date of Visit</th>
+                  <th>Time Start</th>
+                  <th>Time End</th>
+                  <th>Result<br />(C=Completed, CB=Callback, R=Refused)</th>
+                  <th>Date of Next Visit</th>
+                  <th>Name of Interviewer, Initial/Date</th>
+                  <th>Name of Supervisor, Initial/Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1st Visit</td>
+                  <td><input type="date" id="visit1Date" /></td>
+                  <td><input type="time" id="visit1Start" /></td>
+                  <td><input type="time" id="visit1End" /></td>
+                  <td>
+                    <select id="visit1Result">
+                      <option value="">Select</option>
+                      <option value="C">C - Completed</option>
+                      <option value="CB">CB - Callback</option>
+                      <option value="R">R - Refused</option>
+                    </select>
+                  </td>
+                  <td><input type="date" id="visit1NextDate" /></td>
+                  <td>
+                    <input
+                      type="text"
+                      id="visit1Interviewer"
+                      placeholder="Initial/Date"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      id="visit1Supervisor"
+                      placeholder="Initial/Date"
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>2nd Visit</td>
+                  <td><input type="date" id="visit2Date" /></td>
+                  <td><input type="time" id="visit2Start" /></td>
+                  <td><input type="time" id="visit2End" /></td>
+                  <td>
+                    <select id="visit2Result">
+                      <option value="">Select</option>
+                      <option value="C">C - Completed</option>
+                      <option value="CB">CB - Callback</option>
+                      <option value="R">R - Refused</option>
+                    </select>
+                  </td>
+                  <td><input type="date" id="visit2NextDate" /></td>
+                  <td>
+                    <input
+                      type="text"
+                      id="visit2Interviewer"
+                      placeholder="Initial/Date"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      id="visit2Supervisor"
+                      placeholder="Initial/Date"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="button-group">
+              <button type="reset" class="btn secondary">Clear</button>
+              <button type="button" id="backBtn" class="btn secondary">
+                Back
+              </button>
+              <button type="button" id="nextBtn" class="btn">Next</button>
+            </div>
           </div>
         </form>
       </section>
@@ -121,6 +231,7 @@
 
     <script>
       const provinces = [
+        "Benguet",
         "Metro Manila",
         "Cebu",
         "Batangas",
@@ -129,7 +240,6 @@
         "Pampanga",
         "Bulacan",
         "Davao del Sur",
-        "Benguet",
       ];
       const cities = {
         "Metro Manila": [
@@ -140,6 +250,7 @@
           "Taguig",
           "Caloocan",
         ],
+        Benguet: ["Baguio City", "La Trinidad"],
         Cebu: ["Cebu City", "Mandaue", "Lapu-Lapu"],
         Batangas: ["Batangas City", "Lipa", "Tanauan"],
         Cavite: ["Dasmariñas", "Imus", "Bacoor"],
@@ -147,7 +258,6 @@
         Pampanga: ["San Fernando", "Angeles"],
         Bulacan: ["Malolos", "San Jose del Monte"],
         "Davao del Sur": ["Davao City", "Digos"],
-        Benguet: ["Baguio City", "La Trinidad"],
       };
 
       function setupDropdown(inputId, listId, data) {
@@ -158,22 +268,6 @@
           const value = input.value.toLowerCase();
           list.innerHTML = "";
           const matches = data.filter((d) => d.toLowerCase().includes(value));
-          matches.forEach((item) => {
-            const div = document.createElement("div");
-            div.textContent = item;
-            div.onclick = () => {
-              input.value = item;
-              list.classList.add("hidden");
-            };
-            list.appendChild(div);
-          });
-          list.classList.toggle("hidden", matches.length === 0);
-        });
-
-        input.addEventListener("focus", () => {
-          const value = input.value.toLowerCase();
-          const matches = data.filter((d) => d.toLowerCase().includes(value));
-          list.innerHTML = "";
           matches.forEach((item) => {
             const div = document.createElement("div");
             div.textContent = item;
