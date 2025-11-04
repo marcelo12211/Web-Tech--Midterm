@@ -136,8 +136,10 @@
                 <input type="text" id="newNumOfHouseholdMem" required />
               </div>
             </div>
-            <button type="reset" class="btn secondary">Clear</button>
-            <button type="button" id="nextBtn" class="btn">Next</button>
+            <div class="button-group">
+              <button type="reset" class="btn secondary">Clear</button>
+              <button type="button" id="nextBtn1" class="btn">Next</button>
+            </div>
           </div>
 
           <!-- PAGE 2 -->
@@ -220,10 +222,23 @@
 
             <div class="button-group">
               <button type="reset" class="btn secondary">Clear</button>
-              <button type="button" id="backBtn" class="btn secondary">
+              <button type="button" id="backBtn2" class="btn secondary">
                 Back
               </button>
-              <button type="button" id="nextBtn" class="btn">Next</button>
+              <button type="button" id="nextBtn2" class="btn">Next</button>
+            </div>
+          </div>
+
+          <!-- PAGE 3 -->
+          <div id="page3" class="hidden">
+            <h2>C. Encoding Information</h2>
+
+            <div class="button-group">
+              <button type="reset" class="btn secondary">Clear</button>
+              <button type="button" id="backBtn3" class="btn secondary">
+                Back
+              </button>
+              <button type="submit" id="submitBtn" class="btn">Submit</button>
             </div>
           </div>
         </form>
@@ -242,6 +257,7 @@
         "Bulacan",
         "Davao del Sur",
       ];
+
       const cities = {
         "Metro Manila": [
           "Manila",
@@ -303,21 +319,33 @@
         }
       });
 
-      const nextBtn = document.getElementById("nextBtn");
-      const backBtn = document.getElementById("backBtn");
+      // Page navigation
       const page1 = document.getElementById("page1");
       const page2 = document.getElementById("page2");
+      const page3 = document.getElementById("page3");
 
-      nextBtn.addEventListener("click", () => {
+      // Page 1 -> Page 2
+      document.getElementById("nextBtn1").addEventListener("click", () => {
         const fields = document.querySelectorAll("#page1 input");
-        let formData = {};
+        const formData = {};
         fields.forEach((f) => (formData[f.id] = f.value));
         localStorage.setItem("page1Data", JSON.stringify(formData));
         page1.classList.add("hidden");
         page2.classList.remove("hidden");
       });
 
-      backBtn.addEventListener("click", () => {
+      // Page 2 -> Page 3
+      document.getElementById("nextBtn2").addEventListener("click", () => {
+        const fields = document.querySelectorAll("#page2 input, #page2 select");
+        const formData = {};
+        fields.forEach((f) => (formData[f.id] = f.value));
+        localStorage.setItem("page2Data", JSON.stringify(formData));
+        page2.classList.add("hidden");
+        page3.classList.remove("hidden");
+      });
+
+      // Back from Page 2 -> Page 1
+      document.getElementById("backBtn2").addEventListener("click", () => {
         const saved = JSON.parse(localStorage.getItem("page1Data"));
         if (saved) {
           Object.keys(saved).forEach((id) => {
@@ -329,6 +357,13 @@
         page1.classList.remove("hidden");
       });
 
+      // Back from Page 3 -> Page 2
+      document.getElementById("backBtn3").addEventListener("click", () => {
+        page3.classList.add("hidden");
+        page2.classList.remove("hidden");
+      });
+
+      // Logout setup
       function setupLogout() {
         const logoutBtn = document.getElementById("logoutBtn");
         logoutBtn.addEventListener("click", () => {
@@ -337,6 +372,7 @@
         });
       }
 
+      // Display user
       function showUser() {
         const user = JSON.parse(localStorage.getItem("rms_user"));
         const userNameSpan = document.getElementById("userName");
