@@ -1,124 +1,261 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>New Record</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-<div class="container">
-    <div class="topbar-right">
-    <span id="userName" class="user-name"></span>
-    <button id="logoutBtn" class="btn subtle">Logout</button>
-  </div>
-    <header>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .hidden {
+        display: none;
+      }
+      .suggestions {
+        position: relative;
+      }
+      .listbox {
+        position: absolute;
+        top: 38px;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ccc;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 100;
+      }
+      .listbox div {
+        padding: 6px 10px;
+        cursor: pointer;
+      }
+      .listbox div:hover {
+        background: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="topbar-right">
+        <span id="userName" class="user-name"></span>
+        <button id="logoutBtn" class="btn subtle">Logout</button>
+      </div>
+
+      <header>
         <h1>Create New Facility Record</h1>
         <div class="btn-group">
-            <a href="index.html" class="btn">Home</a>
-            <a href="search.html" class="btn">Search</a>
-            <a href="update.html" class="btn">Update</a>
-            <a href="delete.html" class="btn">Delete</a>
+          <a href="index.html" class="btn">Home</a>
+          <a href="search.html" class="btn">Search</a>
+          <a href="update.html" class="btn">Update</a>
+          <a href="delete.html" class="btn">Delete</a>
         </div>
-    </header>
+      </header>
 
-    <section class="card">
+      <section class="card">
         <form id="newForm">
+          <div id="page1">
             <div class="form-grid">
-                <div class="input-group">
-                    <label for="newName">Full Name</label>
-                    <input type="text" id="newName" required>
+              <div class="input-group">
+                <label for="newFirst">First Name</label>
+                <input type="text" id="newFirst" required />
+              </div>
+              <div class="input-group">
+                <label for="newMiddle">Middle Name</label>
+                <input type="text" id="newMiddle" />
+              </div>
+              <div class="input-group">
+                <label for="newLast">Surname</label>
+                <input type="text" id="newLast" required />
+              </div>
+              <div class="input-group">
+                <label for="newSuffix">Suffix</label>
+                <input type="text" id="newSuffix" placeholder="e.g., Jr, Sr" />
+              </div>
+              <div class="input-group">
+                <label for="newProvince">Province</label>
+                <div class="suggestions">
+                  <input
+                    type="text"
+                    id="newProvince"
+                    autocomplete="off"
+                    required
+                  />
+                  <div id="provinceList" class="listbox hidden"></div>
                 </div>
-                <div class="input-group">
-                    <label for="newProvince">Province</label>
-                    <input type="text" id="newProvince" required>
+              </div>
+              <div class="input-group">
+                <label for="newCity">City/Municipality</label>
+                <div class="suggestions">
+                  <input type="text" id="newCity" autocomplete="off" required />
+                  <div id="cityList" class="listbox hidden"></div>
                 </div>
-                <div class="input-group">
-                    <label for="newCity">City/Municipality</label>
-                    <input type="text" id="newCity" required>
-                </div>
-                <div class="input-group">
-                    <label for="newBarangay">Barangay</label>
-                    <input type="text" id="newBarangay" required>
-                </div>
-                <div class="input-group">
-                    <label for="newAddress">Address</label>
-                    <input type="text" id="newAddress" required>
-                </div>
-                <div class="input-group">
-                    <label for="newHouseholdHead">Household Head</label>
-                    <input type="text" id="newHouseholdHead" required>
-                </div>
-                <div class="input-group">
-                    <label for="newNumOfHouseholdMem">Total Number of Household Members</label>
-                    <input type="text" id="newNumOfHouseholdMem" required>
-                </div>
+              </div>
+              <div class="input-group">
+                <label for="newBarangay">Barangay</label>
+                <input type="text" id="newBarangay" required />
+              </div>
+              <div class="input-group">
+                <label for="newAddress">Address</label>
+                <input type="text" id="newAddress" required />
+              </div>
+              <div class="input-group">
+                <label for="newHouseholdHead">Household Head</label>
+                <input type="text" id="newHouseholdHead" required />
+              </div>
+              <div class="input-group">
+                <label for="newNumOfHouseholdMem"
+                  >Total Number of Household Members</label
+                >
+                <input type="text" id="newNumOfHouseholdMem" required />
+              </div>
             </div>
-            <button type="submit" class="btn">Create</button>
+            <button type="button" id="nextBtn" class="btn">Next</button>
             <button type="reset" class="btn secondary">Clear</button>
+          </div>
+
+          <div id="page2" class="hidden">
+            <p>Second page is currently empty.</p>
+            <button type="button" id="backBtn" class="btn">Back</button>
+          </div>
         </form>
-    </section>
-</div>
+      </section>
+    </div>
 
-<script>
-document.getElementById('newForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+    <script>
+      const provinces = [
+        "Metro Manila",
+        "Cebu",
+        "Batangas",
+        "Cavite",
+        "Laguna",
+        "Pampanga",
+        "Bulacan",
+        "Davao del Sur",
+        "Benguet",
+      ];
+      const cities = {
+        "Metro Manila": [
+          "Manila",
+          "Quezon City",
+          "Pasig",
+          "Makati",
+          "Taguig",
+          "Caloocan",
+        ],
+        Cebu: ["Cebu City", "Mandaue", "Lapu-Lapu"],
+        Batangas: ["Batangas City", "Lipa", "Tanauan"],
+        Cavite: ["Dasmariñas", "Imus", "Bacoor"],
+        Laguna: ["Calamba", "Santa Rosa", "Biñan"],
+        Pampanga: ["San Fernando", "Angeles"],
+        Bulacan: ["Malolos", "San Jose del Monte"],
+        "Davao del Sur": ["Davao City", "Digos"],
+        Benguet: ["Baguio City", "La Trinidad"],
+      };
 
-    const code = document.getElementById('newCode').value.trim();
-    const name = document.getElementById('newName').value.trim();
-    const site = document.getElementById('newSite').value.trim();
-    const submitter = document.getElementById('newSubmitter').value.trim();
+      function setupDropdown(inputId, listId, data) {
+        const input = document.getElementById(inputId);
+        const list = document.getElementById(listId);
 
-    if (!code || !name || !site || !submitter) {
-        alert('Please fill out all fields.');
-        return;
-    }
+        input.addEventListener("input", () => {
+          const value = input.value.toLowerCase();
+          list.innerHTML = "";
+          const matches = data.filter((d) => d.toLowerCase().includes(value));
+          matches.forEach((item) => {
+            const div = document.createElement("div");
+            div.textContent = item;
+            div.onclick = () => {
+              input.value = item;
+              list.classList.add("hidden");
+            };
+            list.appendChild(div);
+          });
+          list.classList.toggle("hidden", matches.length === 0);
+        });
 
-    let records = JSON.parse(localStorage.getItem('facilities')) || [];
+        input.addEventListener("focus", () => {
+          const value = input.value.toLowerCase();
+          const matches = data.filter((d) => d.toLowerCase().includes(value));
+          list.innerHTML = "";
+          matches.forEach((item) => {
+            const div = document.createElement("div");
+            div.textContent = item;
+            div.onclick = () => {
+              input.value = item;
+              list.classList.add("hidden");
+            };
+            list.appendChild(div);
+          });
+          list.classList.toggle("hidden", matches.length === 0);
+        });
 
-    const exists = records.some(r => r.code === code);
-    if (exists) {
-        alert('Facility code already exists.');
-        return;
-    }
+        document.addEventListener("click", (e) => {
+          if (!input.contains(e.target) && !list.contains(e.target)) {
+            list.classList.add("hidden");
+          }
+        });
+      }
 
-    const newRecord = {
-        code,
-        name,
-        site,
-        submitter,
-        updated: new Date().toLocaleDateString()
-    };
+      setupDropdown("newProvince", "provinceList", provinces);
 
-    records.push(newRecord);
-    localStorage.setItem('facilities', JSON.stringify(records));
+      document.getElementById("newProvince").addEventListener("change", () => {
+        const selected = document.getElementById("newProvince").value;
+        const cityInput = document.getElementById("newCity");
+        cityInput.value = "";
+        const cityList = document.getElementById("cityList");
+        cityList.innerHTML = "";
+        if (cities[selected]) {
+          setupDropdown("newCity", "cityList", cities[selected]);
+        } else {
+          setupDropdown("newCity", "cityList", []);
+        }
+      });
 
-    alert('Record added successfully.');
-    this.reset();
-});
+      const nextBtn = document.getElementById("nextBtn");
+      const backBtn = document.getElementById("backBtn");
+      const page1 = document.getElementById("page1");
+      const page2 = document.getElementById("page2");
 
-function setupLogout() {
-  const logoutBtn = document.getElementById('logoutBtn');
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem('rms_user');
-    window.location.href = 'login.html';
-  });
-}
+      nextBtn.addEventListener("click", () => {
+        const fields = document.querySelectorAll("#page1 input");
+        let formData = {};
+        fields.forEach((f) => (formData[f.id] = f.value));
+        localStorage.setItem("page1Data", JSON.stringify(formData));
+        page1.classList.add("hidden");
+        page2.classList.remove("hidden");
+      });
 
-function showUser() {
-  const user = JSON.parse(localStorage.getItem('rms_user'));
-  const userNameSpan = document.getElementById('userName');
-  if (user && user.name) {
-    userNameSpan.textContent = `Welcome, ${user.name}`;
-  } else {
-    window.location.href = 'new.html';
-  }
-}
+      backBtn.addEventListener("click", () => {
+        const saved = JSON.parse(localStorage.getItem("page1Data"));
+        if (saved) {
+          Object.keys(saved).forEach((id) => {
+            const field = document.getElementById(id);
+            if (field) field.value = saved[id];
+          });
+        }
+        page2.classList.add("hidden");
+        page1.classList.remove("hidden");
+      });
 
-window.onload = function() {
-  showUser();
-  setupLogout();
-};
-</script>
-</body>
+      function setupLogout() {
+        const logoutBtn = document.getElementById("logoutBtn");
+        logoutBtn.addEventListener("click", () => {
+          localStorage.removeItem("rms_user");
+          window.location.href = "login.html";
+        });
+      }
+
+      function showUser() {
+        const user = JSON.parse(localStorage.getItem("rms_user"));
+        const userNameSpan = document.getElementById("userName");
+        if (user && user.name) {
+          userNameSpan.textContent = `Welcome, ${user.name}`;
+        } else {
+          window.location.href = "new.html";
+        }
+      }
+
+      window.onload = function () {
+        showUser();
+        setupLogout();
+      };
+    </script>
+  </body>
 </html>
