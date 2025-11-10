@@ -1,4 +1,3 @@
-/* Simple professional styling inspired by admin dashboards */
 :root{
   --bg:#f6f8fb; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --danger:#dc2626;
   --radius:8px; --glass: rgba(255,255,255,0.6);
@@ -26,6 +25,7 @@ body{margin:0;background:var(--bg);color:#0f172a;}
 .btn.primary{background:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(37,99,235,0.12);}
 .btn.subtle{background:transparent;color:var(--muted);border:1px solid #e6e9ef;padding:8px 10px;}
 .btn.link{background:transparent;color:var(--accent);text-decoration:none;padding:8px 10px;}
+
 
 /* App layout */
 .topbar{height:64px;background:var(--card);display:flex;align-items:center;justify-content:space-between;padding:0 20px;box-shadow:var(--shadow);}

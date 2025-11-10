@@ -1,3 +1,57 @@
+<?php
+//DATABASE CONNECTION
+$servername = "127.0.0.1";
+$username = "root";
+$password = "";
+$dbname = "happyhallow";
+$port = 3306;
+
+$conn = mysqli_connect($servername, $username, $password, $dbname,3306);
+mysqli_set_charset($conn, 'utf8mb4');
+
+if (!$conn) {
+  die("Connection failed: " . mysqli_connect_error());
+}
+
+// LOGIN HANDLING
+$message = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  $email = trim($_POST['email']);
+  $password = $_POST['password'];
+  $role = $_POST['role'];
+
+  $stmt = mysqli_prepare($conn, "SELECT id, password FROM users WHERE email = ? AND role = ?");
+  mysqli_stmt_bind_param($stmt, "ss", $email, $role);
+  mysqli_stmt_execute($stmt);
+  mysqli_stmt_bind_result($stmt, $id, $hash);
+
+  if (mysqli_stmt_fetch($stmt)) {
+    if (password_verify($password, $hash)) {
+      session_start();
+      session_regenerate_id(true);
+      $_SESSION['user_id'] = $id;
+      $_SESSION['email'] = $email;
+      $_SESSION['role'] = $role;
+
+      if ($role == "admin") {
+        header("Location: admin/admin_menu.html");
+      } else {
+        header("Location: new.html");
+      }
+      exit;
+    } else {
+      $message = "❌ Incorrect password.";
+    }
+  } else {
+    $message = "⚠️ Account not found.";
+  }
+
+  mysqli_stmt_close($stmt);
+}
+?>
+
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -35,7 +89,6 @@
       z-index: 2;
     }
 
-  
     .auth-card h1 {
       color: #fff;
     }
@@ -51,6 +104,10 @@
       border: none;
       color: #fff;
       font-size: 15px;
+      padding: 8px;
+      border-radius: 6px;
+      width: 100%;
+      margin-bottom: 10px;
     }
 
     .form-grid input::placeholder {
@@ -63,9 +120,11 @@
       color: #fff;
       font-weight: bold;
       border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
       transition: background 0.3s ease;
+      cursor: pointer;
     }
-
 
     .btn.primary:hover {
       background: #1d4ed8;
@@ -75,13 +134,15 @@
     .btn.link {
       color: #bfdbfe;
       font-size: 14px;
+      display: inline-block;
+      margin-top: 10px;
     }
 
     .btn.link:hover {
       text-decoration: underline;
     }
 
-      .role-selector { 
+    .role-selector { 
       margin-top: 16px; 
       display: flex; 
       justify-content: center; 
@@ -107,10 +168,16 @@
       background: rgba(59,130,246,0.4); 
     }
 
-    /* Animation- login box slide left a bit at the start */
+    /* Animation */
     @keyframes slideInLeft {
       from { opacity: 0; transform: translateX(-40px); }
       to { opacity: 1; transform: translateX(0); }
+    }
+
+    .form-message {
+      margin-top: 15px;
+      color: yellow;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -118,70 +185,60 @@
 <body class="auth-page">
   <main class="auth-card">
     <div class="brand">
-      <img src="assets/LOGO.png" alt="Logo" class="logo" style="width:50px;height:50px;border-radius:8px;">
+      <img src="assets/logo.png" alt="Logo" class="logo" style="width:50px;height:50px;border-radius:8px;">
       <h1>Record Management System</h1>
     </div>
 
     <p>Welcome back! Please login to continue.</p>
 
-    <form id="loginForm" class="form-grid">
+    <form method="POST" class="form-grid">
       <label>Email
         <input type="email" name="email" required placeholder="you@gmail.com">
       </label>
       <label>Password
         <input type="password" name="password" required placeholder="Your password">
       </label>
-<!-- login and create account button -->
+
+      <!-- Hidden input for role -->
+      <input type="hidden" name="role" id="roleInput" value="client">
+
       <div class="form-actions">
         <button type="submit" class="btn primary">Login</button>
-        <a href="register.html" class="btn link">Create account</a>
       </div>
-       
+      <div class="form-actions">
+        <a href="register.php" class="btn link">Create account</a>
+      </div>
+
+      <!-- Role selector -->
       <div class="role-selector">
         <button type="button" class="role-btn active" id="clientBtn">Client</button>
-        <button type="button" class="role-btn" id="adminBtn">Admin</button> 
-      </div> 
+        <button type="button" class="role-btn" id="adminBtn">Admin</button>
+      </div>
 
-      <p id="loginMessage" class="form-message"></p>
+      <!-- Display message from PHP -->
+      <?php if (!empty($message)): ?>
+        <p class="form-message"><?php echo $message; ?></p>
+      <?php endif; ?>
     </form>
   </main>
 
-    <script>
-    let selectedRole = "client"; // default role
-
+  <script>
+    // handle role switching
+    const roleInput = document.getElementById("roleInput");
     const clientBtn = document.getElementById("clientBtn");
     const adminBtn = document.getElementById("adminBtn");
 
-    // --- toggle active role ---
     clientBtn.addEventListener("click", () => {
-      selectedRole = "client";
+      roleInput.value = "client";
       clientBtn.classList.add("active");
       adminBtn.classList.remove("active");
     });
 
     adminBtn.addEventListener("click", () => {
-      selectedRole = "admin";
+      roleInput.value = "admin";
       adminBtn.classList.add("active");
       clientBtn.classList.remove("active");
     });
-
-    // --- handle login ---
-    document.getElementById("loginForm").addEventListener("submit", (e) => {
-      e.preventDefault();
-console.log("Selected role:", selectedRole);
-      const email = e.target.email.value;
-      const password = e.target.password.value;
-
-      // direct based on role
-  if (selectedRole === "admin") {
-  window.location.href = "admin/admin_menu.html"; 
-} 
-else if (selectedRole === "client") {
-  window.location.href = "new.html"; 
-}
-    });
   </script>
-<!-- login logic -->
-  <script src="js/auth.js"></script>
 </body>
 </html>

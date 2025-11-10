@@ -1,53 +1,27 @@
-// auth.js — localStorage version
 document.addEventListener("DOMContentLoaded", () => {
-  const loginForm = document.getElementById("loginForm");
-  const registerForm = document.getElementById("registerForm");
+  const clientBtn = document.getElementById("clientBtn");
+  const adminBtn = document.getElementById("adminBtn");
+  const roleInput = document.getElementById("roleInput");
+  const createAccountLink = document.getElementById("createAccountLink");
 
-  // LOGIN
-  if (loginForm) {
-    loginForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const msg = document.getElementById("loginMessage");
-      msg.textContent = "";
+  // Default role
+  let selectedRole = "client";
 
-      const email = loginForm.email.value.trim();
-      const password = loginForm.password.value.trim();
+  // Switch to Client
+  clientBtn.addEventListener("click", () => {
+    selectedRole = "client";
+    roleInput.value = "client"; // hidden input in login form
+    createAccountLink.href = "register.php?role=client"; // update create account link
+    clientBtn.classList.add("active");
+    adminBtn.classList.remove("active");
+  });
 
-      const users = JSON.parse(localStorage.getItem("rms_users") || "[]");
-      const user = users.find((u) => u.email === email && u.password === password);
-
-     
-    });
-  }
-
-  // REGISTER
-  if (registerForm) {
-    registerForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const msg = document.getElementById("registerMessage");
-      msg.textContent = "";
-
-      const name = registerForm.name.value.trim();
-      const email = registerForm.email.value.trim();
-      const password = registerForm.password.value.trim();
-
-      if (!name || !email || !password) {
-        msg.textContent = "All fields are required.";
-        return;
-      }
-
-      const users = JSON.parse(localStorage.getItem("rms_users") || "[]");
-      if (users.find((u) => u.email === email)) {
-        msg.textContent = "Email already exists.";
-        return;
-      }
-
-      users.push({ name, email, password });
-      localStorage.setItem("rms_users", JSON.stringify(users));
-
-      msg.style.color = "green";
-      msg.textContent = "Registered successfully. Redirecting to login...";
-      setTimeout(() => (window.location.href = "new.html"), 1000);
-    });
-  }
+  // Switch to Admin
+  adminBtn.addEventListener("click", () => {
+    selectedRole = "admin";
+    roleInput.value = "admin";
+    createAccountLink.href = "register.php?role=admin";
+    adminBtn.classList.add("active");
+    clientBtn.classList.remove("active");
+  });
 });

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 04, 2025 at 09:58 AM
+-- Generation Time: Nov 10, 2025 at 03:45 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -308,6 +308,30 @@ CREATE TABLE IF NOT EXISTS `skills` (
   `CURRENT_SKILLS` varchar(100) NOT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('admin','client') NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `email`, `password`, `role`) VALUES
+(1, 'admin@happyhallow.com', '$2y$10$zGf9uFZKhYqX9x0g8aO63eAFeSxeZKPDnY7QhgrRZqWvOAzPll2Ui', 'admin'),
+(2, 'client@happyhallow.com', '$2y$10$zGf9uFZKhYqX9x0g8aO63eAFeSxeZKPDnY7QhgrRZqWvOAzPll2Ui', 'client');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
