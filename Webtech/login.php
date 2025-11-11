@@ -6,7 +6,7 @@ $password = "";
 $dbname = "happyhallow";
 $port = 3306;
 
-$conn = mysqli_connect($servername, $username, $password, $dbname,3306);
+$conn = mysqli_connect($servername, $username, $password, $dbname,$port);
 mysqli_set_charset($conn, 'utf8mb4');
 
 if (!$conn) {
@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       if ($role == "admin") {
         header("Location: admin/admin_menu.html");
       } else {
-        header("Location: new.html");
+        header("Location: new.php");
       }
       exit;
     } else {
