@@ -108,10 +108,13 @@ $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
 <body>
 
 <div class="container">
-  <div class="top-bar">
-    <a href="admin_menu.html" class="back-btn">← Back</a>
-    <button class="add-btn" id="openModal">+ Add User</button>
-  </div>
+  
+<div class="top-bar" style="justify-content: center; gap: 10px;">
+  <a href="admin_menu.html" class="back-btn">← Back</a>
+  <input type="text" id="searchInput" placeholder="Search users..." 
+  style="padding:6px 10px; border-radius:6px; border:1px solid #ccc; width:300px;">
+  <button class="add-btn" id="openModal">+ Add User</button>
+</div>
 
   <h2>Manage Users</h2>
   <?php if(!empty($message)) echo "<p class='message'>$message</p>"; ?>
@@ -188,7 +191,9 @@ $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
   </div>
 </div>
 
+
 <script>
+
 document.addEventListener("DOMContentLoaded", () => {
   // Add modal
   const addModal = document.getElementById("userModal");
@@ -218,6 +223,26 @@ document.addEventListener("DOMContentLoaded", () => {
       editModal.style.display = "flex";
     });
   });
+
+  // search bar after pressing enter
+const searchInput = document.getElementById("searchInput");
+searchInput.addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault(); 
+    const filter = searchInput.value.toLowerCase();
+    const rows = document.querySelectorAll("table tbody tr");
+    
+    rows.forEach(row => {
+      let match = false;
+      row.querySelectorAll("td").forEach(td => {
+        if (td.textContent.toLowerCase().includes(filter)) {
+          match = true;
+        }
+      });
+      row.style.display = match ? "" : "none";
+    });
+  }
+});
 });
 </script>
 
