@@ -1,11 +1,10 @@
 <?php
-// ---------- DATABASE CONNECTION ----------
 $servername = "127.0.0.1";
 $username = "root";
 $password = "";
 $dbname = "happyhallow";
 $port = 3306;
-$conn = mysqli_connect($servername, $username, $password, $dbname,$port);
+$conn = mysqli_connect($servername, $username, $password, $dbname, $port); 
 mysqli_set_charset($conn, 'utf8mb4');
 
 if (!$conn) {
@@ -14,34 +13,36 @@ if (!$conn) {
 
 $message = "";
 
-// ---------- HANDLE REGISTRATION ----------
+// handle regis
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  $email = $_POST['email']; 
-  $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-   $role = $_POST['role'];
+    $fullname = mysqli_real_escape_string($conn, $_POST['name']); // full name
+    $email = $_POST['email']; 
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $role = $_POST['role'];
   
-  // check if email already exists
-  $check = mysqli_prepare($conn, "SELECT id FROM users WHERE email = ?");
-  mysqli_stmt_bind_param($check, "s", $email);
-  mysqli_stmt_execute($check);
-  mysqli_stmt_store_result($check);
+    // check if email already exists
+    $check = mysqli_prepare($conn, "SELECT id FROM users WHERE email = ?");
+    mysqli_stmt_bind_param($check, "s", $email);
+    mysqli_stmt_execute($check);
+    mysqli_stmt_store_result($check);
 
-  if (mysqli_stmt_num_rows($check) > 0) {
-    $message = "⚠️ Email already registered!";
-  } else {
-    // insert user
-    $stmt = mysqli_prepare($conn, "INSERT INTO users (email, password, role) VALUES (?, ?, ?)");
-    mysqli_stmt_bind_param($stmt, "sss", $email, $password, $role);
-    if (mysqli_stmt_execute($stmt)) {
-      $message = "✅ Account created successfully! You can now log in.";
-      header("Refresh:2; url=login.php");// redirect after 2 seconds
+    if (mysqli_stmt_num_rows($check) > 0) {
+        $message = "⚠️ Email already registered!";
     } else {
-      $message = "❌ Error: " . mysqli_error($conn);
-    }
-    mysqli_stmt_close($stmt);
-  }
+        // insert user with fullname
+        $stmt = mysqli_prepare($conn, "INSERT INTO users (fullname, email, password, role) VALUES (?, ?, ?, ?)");
+        mysqli_stmt_bind_param($stmt, "ssss", $fullname, $email, $password, $role);
 
-  mysqli_stmt_close($check);
+        if (mysqli_stmt_execute($stmt)) {
+            $message = "✅ Account created successfully! You can now log in.";
+            header("Refresh:2; url=login.php"); // redirect after 2 seconds
+        } else {
+            $message = "❌ Error: " . mysqli_error($conn);
+        }
+        mysqli_stmt_close($stmt);
+    }
+
+    mysqli_stmt_close($check);
 }
 ?>
 

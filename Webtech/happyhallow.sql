@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 10, 2025 at 03:45 PM
+-- Generation Time: Nov 11, 2025 at 02:17 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -318,20 +318,32 @@ CREATE TABLE IF NOT EXISTS `skills` (
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `id` bigint NOT NULL AUTO_INCREMENT,
+  `fullname` varchar(255) NOT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('admin','client') NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `email`, `password`, `role`) VALUES
-(1, 'admin@happyhallow.com', '$2y$10$zGf9uFZKhYqX9x0g8aO63eAFeSxeZKPDnY7QhgrRZqWvOAzPll2Ui', 'admin'),
-(2, 'client@happyhallow.com', '$2y$10$zGf9uFZKhYqX9x0g8aO63eAFeSxeZKPDnY7QhgrRZqWvOAzPll2Ui', 'client');
+INSERT INTO `users` (`id`, `fullname`, `email`, `password`, `role`) VALUES
+(1, '', 'admin@happyhallow.com', '$2y$10$zGf9uFZKhYqX9x0g8aO63eAFeSxeZKPDnY7QhgrRZqWvOAzPll2Ui', 'admin'),
+(2, '', 'client@happyhallow.com', '$2y$10$zGf9uFZKhYqX9x0g8aO63eAFeSxeZKPDnY7QhgrRZqWvOAzPll2Ui', 'client'),
+(3, '', 'pol@gmail.com', '$2y$10$t/7G.9t9y4SYCwJNF4vRCOtH9NiixrnteB97AT3DJ6MoZyc0dCIim', 'client'),
+(4, '', 'doe@gmail.com', '$2y$10$rxsTL3Nfkk5hx/PB9Txc2OYXRbrG2FBMu1Of.riV.7ElwPMhPZDsO', 'client'),
+(5, '', 'levii@gmail.com', '$2y$10$K8XoXrP3y7fT6N2VEUbh3OY/5F3x84o6eMB8zfvZdaXjKQaIb8psq', 'client'),
+(6, '', 'ira@gmail.com', '$2y$10$t9rboloTnnSu2d1E1u1a.eN0ymMwlc/ot8GG/t/ytt9bcQPw9K7l.', 'client'),
+(7, '', 'hatdog@gmail.com', '$2y$10$zuUt6foa6TbnrYhAHYAZle4/YeV4zyDoN6lqxGfIq2rSy7TGE9zxS', 'client'),
+(8, '', 'add@gmail.com', '$2y$10$e.1gXLWIXa/gakdQLPLnb.nZuZd42q/1/oDYGNzcKWJd3FgEam.py', 'client'),
+(10, '', 'testt@gmail.com', '$2y$10$JJO3ub5MT1vS5Dhnge4EfeCNYO1jz9Gb0SjOSfq7GhNfSTHhXSdZy', 'client'),
+(16, '', 'hell@gmail.com', '$2y$10$1Nvx4SRvRgvktgz1PHWPiuzziaAv0QCamQlxi9nTi2w.7DULQTvT.', 'admin'),
+(18, 'Jordan Bel', 'jordan@gmail.com', '$2y$10$5qJQlmdfLtHPLA1kdQ0truq3W3LFxKVqVjQUh2gmvF6H3hWJPuaqC', 'admin'),
+(19, 'Connor', 'connor@gmail.com', '$2y$10$v3Fj7HfKjMSX5z.8rPETaOCioiDRiO1fF.nlNHf3ebyP77Pf.be5G', 'client'),
+(20, 'Kara', 'kara@gmail.com', '$2y$10$ejiuKtST.2/74qsig2YPwOYX3NHF7A2MV.6v4B44vdctLb5seP7r2', 'client');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
