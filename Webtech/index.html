@@ -1,81 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
-    
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facilities Database</title>
-    <link rel="stylesheet" href="css/style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Facilities Database</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
 
-</head>
-<body>
-<div class="container">
-        <div class="topbar-right">
-      <span id="userName" class="user-name"></span>
-      <button id="logoutBtn" class="btn subtle">Logout</button>
+  <body>
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="logo">RBIM System</div>
+        <nav class="main-nav">
+          <ul>
+            <li><a href="index.html" class="active">Dashboard</a></li>
+            <li><a href="residents.html">Residents</a></li>
+            <li><a href="addnewresidents.html">Add Resident</a></li>
+            <li><a href="reports.html">Reports</a></li>
+            <li class="nav-divider"></li>
+            <li><a href="search.html">Search Facilities</a></li>
+            <li><a href="update.html">Update Record</a></li>
+            <li><a href="delete.html">Delete Record</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <div class="main-content">
+        <header class="topbar">
+          <div class="topbar-right">
+            <span id="userName" class="user-info">Welcome, User</span>
+            <button id="logoutBtn" class="btn logout-btn">Logout</button>
+          </div>
+        </header>
+
+        <main class="page-content">
+          <h2>Dashboard Overview</h2>
+
+          <div class="dashboard-grid">
+            <div class="stat-card">
+              <p class="stat-label">Senior Citizen</p>
+              <p class="stat-value"><span>[150]</span></p>
+            </div>
+
+            <div class="stat-card">
+              <p class="stat-label">Solo Parents</p>
+              <p class="stat-value"><span>[89]</span></p>
+            </div>
+
+            <div class="stat-card">
+              <p class="stat-label">PWD</p>
+              <p class="stat-value"><span>[42]</span></p>
+            </div>
+
+            <div class="card chart-card">
+              <h3>Population by Purok</h3>
+              <div class="purok-chart">
+                <div class="purok-item">
+                  <span class="purok-label">Purok 1</span>
+                  <div class="purok-bar-container">
+                    <div class="purok-bar" style="width: 100%"></div>
+                    <span class="purok-count">[250]</span>
+                  </div>
+                </div>
+                <div class="purok-item">
+                  <span class="purok-label">Purok 1</span>
+                  <div class="purok-bar-container">
+                    <div class="purok-bar" style="width: 80%"></div>
+                    <span class="purok-count">[200]</span>
+                  </div>
+                </div>
+                <div class="purok-item">
+                  <span class="purok-label">Purok 1</span>
+                  <div class="purok-bar-container">
+                    <div class="purok-bar" style="width: 60%"></div>
+                    <span class="purok-count">[150]</span>
+                  </div>
+                </div>
+                <div class="purok-item">
+                  <span class="purok-label">Purok 1</span>
+                  <div class="purok-bar-container">
+                    <div class="purok-bar" style="width: 40%"></div>
+                    <span class="purok-count">[100]</span>
+                  </div>
+                </div>
+                <div class="purok-item">
+                  <span class="purok-label">Purok 1</span>
+                  <div class="purok-bar-container">
+                    <div class="purok-bar" style="width: 20%"></div>
+                    <span class="purok-count">[50]</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
-    <header>
-        <h1>Facilities Database</h1>
-        <div class="btn-group">
-            <a href="search.html" class="btn">Search</a>
-            <a href="new.html" class="btn">New</a>
-            <a href="update.html" class="btn">Update</a>
-            <a href="delete.html" class="btn">Delete</a>
-        </div>
-    </header>
 
-    <main class="card">
-        <h2>All Facility Records</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Facility Code</th>
-                    <th>Facility Name</th>
-                    <th>Site</th>
-                    <th>Submitter</th>
-                    <th>Last Updated</th>
-                </tr>
-            </thead>
-            <tbody id="recordTable"></tbody>
-        </table>
-    </main>
-</div>
+    <script>
+      function loadRecords() {
+        let records = JSON.parse(localStorage.getItem("facilities")) || [];
+        const table = document.getElementById("recordTable");
+        if (table) {
+          table.innerHTML = "";
+          records.forEach((r) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `<td>${r.code}</td><td>${r.name}</td><td>${r.site}</td><td>${r.submitter}</td><td>${r.updated}</td>`;
+            table.appendChild(row);
+          });
+        }
+      }
+      function setupLogout() {
+        const logoutBtn = document.getElementById("logoutBtn");
+        logoutBtn.addEventListener("click", () => {
+          localStorage.removeItem("rms_user");
+          window.location.href = "login.html";
+        });
+      }
 
-<script>
-function loadRecords() {
-    let records = JSON.parse(localStorage.getItem('facilities')) || [];
-    const table = document.getElementById('recordTable');
-    table.innerHTML = '';
-    records.forEach(r => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${r.code}</td><td>${r.name}</td><td>${r.site}</td><td>${r.submitter}</td><td>${r.updated}</td>`;
-        table.appendChild(row);
-    });
-}
-function setupLogout() {
-  const logoutBtn = document.getElementById('logoutBtn');
-  logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem('rms_user');
-    window.location.href = 'login.html';
-  });
-}
+      function showUser() {
+        const user = JSON.parse(localStorage.getItem("rms_user"));
+        const userNameSpan = document.getElementById("userName");
+        if (user && user.name) {
+          userNameSpan.textContent = `Welcome, ${user.name}`;
+        } else {
+          userNameSpan.textContent = `Welcome, Guest`;
+        }
+      }
 
-function showUser() {
-  const user = JSON.parse(localStorage.getItem('rms_user'));
-  const userNameSpan = document.getElementById('userName');
-  if (user && user.name) {
-    userNameSpan.textContent = `Welcome, ${user.name}`;
-  } else {
-    window.location.href = 'login.html';
-  }
-}
-
-window.onload = function() {
-  showUser();
-  loadRecords();
-  setupLogout();
-};
-window.onload = loadRecords;
-</script>
-</body>
+      window.onload = function () {
+        showUser();
+        loadRecords(); // Call loadRecords only if the table is present
+        setupLogout();
+      };
+    </script>
+  </body>
 </html>

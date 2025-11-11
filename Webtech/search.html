@@ -1,72 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Search Facility Records</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-<div class="container">
-    <header>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
         <h1>Search Facility Records</h1>
         <div class="btn-group">
-            <a href="index.html" class="btn">Home</a>
-            <a href="new.html" class="btn">New</a>
-            <a href="update.html" class="btn">Update</a>
-            <a href="delete.html" class="btn">Delete</a>
+          <a href="index.html" class="btn">Home</a>
+          <a href="new.html" class="btn">New</a>
+          <a href="update.html" class="btn">Update</a>
+          <a href="delete.html" class="btn">Delete</a>
         </div>
-    </header>
+      </header>
 
-    <section class="card">
+      <section class="card">
         <div class="input-group">
-            <label>Search Term</label>
-            <input type="text" id="searchTerm" placeholder="Enter keyword...">
+          <label>Search Term</label>
+          <input type="text" id="searchTerm" placeholder="Enter keyword..." />
         </div>
         <button class="btn" id="searchBtn">Search</button>
         <button class="btn secondary" id="resetBtn">Reset</button>
 
         <table>
-            <thead>
-                <tr>
-                    <th>Facility Code</th>
-                    <th>Facility Name</th>
-                    <th>Site</th>
-                    <th>Submitter</th>
-                    <th>Last Updated</th>
-                </tr>
-            </thead>
-            <tbody id="recordTable"></tbody>
+          <thead>
+            <tr>
+              <th>Facility Code</th>
+              <th>Facility Name</th>
+              <th>Site</th>
+              <th>Submitter</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody id="recordTable"></tbody>
         </table>
-    </section>
-</div>
+      </section>
+    </div>
 
-<script>
-const table = document.getElementById('recordTable');
-function loadRecords() {
-    const records = JSON.parse(localStorage.getItem('facilities')) || [];
-    table.innerHTML = '';
-    records.forEach(r => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${r.code}</td><td>${r.name}</td><td>${r.site}</td><td>${r.submitter}</td><td>${r.updated}</td>`;
-        table.appendChild(row);
-    });
-}
-loadRecords();
+    <script>
+      const table = document.getElementById("recordTable");
+      function loadRecords() {
+        const records = JSON.parse(localStorage.getItem("facilities")) || [];
+        table.innerHTML = "";
+        records.forEach((r) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${r.code}</td><td>${r.name}</td><td>${r.site}</td><td>${r.submitter}</td><td>${r.updated}</td>`;
+          table.appendChild(row);
+        });
+      }
+      loadRecords();
 
-document.getElementById('searchBtn').onclick = () => {
-    const term = document.getElementById('searchTerm').value.toLowerCase();
-    const rows = table.querySelectorAll('tr');
-    rows.forEach(r => {
-        const text = r.innerText.toLowerCase();
-        r.style.display = text.includes(term) ? '' : 'none';
-    });
-};
+      document.getElementById("searchBtn").onclick = () => {
+        const term = document.getElementById("searchTerm").value.toLowerCase();
+        const rows = table.querySelectorAll("tr");
+        rows.forEach((r) => {
+          const text = r.innerText.toLowerCase();
+          r.style.display = text.includes(term) ? "" : "none";
+        });
+      };
 
-document.getElementById('resetBtn').onclick = () => {
-    document.getElementById('searchTerm').value = '';
-    loadRecords();
-};
-</script>
-</body>
+      document.getElementById("resetBtn").onclick = () => {
+        document.getElementById("searchTerm").value = "";
+        loadRecords();
+      };
+    </script>
+  </body>
 </html>

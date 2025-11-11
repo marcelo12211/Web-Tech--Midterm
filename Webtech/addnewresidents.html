@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add New Resident</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="logo">RBIM System</div>
+        <nav class="main-nav">
+          <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="residents.html">Residents</a></li>
+            <li><a href="addnewresidents.html">Add Resident</a></li>
+            <li><a href="reports.html" class="active">Reports</a></li>
+            <li class="nav-divider"></li>
+            <li><a href="search.html">Search Facilities</a></li>
+            <li><a href="update.html">Update Record</a></li>
+            <li><a href="delete.html">Delete Record</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <div class="main-content">
+        <header class="topbar">
+          <div class="topbar-right">
+            <span id="userName" class="user-info">Welcome, User</span>
+            <button id="logoutBtn" class="btn logout-btn">Logout</button>
+          </div>
+        </header>
+
+        <main class="page-content">
+          <div class="add-resident-form-container">
+            <div class="form-modal-card">
+              <a href="residents.html" class="close-btn">&times;</a>
+
+              <form id="addResidentForm">
+                <h2 class="form-title">Add New Resident</h2>
+
+                <div class="form-section">
+                  <h3>Personal Information</h3>
+                  <div class="form-grid">
+                    <div class="input-group">
+                      <label for="lastName">Last Name</label>
+                      <input
+                        type="text"
+                        id="lastName"
+                        name="lastName"
+                        required
+                      />
+                    </div>
+                    <div class="input-group">
+                      <label for="firstName">First Name</label>
+                      <input
+                        type="text"
+                        id="firstName"
+                        name="firstName"
+                        required
+                      />
+                    </div>
+                    <div class="input-group">
+                      <label for="middleName">Middle Name</label>
+                      <input type="text" id="middleName" name="middleName" />
+                    </div>
+                    <div class="input-group">
+                      <label for="suffix">Suffix (e.g., Jr., Sr.)</label>
+                      <input type="text" id="suffix" name="suffix" />
+                    </div>
+                    <div class="input-group">
+                      <label for="birthDate">Date of Birth</label>
+                      <input
+                        type="date"
+                        id="birthDate"
+                        name="birthDate"
+                        required
+                      />
+                    </div>
+                    <div class="input-group">
+                      <label for="gender">Gender</label>
+                      <select id="gender" name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <div class="input-group">
+                      <label for="civilStatus">Civil Status</label>
+                      <select id="civilStatus" name="civilStatus" required>
+                        <option value="">Select Status</option>
+                        <option value="single">Single</option>
+                        <option value="married">Married</option>
+                        <option value="widowed">Widowed</option>
+                        <option value="separated">Separated</option>
+                      </select>
+                    </div>
+                    <div class="input-group">
+                      <label for="contactNumber">Contact Number</label>
+                      <input
+                        type="tel"
+                        id="contactNumber"
+                        name="contactNumber"
+                        pattern="[0-9]{11}"
+                        placeholder="e.g., 09123456789"
+                      />
+                    </div>
+                    <div class="input-group">
+                      <label for="email">Email Address</label>
+                      <input type="email" id="email" name="email" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h3>Address Information</h3>
+                  <div class="form-grid">
+                    <div class="input-group">
+                      <label for="houseNumber">House/Unit No.</label>
+                      <input type="text" id="houseNumber" name="houseNumber" />
+                    </div>
+                    <div class="input-group">
+                      <label for="street">Street Name</label>
+                      <input type="text" id="street" name="street" required />
+                    </div>
+                    <div class="input-group">
+                      <label for="purok">Purok</label>
+                      <select id="purok" name="purok" required>
+                        <option value="">Select Purok</option>
+                        <option value="purok1">Purok 1</option>
+                        <option value="purok2">Purok 2</option>
+                        <option value="purok3">Purok 3</option>
+                      </select>
+                    </div>
+                    <div class="input-group">
+                      <label for="barangay">Barangay</label>
+                      <input
+                        type="text"
+                        id="barangay"
+                        name="barangay"
+                        value="[Your Barangay]"
+                        required
+                      />
+                    </div>
+                    <div class="input-group">
+                      <label for="city">City/Municipality</label>
+                      <input
+                        type="text"
+                        id="city"
+                        name="city"
+                        value="[Your City]"
+                        required
+                      />
+                    </div>
+                    <div class="input-group">
+                      <label for="province">Province</label>
+                      <input
+                        type="text"
+                        id="province"
+                        name="province"
+                        value="[Your Province]"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h3>Other Information</h3>
+                  <div class="form-grid">
+                    <div class="input-group">
+                      <label for="category">Resident Category</label>
+                      <select id="category" name="category" required>
+                        <option value="">Select Category</option>
+                        <option value="senior">Senior Citizen</option>
+                        <option value="solo_parent">Solo Parent</option>
+                        <option value="pwd">PWD</option>
+                        <option value="youth">Youth</option>
+                        <option value="adult">Adult</option>
+                      </select>
+                    </div>
+                    <div class="input-group">
+                      <label for="occupation">Occupation</label>
+                      <input type="text" id="occupation" name="occupation" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button type="submit" class="btn primary-btn create">
+                    Save Resident
+                  </button>
+                  <button type="button" class="btn secondary">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      function setupLogout() {
+        const logoutBtn = document.getElementById("logoutBtn");
+        logoutBtn.addEventListener("click", () => {
+          localStorage.removeItem("rms_user");
+          window.location.href = "login.html";
+        });
+      }
+
+      function showUser() {
+        const user = JSON.parse(localStorage.getItem("rms_user"));
+        const userNameSpan = document.getElementById("userName");
+        if (user && user.name) {
+          userNameSpan.textContent = `Welcome, ${user.name}`;
+        } else {
+          userNameSpan.textContent = `Welcome, Guest`;
+        }
+      }
+
+      window.onload = function () {
+        showUser();
+        setupLogout();
+        document
+          .getElementById("addResidentForm")
+          .addEventListener("submit", function (event) {
+            event.preventDefault();
+            alert("Resident data would be saved here!");
+
+            window.location.href = "residents.html";
+          });
+
+        document
+          .querySelector(".form-actions .secondary")
+          .addEventListener("click", function () {
+            window.location.href = "residents.html";
+          });
+      };
+    </script>
+  </body>
+</html>
