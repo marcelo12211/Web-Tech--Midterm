@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Residents Directory</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="logo">RBIM System</div>
+        <nav class="main-nav">
+          <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="residents.html" class="active">Residents</a></li>
+            <li><a href="addnewresidents.html">Add Resident</a></li>
+            <li><a href="reports.html">Reports</a></li>
+            <li class="nav-divider"></li>
+            <li><a href="search.html">Search Facilities</a></li>
+            <li><a href="update.html">Update Record</a></li>
+            <li><a href="delete.html">Delete Record</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <div class="main-content">
+        <header class="topbar">
+          <div class="topbar-right">
+            <span id="userName" class="user-info">Welcome, User</span>
+            <button id="logoutBtn" class="btn logout-btn">Logout</button>
+          </div>
+        </header>
+
+        <main class="page-content">
+          <div class="residents-directory card">
+            <div class="directory-header">
+              <h2>Resident Directory</h2>
+              <a href="new.html" class="btn primary-btn">+ Add New</a>
+            </div>
+
+            <div class="filter-section">
+              <div class="search-bar-group">
+                <input type="text" placeholder="Search" class="search-input" />
+                <button class="btn filter-btn">Filter</button>
+              </div>
+
+              <div class="filter-dropdowns">
+                <div class="input-group">
+                  <label for="category-filter">Category</label>
+                  <select id="category-filter">
+                    <option value="">-- Select Category --</option>
+                    <option value="senior">Senior Citizen</option>
+                    <option value="solo">Solo Parent</option>
+                    <option value="pwd">PWD</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label for="purok-filter">Purok</label>
+                  <select id="purok-filter">
+                    <option value="">-- Select Purok --</option>
+                    <option value="purok1">Purok 1</option>
+                    <option value="purok2">Purok 2</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label for="age-range-filter">Age Range</label>
+                  <select id="age-range-filter">
+                    <option value="">-- Select Age Range --</option>
+                    <option value="0-17">0-17 (Minor)</option>
+                    <option value="18-59">18-59 (Adult)</option>
+                    <option value="60+">60+ (Senior)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="data-table-card">
+              <table>
+                <thead>
+                  <tr>
+                    <th>[ID]</th>
+                    <th>[Name]</th>
+                    <th>[Age]</th>
+                    <th>[Purok]</th>
+                    <th>[Category]</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="residentsTableBody">
+                  <tr>
+                    <td>[001]</td>
+                    <td>[Juan Dela Cruz]</td>
+                    <td>[65]</td>
+                    <td>[Purok 1]</td>
+                    <td>
+                      <span class="category-tag senior-citizen"
+                        >[Senior Citizen]</span
+                      >
+                    </td>
+                    <td>
+                      <a href="#" class="action-link view">View</a> |
+                      <a href="#" class="action-link edit">Edit</a> |
+                      <a href="#" class="action-link delete">Delete</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>[002]</td>
+                    <td>[Mario Santos]</td>
+                    <td>[34]</td>
+                    <td>[Purok 2]</td>
+                    <td>
+                      <span class="category-tag solo-parent"
+                        >[Solo Parent]</span
+                      >
+                    </td>
+                    <td>
+                      <a href="#" class="action-link view">View</a> |
+                      <a href="#" class="action-link edit">Edit</a> |
+                      <a href="#" class="action-link delete">Delete</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>[003]</td>
+                    <td>[Pedro Reyes]</td>
+                    <td>[42]</td>
+                    <td>[Purok 1]</td>
+                    <td><span class="category-tag pwd">[PWD]</span></td>
+                    <td>
+                      <a href="#" class="action-link view">View</a> |
+                      <a href="#" class="action-link edit">Edit</a> |
+                      <a href="#" class="action-link delete">Delete</a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      function setupLogout() {
+        const logoutBtn = document.getElementById("logoutBtn");
+        logoutBtn.addEventListener("click", () => {
+          localStorage.removeItem("rms_user");
+          window.location.href = "login.html";
+        });
+      }
+
+      function showUser() {
+        const user = JSON.parse(localStorage.getItem("rms_user"));
+        const userNameSpan = document.getElementById("userName");
+        if (user && user.name) {
+          userNameSpan.textContent = `Welcome, ${user.name}`;
+        } else {
+          userNameSpan.textContent = `Welcome, Guest`;
+        }
+      }
+
+      window.onload = function () {
+        showUser();
+        setupLogout();
+      };
+    </script>
+  </body>
+</html>

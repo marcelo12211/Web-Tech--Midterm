@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reports & Analytics</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="logo">RBIM System</div>
+        <nav class="main-nav">
+          <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="residents.html">Residents</a></li>
+            <li><a href="addnewresidents.html">Add Resident</a></li>
+            <li><a href="reports.html" class="active">Reports</a></li>
+            <li class="nav-divider"></li>
+            <li><a href="search.html">Search Facilities</a></li>
+            <li><a href="update.html">Update Record</a></li>
+            <li><a href="delete.html">Delete Record</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <div class="main-content">
+        <header class="topbar">
+          <div class="topbar-right">
+            <span id="userName" class="user-info">Welcome, User</span>
+            <button id="logoutBtn" class="btn logout-btn">Logout</button>
+          </div>
+        </header>
+
+        <main class="page-content">
+          <h2>Generate Reports & Analytics</h2>
+
+          <h3>Key Statistics</h3>
+          <div class="dashboard-grid">
+            <div class="stat-card report-stat">
+              <p class="stat-label">Total Population</p>
+              <p class="stat-value"><span>[1,560]</span></p>
+            </div>
+            <div class="stat-card report-stat">
+              <p class="stat-label">Total Households</p>
+              <p class="stat-value"><span>[350]</span></p>
+            </div>
+            <div class="stat-card report-stat">
+              <p class="stat-label">Senior Citizens (%)</p>
+              <p class="stat-value"><span>[12%]</span></p>
+            </div>
+            <div class="stat-card report-stat">
+              <p class="stat-label">Active Solo Parents</p>
+              <p class="stat-value"><span>[89]</span></p>
+            </div>
+          </div>
+
+          <div class="card chart-card">
+            <h3>Age Distribution (Visual)</h3>
+            <div class="chart-placeholder">
+              <p>
+                This area would display a Bar/Pie Chart showing population by
+                age group (e.g., 0-17, 18-59, 60+).
+              </p>
+              <img
+                src="https://via.placeholder.com/740x250?text=Bar+Chart+Placeholder"
+                alt="Age Distribution Chart Placeholder"
+              />
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Detailed Report Generator</h3>
+            <form id="reportGeneratorForm">
+              <div class="filter-dropdowns">
+                <div class="input-group">
+                  <label for="reportType">Report Type</label>
+                  <select id="reportType" required>
+                    <option value="">-- Select Report --</option>
+                    <option value="purok">Population by Purok</option>
+                    <option value="category">
+                      Resident Category Breakdown
+                    </option>
+                    <option value="voters">Registered Voters List</option>
+                    <option value="household">Household Head Directory</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label for="startDate">Start Date (Registration)</label>
+                  <input type="date" id="startDate" />
+                </div>
+                <div class="input-group">
+                  <label for="endDate">End Date (Registration)</label>
+                  <input type="date" id="endDate" />
+                </div>
+                <div class="input-group">
+                  <label for="targetPurok">Target Purok (Optional)</label>
+                  <select id="targetPurok">
+                    <option value="all">All Puroks</option>
+                    <option value="purok1">Purok 1</option>
+                    <option value="purok2">Purok 2</option>
+                    <option value="purok3">Purok 3</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-actions" style="margin-top: 20px">
+                <button type="submit" class="btn primary-btn create">
+                  Generate Report
+                </button>
+                <button type="button" class="btn secondary">
+                  Reset Filters
+                </button>
+              </div>
+            </form>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      function setupLogout() {
+        const logoutBtn = document.getElementById("logoutBtn");
+        logoutBtn.addEventListener("click", () => {
+          localStorage.removeItem("rms_user");
+          window.location.href = "login.html";
+        });
+      }
+
+      function showUser() {
+        const user = JSON.parse(localStorage.getItem("rms_user"));
+        const userNameSpan = document.getElementById("userName");
+        if (user && user.name) {
+          userNameSpan.textContent = `Welcome, ${user.name}`;
+        } else {
+          userNameSpan.textContent = `Welcome, Guest`;
+        }
+      }
+
+      window.onload = function () {
+        showUser();
+        setupLogout();
+
+        document
+          .getElementById("reportGeneratorForm")
+          .addEventListener("submit", function (event) {
+            event.preventDefault();
+            const reportType = document.getElementById("reportType").value;
+            if (reportType) {
+              alert(
+                `Generating report: ${reportType}. Check console for data!`
+              );
+            } else {
+              alert("Please select a Report Type.");
+            }
+          });
+      };
+    </script>
+  </body>
+</html>
