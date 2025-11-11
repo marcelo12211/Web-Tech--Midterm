@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       if ($role == "admin") {
         header("Location: admin/admin_menu.html");
       } else {
-        header("Location: new.php");
+        header("Location: client_main.php");
       }
       exit;
     } else {
