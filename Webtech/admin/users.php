@@ -108,11 +108,28 @@ $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
 <body>
 
 <div class="container">
-  
+
 <div class="top-bar" style="justify-content: center; gap: 10px;">
   <a href="admin_menu.html" class="back-btn">← Back</a>
+
+  <!-- Search input -->
   <input type="text" id="searchInput" placeholder="Search users..." 
-  style="padding:6px 10px; border-radius:6px; border:1px solid #ccc; width:300px;">
+  style="padding:6px 10px; border-radius:6px; border:1px solid #ccc; width:180px;">
+
+  <!-- Role filter (All/Admin/Client) -->
+  <select id="roleFilter" style="padding:6px 10px; border-radius:6px; border:1px solid #ccc;">
+    <option value="">All Roles</option>
+    <option value="admin">Admin</option>
+    <option value="client">Client</option>
+  </select>
+
+  <!-- ID filter (number range) -->
+  <input type="number" id="minId" placeholder="Min ID" style="padding:6px 10px; border-radius:6px; border:1px solid #ccc; width:70px;">
+  <input type="number" id="maxId" placeholder="Max ID" style="padding:6px 10px; border-radius:6px; border:1px solid #ccc; width:70px;">
+
+  <!-- filter button -->
+  <button id="filterBtn" class="add-btn">Filter</button>
+
   <button class="add-btn" id="openModal">+ Add User</button>
 </div>
 
@@ -193,27 +210,26 @@ $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
 
 <script>
-
 document.addEventListener("DOMContentLoaded", () => {
-  // Add modal
+//  modals
   const addModal = document.getElementById("userModal");
   const openAdd = document.getElementById("openModal");
   const closeAdd = document.getElementById("closeModal");
-  openAdd.addEventListener("click", () => addModal.style.display = "flex");
-  closeAdd.addEventListener("click", () => addModal.style.display = "none");
 
-  // Edit modal
   const editModal = document.getElementById("editModal");
   const closeEdit = document.getElementById("closeEdit");
+
+  openAdd.addEventListener("click", () => addModal.style.display = "flex");
+  closeAdd.addEventListener("click", () => addModal.style.display = "none");
   closeEdit.addEventListener("click", () => editModal.style.display = "none");
 
-  // Close modal if clicking outside
+  // Close modals when clicking outside
   window.addEventListener("click", e => {
     if (e.target === addModal) addModal.style.display = "none";
     if (e.target === editModal) editModal.style.display = "none";
   });
 
-  // Fill Edit modal with user data
+  // edit button
   document.querySelectorAll(".edit-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       document.getElementById("editId").value = btn.dataset.id;
@@ -224,25 +240,76 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // search bar after pressing enter
-const searchInput = document.getElementById("searchInput");
-searchInput.addEventListener("keypress", function(e) {
-  if (e.key === "Enter") {
-    e.preventDefault(); 
-    const filter = searchInput.value.toLowerCase();
-    const rows = document.querySelectorAll("table tbody tr");
-    
+  // tablke and filter
+  const table = document.querySelector("table");
+  const headers = table.querySelectorAll("th");
+  let sortDirection = 1;
+
+  const searchInput = document.getElementById("searchInput");
+  const roleFilter = document.getElementById("roleFilter");
+  const minId = document.getElementById("minId");
+  const maxId = document.getElementById("maxId");
+  const filterBtn = document.getElementById("filterBtn");
+
+  function filterRows() {
+    const text = searchInput.value.toLowerCase();
+    const roleValue = roleFilter.value.toLowerCase();
+    const min = parseInt(minId.value) || Number.MIN_SAFE_INTEGER;
+    const max = parseInt(maxId.value) || Number.MAX_SAFE_INTEGER;
+
+    const rows = table.querySelectorAll("tbody tr");
     rows.forEach(row => {
-      let match = false;
-      row.querySelectorAll("td").forEach(td => {
-        if (td.textContent.toLowerCase().includes(filter)) {
-          match = true;
-        }
-      });
-      row.style.display = match ? "" : "none";
+      const cells = row.querySelectorAll("td");
+      const id = parseInt(cells[0].textContent);
+      const fullname = cells[1].textContent.toLowerCase();
+      const email = cells[2].textContent.toLowerCase();
+      const role = cells[3].textContent.toLowerCase();
+
+      const matchesText = fullname.includes(text) || email.includes(text);
+      const matchesRole = roleValue === "" || role === roleValue;
+      const matchesId = id >= min && id <= max;
+
+      row.style.display = (matchesText && matchesRole && matchesId) ? "" : "none";
     });
   }
-});
+  
+  filterBtn.addEventListener("click", filterRows);
+// press enter on searchbar
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // stops form submission 
+      filterRows();       
+    }
+  });
+
+//  sorting
+  headers.forEach((header, index) => {
+    header.style.cursor = "pointer";
+    header.addEventListener("click", () => {
+      const tbody = table.querySelector("tbody");
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+
+      rows.sort((a, b) => {
+        const aText = a.querySelectorAll("td")[index].textContent.trim().toLowerCase();
+        const bText = b.querySelectorAll("td")[index].textContent.trim().toLowerCase();
+
+        if (!isNaN(aText) && !isNaN(bText)) {
+          return (Number(aText) - Number(bText)) * sortDirection;
+        } else {
+          return aText.localeCompare(bText) * sortDirection;
+        }
+      });
+
+      tbody.innerHTML = "";
+      rows.forEach(row => tbody.appendChild(row));
+
+      sortDirection *= -1;
+
+      // Reset header backgrounds
+      headers.forEach(h => h.style.background = "#003366");
+      header.style.background = "#0055aa";
+    });
+  });
 });
 </script>
 
