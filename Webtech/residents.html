@@ -16,6 +16,8 @@
             <li><a href="index.html">Dashboard</a></li>
             <li><a href="residents.html" class="active">Residents</a></li>
             <li><a href="addnewresidents.html">Add Resident</a></li>
+            <li><a href="deaths.html">Deaths</a></li>
+            <li><a href="documents.html">Documents</a></li>
             <li class="nav-divider"></li>
           </ul>
         </nav>
@@ -85,9 +87,9 @@
                   <tr>
                     <th>ID</th>
                     <th>Name</th>
+                    <th>Age</th>
                     <th>Purok</th>
                     <th>Category</th>
-                    <th>Period of Residence</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -95,9 +97,9 @@
                   <tr>
                     <td>001</td>
                     <td>Juan Dela Cruz</td>
+                    <td>65</td>
                     <td>Purok 1</td>
                     <td>Senior Citizen</td>
-                    <td>1 Year</td>
                     <td>
                       <button class="btn small-btn edit-btn">Edit</button>
                       <button class="btn small-btn delete-btn">Delete</button>
@@ -106,9 +108,9 @@
                   <tr>
                     <td>002</td>
                     <td>Maria Santos</td>
+                    <td>45</td>
                     <td>Purok 2</td>
                     <td>Solo Parent</td>
-                    <td>45 Years</td>
                     <td>
                       <button class="btn small-btn edit-btn">Edit</button>
                       <button class="btn small-btn delete-btn">Delete</button>
@@ -117,14 +119,15 @@
                   <tr>
                     <td>003</td>
                     <td>Carlos Reyes</td>
+                    <td>30</td>
                     <td>Purok 1</td>
                     <td>PWD</td>
-                    <td>30 Years</td>
                     <td>
                       <button class="btn small-btn edit-btn">Edit</button>
                       <button class="btn small-btn delete-btn">Delete</button>
                     </td>
                   </tr>
+                  <!-- Add more rows here as needed -->
                 </tbody>
               </table>
             </div>
@@ -156,6 +159,7 @@
         showUser();
         setupLogout();
 
+        // You can add JS for filtering/searching residents here if needed
       };
     </script>
   </body>
