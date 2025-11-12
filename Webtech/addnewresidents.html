@@ -17,8 +17,6 @@
             <li>
               <a href="addnewresidents.html" class="active">Add Resident</a>
             </li>
-            <li><a href="deaths.html">Death Records</a></li>
-            <li><a href="documents.html">Documents</a></li>
             <li class="nav-divider"></li>
           </ul>
         </nav>
@@ -37,7 +35,7 @@
             <div class="form-modal-card">
               <a href="residents.html" class="close-btn">&times;</a>
 
-              <form id="addResidentForm">
+              <form id="addResidentForm" novalidate>
                 <h2 class="form-title">Add New Resident</h2>
 
                 <div class="form-section">
@@ -110,6 +108,15 @@
                       </select>
                     </div>
                     <div class="input-group">
+                      <label for="citizenship">Citizenship</label>
+                      <input
+                        type="text"
+                        id="citizenship"
+                        name="citizenship"
+                        required
+                      />
+                    </div>
+                    <div class="input-group">
                       <label for="contactNumber">Contact Number</label>
                       <input
                         type="tel"
@@ -117,6 +124,7 @@
                         name="contactNumber"
                         pattern="[0-9]{11}"
                         placeholder="e.g., 09123456789"
+                        title="Please enter an 11-digit Philippine mobile number"
                       />
                     </div>
                     <div class="input-group">
@@ -163,7 +171,7 @@
                         type="text"
                         id="barangay"
                         name="barangay"
-                        placeholder="Your Barangay"
+                        placeholder="Barangay"
                         required
                       />
                     </div>
@@ -173,7 +181,7 @@
                         type="text"
                         id="city"
                         name="city"
-                        placeholder="Your City"
+                        placeholder="City"
                         required
                       />
                     </div>
@@ -183,7 +191,7 @@
                         type="text"
                         id="province"
                         name="province"
-                        placeholder="Your Province"
+                        placeholder="Province"
                         required
                       />
                     </div>
@@ -203,6 +211,17 @@
                         <option value="youth">Youth</option>
                         <option value="adult">Adult</option>
                       </select>
+                    </div>
+                    <div class="input-group" id="idNumberGroup" style="display: none;">
+                      <label for="idNumber">ID Number</label> 
+                      <input 
+                        type="text" 
+                        id="idNumber"
+                        name="idNumber"
+                        placeholder="Enter ID number" 
+                        inputmode="numeric" 
+                        pattern="[0-9]+" 
+                      /> 
                     </div>
                     <div class="input-group">
                       <label for="occupation">Occupation</label>
@@ -230,6 +249,16 @@
     </div>
 
     <script>
+      function showUser() {
+        const user = JSON.parse(localStorage.getItem("rms_user"));
+        const userNameSpan = document.getElementById("userName");
+        if (user && user.name) {
+          userNameSpan.textContent = `Welcome, ${user.name}`;
+        } else {
+          userNameSpan.textContent = "Welcome, Guest";
+        }
+      }
+
       function setupLogout() {
         const logoutBtn = document.getElementById("logoutBtn");
         logoutBtn.addEventListener("click", () => {
@@ -238,33 +267,55 @@
         });
       }
 
-      function showUser() {
-        const user = JSON.parse(localStorage.getItem("rms_user"));
-        const userNameSpan = document.getElementById("userName");
-        if (user && user.name) {
-          userNameSpan.textContent = `Welcome, ${user.name}`;
-        } else {
-          userNameSpan.textContent = `Welcome, Guest`;
+      document.getElementById("addResidentForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+        const residentData = Object.fromEntries(formData);
+
+        let residents = JSON.parse(localStorage.getItem("residents") || "[]");
+        residentData.id = Date.now(); // simple ID
+        residents.push(residentData);
+        localStorage.setItem("residents", JSON.stringify(residents));
+
+        alert("Resident successfully added!");
+        window.location.href = "residents.html";
+      });
+
+      document.querySelector(".form-actions .secondary").addEventListener("click", function () {
+        if (confirm("Are you sure you want to cancel? Unsaved data will be lost.")) {
+          window.location.href = "residents.html";
         }
-      }
+      });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const categorySelect = document.getElementById('category');
+        const idGroup = document.getElementById('idNumberGroup');
+        const idInput = document.getElementById('idNumber');
+
+        function updateIdField() {
+          const value = categorySelect.value;
+          if (value === 'senior' || value === 'pwd') {
+            idGroup.style.display = 'block';
+            idInput.required = true;
+            idInput.closest('.input-group').querySelector('label').innerHTML = 
+              'ID Number <span class="required-star">*</span>';
+          } else {
+            idGroup.style.display = 'none';
+            idInput.required = false;
+            idInput.value = '';
+            idInput.closest('.input-group').querySelector('label').innerHTML = 'ID Number';
+          }
+        }
+
+        updateIdField();
+
+        categorySelect.addEventListener('change', updateIdField);
+      });
 
       window.onload = function () {
         showUser();
         setupLogout();
-        document
-          .getElementById("addResidentForm")
-          .addEventListener("submit", function (event) {
-            event.preventDefault();
-            alert("Resident data would be saved here!");
-
-            window.location.href = "residents.html";
-          });
-
-        document
-          .querySelector(".form-actions .secondary")
-          .addEventListener("click", function () {
-            window.location.href = "residents.html";
-          });
       };
     </script>
   </body>
