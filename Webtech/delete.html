@@ -7,24 +7,38 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="container">
-    <header>
-        <h1>Delete Facility Record</h1>
-        <div class="btn-group">
-            <a href="index.html" class="btn">Home</a>
-            <a href="search.html" class="btn">Search</a>
-            <a href="new.html" class="btn">New</a>
-            <a href="update.html" class="btn">Update</a>
-        </div>
-    </header>
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="logo">Happy Hallow Barangay System</div>
+        <nav class="main-nav">
+          <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="residents.html">Residents</a></li>
+            <li><a href="addnewresidents.html">Add Resident</a></li>
+            <li><a href="reports.html">Reports</a></li>
+            <li class="nav-divider"></li>
+            <li><a href="search.html">Search Facilities</a></li>
+            <li><a href="update.html">Update Record</a></li>
+            <li><a href="delete.html" class="active">Delete Record</a></li>
+          </ul>
+        </nav>
+      </aside>
 
-    <section class="card">
-        <form id="deleteForm">
-            <div class="input-group"><label>Facility Code</label><input type="text" id="code" required></div>
-            <button type="submit" class="btn">Delete</button>
-        </form>
-    </section>
-</div>
+      <main class="main-content">
+        <div class="page-content">
+          <section class="card">
+            <h2>Delete Record</h2>
+            <form id="deleteForm">
+              <div class="input-group">
+                <label>Facility Code</label>
+                <input type="text" id="code" required>
+              </div>
+              <button type="submit" class="btn primary-btn">Delete</button>
+            </form>
+          </section>
+        </div>
+      </main>
+    </div>
 
 <script>
 document.getElementById('deleteForm').onsubmit = e => {

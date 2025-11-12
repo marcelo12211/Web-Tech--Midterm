@@ -6,57 +6,87 @@
     <title>Search Facility Records</title>
     <link rel="stylesheet" href="css/style.css" />
   </head>
+  
   <body>
-    <div class="container">
-      <header>
-        <h1>Search Facility Records</h1>
-        <div class="btn-group">
-          <a href="index.html" class="btn">Home</a>
-          <a href="new.html" class="btn">New</a>
-          <a href="update.html" class="btn">Update</a>
-          <a href="delete.html" class="btn">Delete</a>
-        </div>
-      </header>
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="logo">Happy Hallow Barangay System</div>
+        <nav class="main-nav">
+          <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="residents.html">Residents</a></li>
+            <li><a href="addnewresidents.html">Add Resident</a></li>
+            <li><a href="reports.html">Reports</a></li>
+            <li class="nav-divider"></li>
+            <li><a href="search.html" class="active">Search Facilities</a></li>
+            <li><a href="update.html">Update Record</a></li>
+            <li><a href="delete.html">Delete Record</a></li>
+          </ul>
+        </nav>
+      </aside>
 
-      <section class="card">
-        <div class="input-group">
-          <label>Search Term</label>
-          <input type="text" id="searchTerm" placeholder="Enter keyword..." />
-        </div>
-        <button class="btn" id="searchBtn">Search</button>
-        <button class="btn secondary" id="resetBtn">Reset</button>
+      <main class="main-content">
+        <div class="page-content">
+          <section class="card">
+            <h2>Search Facility Records</h2>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Facility Code</th>
-              <th>Facility Name</th>
-              <th>Site</th>
-              <th>Submitter</th>
-              <th>Last Updated</th>
-            </tr>
-          </thead>
-          <tbody id="recordTable"></tbody>
-        </table>
-      </section>
+            <div class="input-group">
+              <label for="searchTerm">Search Term</label>
+              <input
+                type="text"
+                id="searchTerm"
+                placeholder="Enter keyword..."
+              />
+            </div>
+
+            <div class="search-controls">
+              <button class="btn primary-btn" id="searchBtn">Search</button>
+              <button class="btn" id="resetBtn">Reset</button>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Facility Code</th>
+                  <th>Facility Name</th>
+                  <th>Site</th>
+                  <th>Submitter</th>
+                  <th>Last Updated</th>
+                </tr>
+              </thead>
+              <tbody id="recordTable"></tbody>
+            </table>
+          </section>
+        </div>
+      </main>
     </div>
 
     <script>
       const table = document.getElementById("recordTable");
+
       function loadRecords() {
         const records = JSON.parse(localStorage.getItem("facilities")) || [];
         table.innerHTML = "";
+
         records.forEach((r) => {
           const row = document.createElement("tr");
-          row.innerHTML = `<td>${r.code}</td><td>${r.name}</td><td>${r.site}</td><td>${r.submitter}</td><td>${r.updated}</td>`;
+          row.innerHTML = `
+            <td>${r.code}</td>
+            <td>${r.name}</td>
+            <td>${r.site}</td>
+            <td>${r.submitter}</td>
+            <td>${r.updated}</td>
+          `;
           table.appendChild(row);
         });
       }
+
       loadRecords();
 
       document.getElementById("searchBtn").onclick = () => {
         const term = document.getElementById("searchTerm").value.toLowerCase();
         const rows = table.querySelectorAll("tr");
+
         rows.forEach((r) => {
           const text = r.innerText.toLowerCase();
           r.style.display = text.includes(term) ? "" : "none";
