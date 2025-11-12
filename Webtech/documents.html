@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documents - Happy Hallow Barangay System</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="logo">Happy Hallow Barangay System</div>
+        <nav class="main-nav">
+          <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="residents.html">Residents</a></li>
+            <li><a href="addnewresidents.html">Add Resident</a></li>
+            <li><a href="deaths.html">Death Records</a></li>
+            <li><a href="documents.html" class="active">Documents</a></li>
+            <li class="nav-divider"></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <div class="main-content">
+        <header class="topbar">
+          <div class="topbar-right">
+            <span id="userName" class="user-info">Welcome, User</span>
+            <button id="logoutBtn" class="btn logout-btn">Logout</button>
+          </div>
+        </header>
+
+        <main class="page-content">
+          <h2>Document Generation & Storage</h2>
+          <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr">
+            <div class="card">
+              <h3>Create New Document</h3>
+              <form>
+                <div class="form-grid">
+                  <div class="input-group">
+                    <label for="docType">Document Type</label>
+                    <select id="docType" required>
+                      <option value="">Select Document</option>
+                      <option value="certificate">Barangay Certificate</option>
+                      <option value="clearance">Barangay Clearance</option>
+                    </select>
+                  </div>
+                  <div class="input-group">
+                    <label for="docNumber"
+                      >Document Number (Auto-Generated)</label
+                    >
+                    <input
+                      type="text"
+                      id="docNumber"
+                      value="BC-[AUTO-GENERATE]"
+                      disabled
+                    />
+                  </div>
+                  <div class="input-group" style="grid-column: 1 / -1">
+                    <label for="residentSearch">Resident Name/ID</label>
+                    <input
+                      type="text"
+                      id="residentSearch"
+                      placeholder="Search and Select Resident"
+                      required
+                    />
+                  </div>
+                  <div class="input-group" style="grid-column: 1 / -1">
+                    <label for="purpose">Purpose of Document</label>
+                    <textarea id="purpose" rows="3" required></textarea>
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn primary-btn create">
+                    Generate Document (PDF/Excel)
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div class="card">
+              <h3>🗄️ Stored Documents (PDF/Excel)</h3>
+              <div class="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Doc. No.</th>
+                      <th>Resident Name</th>
+                      <th>Type</th>
+                      <th>Date Generated</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="documentStorageTable">
+                    <tr>
+                      <td>BC-001</td>
+                      <td>Dela Cruz, Juan M.</td>
+                      <td>Certificate</td>
+                      <td>2024-03-20</td>
+                      <td class="actions-cell">
+                        <a href="#" class="action-link view">Download PDF</a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      // Existing functions...
+      function setupLogout() {
+        const logoutBtn = document.getElementById("logoutBtn");
+        logoutBtn.addEventListener("click", () => {
+          localStorage.removeItem("rms_user");
+          window.location.href = "login.html";
+        });
+      }
+
+      function showUser() {
+        const user = JSON.parse(localStorage.getItem("rms_user"));
+        const userNameSpan = document.getElementById("userName");
+        if (user && user.name) {
+          userNameSpan.textContent = `Welcome, ${user.name}`;
+        } else {
+          (userNameSpan.textContent = Welcome), Guest;
+        }
+      }
+
+      window.onload = function () {
+        showUser();
+        setupLogout();
+      };
+    </script>
+  </body>
+</html>
