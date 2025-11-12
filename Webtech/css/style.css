@@ -55,10 +55,10 @@ a {
 .logo {
   font-size: 1.6rem;
   font-weight: 700;
-  text-align: center;
+  text-align: left;
   padding: 0 20px 20px 20px;
   margin-bottom: 15px;
-  color: var(--primary-color);
+  color: #f4f3ef;
   letter-spacing: 0.5px;
 }
 
@@ -71,7 +71,7 @@ a {
   display: flex;
   align-items: center;
   padding: 14px 30px;
-  color: rgba(255, 255, 255, 0.85);
+  color: 	#f4f3ef;
   transition: background-color 0.25s ease, color 0.25s ease;
   font-size: 0.95rem;
   font-weight: 500;
