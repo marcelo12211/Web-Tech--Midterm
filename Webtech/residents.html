@@ -33,7 +33,7 @@
           </div>
         </header>
 
-        <main class="page-content">
+        <div class="page-content">
           <div class="residents-directory card">
             <div class="directory-header">
               <h2>Resident Directory</h2>
@@ -42,8 +42,7 @@
 
             <div class="filter-section">
               <div class="search-bar-group">
-                <input type="text" placeholder="Search" class="search-input" />
-                <button class="btn filter-btn">Filter</button>
+                <input type="text" placeholder="Search by name, ID, or purok..." class="search-input" />
               </div>
 
               <div class="filter-dropdowns">
@@ -80,56 +79,54 @@
               <table>
                 <thead>
                   <tr>
-                    <th>[ID]</th>
-                    <th>[Name]</th>
-                    <th>[Age]</th>
-                    <th>[Purok]</th>
-                    <th>[Category]</th>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Purok</th>
+                    <th>Category</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody id="residentsTableBody">
                   <tr>
-                    <td>[001]</td>
-                    <td>[Juan Dela Cruz]</td>
-                    <td>[65]</td>
-                    <td>[Purok 1]</td>
+                    <td>001</td>
+                    <td>Juan Dela Cruz</td>
+                    <td>65</td>
+                    <td>Purok 1</td>
                     <td>
-                      <span class="category-tag senior-citizen"
-                        >[Senior Citizen]</span
-                      >
+                      <span class="category-tag senior-citizen">Senior Citizen</span>
                     </td>
-                    <td>
-                      <a href="#" class="action-link view">View</a> |
-                      <a href="#" class="action-link edit">Edit</a> |
+                    <td class="actions-cell">
+                      <a href="#" class="action-link view">View</a>
+                      <a href="#" class="action-link edit">Edit</a>
                       <a href="#" class="action-link delete">Delete</a>
                     </td>
                   </tr>
                   <tr>
-                    <td>[002]</td>
-                    <td>[Mario Santos]</td>
-                    <td>[34]</td>
-                    <td>[Purok 2]</td>
+                    <td>002</td>
+                    <td>Mario Santos</td>
+                    <td>34</td>
+                    <td>Purok 2</td>
                     <td>
-                      <span class="category-tag solo-parent"
-                        >[Solo Parent]</span
-                      >
+                      <span class="category-tag solo-parent">Solo Parent</span>
                     </td>
-                    <td>
-                      <a href="#" class="action-link view">View</a> |
-                      <a href="#" class="action-link edit">Edit</a> |
+                    <td class="actions-cell">
+                      <a href="#" class="action-link view">View</a>
+                      <a href="#" class="action-link edit">Edit</a>
                       <a href="#" class="action-link delete">Delete</a>
                     </td>
                   </tr>
                   <tr>
-                    <td>[003]</td>
-                    <td>[Pedro Reyes]</td>
-                    <td>[42]</td>
-                    <td>[Purok 1]</td>
-                    <td><span class="category-tag pwd">[PWD]</span></td>
+                    <td>003</td>
+                    <td>Pedro Reyes</td>
+                    <td>42</td>
+                    <td>Purok 1</td>
                     <td>
-                      <a href="#" class="action-link view">View</a> |
-                      <a href="#" class="action-link edit">Edit</a> |
+                      <span class="category-tag pwd">PWD</span>
+                    </td>
+                    <td class="actions-cell">
+                      <a href="#" class="action-link view">View</a>
+                      <a href="#" class="action-link edit">Edit</a>
                       <a href="#" class="action-link delete">Delete</a>
                     </td>
                   </tr>
@@ -137,7 +134,7 @@
               </table>
             </div>
           </div>
-        </main>
+        </div>
       </div>
     </div>
 
