@@ -16,11 +16,7 @@
             <li><a href="index.html">Dashboard</a></li>
             <li><a href="residents.html" class="active">Residents</a></li>
             <li><a href="addnewresidents.html">Add Resident</a></li>
-            <li><a href="reports.html">Reports</a></li>
             <li class="nav-divider"></li>
-            <li><a href="search.html">Search Facilities</a></li>
-            <li><a href="update.html">Update Record</a></li>
-            <li><a href="delete.html">Delete Record</a></li>
           </ul>
         </nav>
       </aside>
@@ -33,16 +29,23 @@
           </div>
         </header>
 
-        <div class="page-content">
+        <main class="page-content">
           <div class="residents-directory card">
             <div class="directory-header">
               <h2>Resident Directory</h2>
-              <a href="addnewresidents.html" class="btn primary-btn">+ Add New</a>
+              <a href="addnewresidents.html" class="btn primary-btn"
+                >+ Add New</a
+              >
             </div>
 
             <div class="filter-section">
               <div class="search-bar-group">
-                <input type="text" placeholder="Search by name, ID, or purok..." class="search-input" />
+                <input
+                  type="text"
+                  placeholder="Search by name, ID, or purok..."
+                  class="search-input"
+                  id="searchInput"
+                />
               </div>
 
               <div class="filter-dropdowns">
@@ -64,14 +67,13 @@
                   </select>
                 </div>
                 <div class="input-group">
-                  <label for="age-range-filter">Period of Residence</label>
-                  <select id="age-range-filter">
+                  <label for="period-filter">Period of Residence</label>
+                  <select id="period-filter">
                     <option value="">-- Select Period of Residence --</option>
-                    <option value="0-17">1-12 Months</option>
-                    <option value="18-59">1-5 Years</option>
-                    <option value="60+">5-10 Years</option>
-                    <option value="60+">10+ Years</option>
-
+                    <option value="0-1">1-12 Months</option>
+                    <option value="1-5">1-5 Years</option>
+                    <option value="5-10">5-10 Years</option>
+                    <option value="10+">10+ Years</option>
                   </select>
                 </div>
               </div>
@@ -95,48 +97,40 @@
                     <td>Juan Dela Cruz</td>
                     <td>65</td>
                     <td>Purok 1</td>
+                    <td>Senior Citizen</td>
                     <td>
-                      <span class="category-tag senior-citizen">Senior Citizen</span>
-                    </td>
-                    <td class="actions-cell">
-                      <a href="#" class="action-link view">View</a>
-                      <a href="#" class="action-link edit">Edit</a>
-                      <a href="#" class="action-link delete">Delete</a>
+                      <button class="btn small-btn edit-btn">Edit</button>
+                      <button class="btn small-btn delete-btn">Delete</button>
                     </td>
                   </tr>
                   <tr>
                     <td>002</td>
-                    <td>Mario Santos</td>
-                    <td>34</td>
+                    <td>Maria Santos</td>
+                    <td>45</td>
                     <td>Purok 2</td>
+                    <td>Solo Parent</td>
                     <td>
-                      <span class="category-tag solo-parent">Solo Parent</span>
-                    </td>
-                    <td class="actions-cell">
-                      <a href="#" class="action-link view">View</a>
-                      <a href="#" class="action-link edit">Edit</a>
-                      <a href="#" class="action-link delete">Delete</a>
+                      <button class="btn small-btn edit-btn">Edit</button>
+                      <button class="btn small-btn delete-btn">Delete</button>
                     </td>
                   </tr>
                   <tr>
                     <td>003</td>
-                    <td>Pedro Reyes</td>
-                    <td>42</td>
+                    <td>Carlos Reyes</td>
+                    <td>30</td>
                     <td>Purok 1</td>
+                    <td>PWD</td>
                     <td>
-                      <span class="category-tag pwd">PWD</span>
-                    </td>
-                    <td class="actions-cell">
-                      <a href="#" class="action-link view">View</a>
-                      <a href="#" class="action-link edit">Edit</a>
-                      <a href="#" class="action-link delete">Delete</a>
+                      <button class="btn small-btn edit-btn">Edit</button>
+                      <button class="btn small-btn delete-btn">Delete</button>
                     </td>
                   </tr>
+                  <!-- Add more rows here as needed -->
                 </tbody>
               </table>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
 
@@ -162,6 +156,8 @@
       window.onload = function () {
         showUser();
         setupLogout();
+
+        // You can add JS for filtering/searching residents here if needed
       };
     </script>
   </body>
