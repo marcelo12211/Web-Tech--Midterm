@@ -17,7 +17,7 @@ include 'db_connect.php'; // make $conn available
           <ul>
             <li><a href="index.php">Dashboard</a></li>
             <li><a href="residents.php" class="active">Residents</a></li>
-            <li><a href="addnewresidents.html">Add Resident</a></li>
+            <li><a href="addnewresidents.php">Add Resident</a></li>
             <li><a href="deaths.html">Deaths</a></li>
             <li><a href="documents.html">Documents</a></li>
             <li class="nav-divider"></li>
