@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delete Record</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="logo">Happy Hallow Barangay System</div>
+        <nav class="main-nav">
+          <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="residents.html">Residents</a></li>
+            <li><a href="addnewresidents.html">Add Resident</a></li>
+            <li><a href="reports.html">Reports</a></li>
+            <li class="nav-divider"></li>
+            <li><a href="search.html">Search Facilities</a></li>
+            <li><a href="update.html">Update Record</a></li>
+            <li><a href="delete.html" class="active">Delete Record</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <div class="page-content">
+          <section class="card">
+            <h2>Delete Record</h2>
+            <form id="deleteForm">
+              <div class="input-group">
+                <label>Facility Code</label>
+                <input type="text" id="code" required />
+              </div>
+              <button type="submit" class="btn primary-btn">Delete</button>
+            </form>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      document.getElementById("deleteForm").onsubmit = (e) => {
+        e.preventDefault();
+        let records = JSON.parse(localStorage.getItem("facilities")) || [];
+        const index = records.findIndex((r) => r.code === code.value.trim());
+        if (index === -1) return alert("Facility not found.");
+        records.splice(index, 1);
+        localStorage.setItem("facilities", JSON.stringify(records));
+        alert("Record deleted successfully.");
+        e.target.reset();
+      };
+    </script>
+  </body>
+</html>
