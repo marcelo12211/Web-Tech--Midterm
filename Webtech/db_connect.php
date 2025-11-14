@@ -1,7 +1,7 @@
 <?php
-$servername = "localhost";
-$username = "root";        // WAMP default username
-$password = "";            // WAMP default password (empty is default but can change if needed)
+$servername = "127.0.0.1";
+$username = "root";        
+$password = "";         
 $dbname = "happyhallow";
 
 // Create connection
