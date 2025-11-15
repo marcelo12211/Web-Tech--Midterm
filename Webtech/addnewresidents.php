@@ -179,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <!-- PAGE 2 -->
-<div id="page2" class="hidden">
+<div id="page2" style="display:none">
   <h2>B. Basic Details</h2>
 
   <div class="form-grid">
@@ -223,7 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </div>
 
-  <div class="button-group">
+   <div class="button-group">
     <button type="button" id="backBtn2" class="btn secondary">Back</button>
     <button type="button" id="nextBtn2" class="btn">Next</button>
   </div>
@@ -238,10 +238,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
-// PAGE SYSTEM
+// Define all pages in order
 const pages = ["page1", "page2"];
 let currentPage = 0;
 
+// Show only the current page
 function showPage(index) {
   pages.forEach((id, i) => {
     const page = document.getElementById(id);
@@ -253,28 +254,25 @@ function showPage(index) {
   });
 }
 
-// VALIDATION RULES
+// VALIDATION FOR PAGE 1
 function isValidName(value) {
-  // not pure symbols, letters + allowed symbols ok
-  // allowed symbols: space, hyphen, apostrophe, period
-  const validPattern = /^[A-Za-z .'-]+$/;
+  const pattern = /^[A-Za-z .'-]+$/;
   const hasLetter = /[A-Za-z]/;
-
-  return validPattern.test(value) && hasLetter.test(value);
+  return pattern.test(value) && hasLetter.test(value);
 }
 
 function validatePage1() {
-  const firstName = document.querySelector("input[name='firstName']").value.trim();
-  const lastName = document.querySelector("input[name='lastName']").value.trim();
+  const first = document.querySelector("input[name='firstName']").value.trim();
+  const last = document.querySelector("input[name='lastName']").value.trim();
   const province = document.querySelector("input[name='province']").value.trim();
   const city = document.querySelector("input[name='city']").value.trim();
   const barangay = document.querySelector("input[name='barangay']").value.trim();
 
-  if (!isValidName(firstName)) {
+  if (!isValidName(first)) {
     alert("Enter a valid first name.");
     return false;
   }
-  if (!isValidName(lastName)) {
+  if (!isValidName(last)) {
     alert("Enter a valid surname.");
     return false;
   }
@@ -285,39 +283,33 @@ function validatePage1() {
   return true;
 }
 
+// VALIDATION FOR PAGE 2
 function validatePage2() {
-  const birthDate = document.querySelector("input[name='birthDate']").value;
+  const birth = document.querySelector("input[name='birthDate']").value;
   const gender = document.querySelector("select[name='gender']").value;
-  const civilStatus = document.querySelector("select[name='civilStatus']").value;
+  const civil = document.querySelector("select[name='civilStatus']").value;
   const citizenship = document.querySelector("select[name='citizenship']").value;
 
-  if (birthDate === "" || gender === "" || civilStatus === "" || citizenship === "") {
+  if (birth === "" || gender === "" || civil === "" || citizenship === "") {
     alert("Fill out all required fields.");
     return false;
   }
   return true;
 }
 
-// BUTTON EVENTS
-document.getElementById("nextBtn1").onclick = () => {
-  if (validatePage1()) {
-    currentPage = 1;
-    showPage(currentPage);
-  }
+// PAGE 1 NEXT
+document.getElementById("nextBtn1").onclick = function () {
+  document.getElementById("page1").style.display = "none";
+  document.getElementById("page2").style.display = "block";
 };
 
-document.getElementById("backBtn2").onclick = () => {
-  currentPage = 0;
-  showPage(currentPage);
+document.getElementById("backBtn2").onclick = function () {
+  document.getElementById("page2").style.display = "none";
+  document.getElementById("page1").style.display = "block";
 };
 
-document.getElementById("nextBtn2").onclick = () => {
-  if (validatePage2()) {
-    document.getElementById("addResidentForm").submit();
-  }
-};
 
-// INIT
+// Show page 1 at start
 showPage(0);
 </script>
 
