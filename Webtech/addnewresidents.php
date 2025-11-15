@@ -238,16 +238,89 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
+// PAGE SYSTEM
+const pages = ["page1", "page2"];
+let currentPage = 0;
+
+function showPage(index) {
+  pages.forEach((id, i) => {
+    const page = document.getElementById(id);
+    if (i === index) {
+      page.classList.remove("hidden");
+    } else {
+      page.classList.add("hidden");
+    }
+  });
+}
+
+// VALIDATION RULES
+function isValidName(value) {
+  // not pure symbols, letters + allowed symbols ok
+  // allowed symbols: space, hyphen, apostrophe, period
+  const validPattern = /^[A-Za-z .'-]+$/;
+  const hasLetter = /[A-Za-z]/;
+
+  return validPattern.test(value) && hasLetter.test(value);
+}
+
+function validatePage1() {
+  const firstName = document.querySelector("input[name='firstName']").value.trim();
+  const lastName = document.querySelector("input[name='lastName']").value.trim();
+  const province = document.querySelector("input[name='province']").value.trim();
+  const city = document.querySelector("input[name='city']").value.trim();
+  const barangay = document.querySelector("input[name='barangay']").value.trim();
+
+  if (!isValidName(firstName)) {
+    alert("Enter a valid first name.");
+    return false;
+  }
+  if (!isValidName(lastName)) {
+    alert("Enter a valid surname.");
+    return false;
+  }
+  if (province === "" || city === "" || barangay === "") {
+    alert("Fill out all required fields.");
+    return false;
+  }
+  return true;
+}
+
+function validatePage2() {
+  const birthDate = document.querySelector("input[name='birthDate']").value;
+  const gender = document.querySelector("select[name='gender']").value;
+  const civilStatus = document.querySelector("select[name='civilStatus']").value;
+  const citizenship = document.querySelector("select[name='citizenship']").value;
+
+  if (birthDate === "" || gender === "" || civilStatus === "" || citizenship === "") {
+    alert("Fill out all required fields.");
+    return false;
+  }
+  return true;
+}
+
+// BUTTON EVENTS
 document.getElementById("nextBtn1").onclick = () => {
-  document.getElementById("page1").classList.add("hidden");
-  document.getElementById("page2").classList.remove("hidden");
+  if (validatePage1()) {
+    currentPage = 1;
+    showPage(currentPage);
+  }
 };
 
 document.getElementById("backBtn2").onclick = () => {
-  document.getElementById("page2").classList.add("hidden");
-  document.getElementById("page1").classList.remove("hidden");
+  currentPage = 0;
+  showPage(currentPage);
 };
+
+document.getElementById("nextBtn2").onclick = () => {
+  if (validatePage2()) {
+    document.getElementById("addResidentForm").submit();
+  }
+};
+
+// INIT
+showPage(0);
 </script>
+
 
 </body>
 </html>
