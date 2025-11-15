@@ -1,9 +1,9 @@
 <?php
 //DATABASE CONNECTION
-$servername = "127.0.0.1";
+$servername = "192.168.20.25";
 $username = "root";
 $password = "";
-$dbname = "happyhallow";
+$dbname = "happy hallow";
 $port = 3306;
 
 $conn = mysqli_connect($servername, $username, $password, $dbname,$port);

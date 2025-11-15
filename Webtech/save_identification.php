@@ -3,7 +3,7 @@
 $servername = "127.0.0.1";
 $username = "root";
 $password = "";
-$dbname = "happyhallow";
+$dbname = "happy hallow";
 $conn = mysqli_connect($servername, $username, $password, $dbname, 3306);
 mysqli_set_charset($conn, 'utf8mb4');
 

@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <ul>
                 <li><a href="index.php">Dashboard</a></li>
                 <li><a href="residents.php">Residents</a></li>
-                <li><a href="addnewresidents.php" class="active">Add Resident</a></li>
+                <li><a href="addnewresidents.php"class="active">Add Resident</a></li>
                 <li><a href="deaths.php">Deaths</a></li>
                 <li><a href="documents.php">Documents</a></li>
                 <li class="nav-divider"></li>
