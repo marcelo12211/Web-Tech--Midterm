@@ -3,7 +3,7 @@
 $servername = "192.168.20.25";
 $username = "root";
 $password = "";
-$dbname = "happy hallow";
+$dbname = "happyhallow";
 $port = 3306;
 
 $conn = mysqli_connect($servername, $username, $password, $dbname,$port);

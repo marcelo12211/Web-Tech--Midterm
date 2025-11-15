@@ -126,8 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           if(isset($success)) echo "<p style='color:green;'>$success</p>";
           if(isset($error)) echo "<p style='color:red;'>$error</p>";
           ?>
-
-          <form id="addResidentForm" method="POST">
+<form id="addResidentForm" method="POST">
 
 <h2 class="form-title">Add New Resident</h2>
 
@@ -139,37 +138,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="input-group">
       <label>First Name</label>
-      <input type="text" name="firstName" required>
+      <input type="text" name="firstName" id="firstName" required>
     </div>
 
     <div class="input-group">
       <label>Middle Name</label>
-      <input type="text" name="middleName">
+      <input type="text" name="middleName" id="middleName">
     </div>
 
     <div class="input-group">
       <label>Surname</label>
-      <input type="text" name="lastName" required>
+      <input type="text" name="lastName" id="lastName" required>
     </div>
 
     <div class="input-group">
       <label>Suffix</label>
-      <input type="text" name="suffix">
+      <input type="text" name="suffix" id="suffix">
     </div>
 
     <div class="input-group">
       <label>Province</label>
-      <input type="text" name="province" required>
+      <input type="text" name="province" id="province" required>
     </div>
 
     <div class="input-group">
       <label>City/Municipality</label>
-      <input type="text" name="city" required>
+      <input type="text" name="city" id="city" required>
     </div>
 
     <div class="input-group">
       <label>Barangay</label>
-      <input type="text" name="barangay" required>
+      <input type="text" name="barangay" id="barangay" required>
     </div>
 
   </div>
@@ -193,8 +192,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <label>Gender</label>
       <select name="gender" required>
         <option value="">Select</option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
+        <option>Male</option>
+        <option>Female</option>
       </select>
     </div>
 
@@ -202,21 +201,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <label>Civil Status</label>
       <select name="civilStatus" required>
         <option value="">Select</option>
-        <option value="Single">Single</option>
-        <option value="Married">Married</option>
-        <option value="Widowed">Widowed</option>
+        <option>Single</option>
+        <option>Married</option>
+        <option>Widowed</option>
       </select>
     </div>
 
     <div class="input-group">
       <label>Citizenship</label>
-      <input type="text" name="citizenship" required>
+      <select name="citizenship" required>
+        <option value="">Select</option>
+        <option>Filipino</option>
+        <option>American</option>
+        <option>Canadian</option>
+        <option>Japanese</option>
+        <option>Korean</option>
+        <option>Chinese</option>
+        <option>Australian</option>
+        <option>British</option>
+      </select>
     </div>
   </div>
 
   <div class="button-group">
     <button type="button" id="backBtn2" class="btn secondary">Back</button>
-    <button type="submit" class="btn">Submit</button>
+    <button type="button" id="nextBtn2" class="btn">Next</button>
   </div>
 
 </div>
@@ -229,7 +238,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
-// Page Navigation Logic
 document.getElementById("nextBtn1").onclick = () => {
   document.getElementById("page1").classList.add("hidden");
   document.getElementById("page2").classList.remove("hidden");
