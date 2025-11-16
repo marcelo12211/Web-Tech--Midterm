@@ -18,8 +18,8 @@ include 'db_connect.php'; // make $conn available
             <li><a href="index.php">Dashboard</a></li>
             <li><a href="residents.php" class="active">Residents</a></li>
             <li><a href="addnewresidents.php">Add Resident</a></li>
-            <li><a href="deaths.html">Deaths</a></li>
-            <li><a href="documents.html">Documents</a></li>
+            <li><a href="deaths.php">Deaths</a></li>
+            <li><a href="documents.php  ">Documents</a></li>
             <li class="nav-divider"></li>
           </ul>
         </nav>

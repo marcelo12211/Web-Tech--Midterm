@@ -1,3 +1,6 @@
+<?php
+include 'db_connect.php'; // make $conn available
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -9,20 +12,20 @@
 
   <body>
     <div class="app-container">
-      <aside class="sidebar">
+    <aside class="sidebar">
         <div class="logo">Happy Hallow Barangay System</div>
         <nav class="main-nav">
-          <ul>
-            <li><a href="index.html">Dashboard</a></li>
-            <li><a href="residents.html">Residents</a></li>
-            <li><a href="addnewresidents.html">Add Resident</a></li>
-            <li><a href="deaths.html" class="active">Death Records</a></li>
-            <li><a href="documents.html">Documents</a></li>
-            <li class="nav-divider"></li>
-          </ul>
+            <ul>
+        
+                <li><a href="index.php">Dashboard</a></li>
+                <li><a href="residents.php">Residents</a></li>
+                <li><a href="addnewresidents.php">Add Resident</a></li>
+                    <li><a href="deaths.php" class="active" >Deaths</a></li>
+            <li><a href="documents.php">Documents</a></li>
+                <li class="nav-divider"></li>
+            </ul>
         </nav>
-      </aside>
-
+    </aside>
       <div class="main-content">
         <header class="topbar">
           <div class="topbar-right">

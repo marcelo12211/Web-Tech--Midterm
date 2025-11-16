@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reports & Analytics</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <style>
+    :root {
+        --bg: #f6f8fb;
+        --card: #ffffff;
+        --text-primary: #0f172a;
+        --text-muted: #6b7280;
+        --border-color: #e6e9ef;
+        --accent: #2563eb;
+        --accent-hover: #1d4ed8;
+        --danger: #dc2626;
+        --spacing-sm: 8px;
+        --spacing-md: 12px;
+        --spacing-lg: 20px;
+        --header-height: 64px;
+        --radius: 8px;
+        --shadow: 0 4px 18px rgba(11, 15, 30, 0.08);
+        --transition-fast: 0.2s ease-out;
+        --sidebar-width: 240px; /* Slightly wider sidebar */
+        --card-icon-bg: #e0e7ff; /* Light background for card icons */
+    }
+    
+    * {
+        box-sizing: border-box;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto,
+            "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text-primary);
+        line-height: 1.5;
+        display: flex;
+        min-height: 100vh;
+    }
+
+    a {
+        text-decoration: none;
+        color: inherit;
+        transition: color var(--transition-fast);
+    }
+
+    /* --- Global Header (Top Bar) --- */
+    .header {
+        position: fixed;
+        top: 0;
+        right: 0;
+        padding: 0 var(--spacing-lg);
+        color: var(--text-muted);
+        font-size: 14px;
+        background: var(--card);
+        width: calc(100% - var(--sidebar-width));
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Lighter shadow */
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        height: var(--header-height);
+        z-index: 50;
+    }
+    .header a {
+        color: var(--accent);
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius);
+        font-weight: 500;
+    }
+    .header a:hover {
+        background: #f1f5f9; /* Subtle hover effect */
+    }
+    .header span {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    /* --- Sidebar Navigation --- */
+    .sidebar {
+        width: var(--sidebar-width);
+        background: #1d1d1d; 
+        color: white;
+        height: 100vh;
+        padding: var(--spacing-lg) 0;
+        box-sizing: border-box;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 100;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+    .sidebar h2 {
+        font-size: 20px; /* Slightly larger title */
+        font-weight: 700;
+        line-height: 1.3;
+        margin: 0 var(--spacing-lg) 40px var(--spacing-lg);
+        padding-bottom: var(--spacing-md);
+        color: var(--card);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .sidebar a {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md); /* Space between icon and text */
+        color: #e0e0e0;
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-left: 4px solid transparent;
+        transition: all var(--transition-fast);
+        font-size: 16px; /* Slightly larger font */
+        font-weight: 500;
+    }
+    .sidebar a:hover:not(.active) {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: var(--card);
+    }
+    .sidebar a.active {
+        background-color: var(--accent);
+        border-left-color: var(--accent);
+        color: var(--card);
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+    .sidebar a svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    /* --- Main Content Area --- */
+    .main {
+        flex-grow: 1;
+        padding: var(--spacing-lg);
+        padding-top: calc(var(--header-height) + var(--spacing-lg));
+        margin-left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
+        box-sizing: border-box;
+    }
+
+    /* --- Dashboard Title --- */
+    .dashboard-title {
+        font-size: 32px; /* Larger title */
+        font-weight: 800; /* Bolder title */
+        color: var(--text-primary);
+        margin-top: 0;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    /* Subtitle */
+    .dashboard-subtitle {
+        font-size: 16px;
+        color: var(--text-muted);
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-sm);
+    }
+
+
+    /* --- Card Container --- */
+    .card-container {
+        display: flex;
+        flex-wrap: wrap; /* Allows wrapping on smaller desktops/tablets */
+        gap: var(--spacing-lg);
+        margin-bottom: 30px;
+    }
+    .card {
+        background: var(--card);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: var(--spacing-lg);
+        text-align: left; /* Align text to left inside cards */
+        flex: 1;
+        min-width: 220px; /* Ensure cards don't get too small */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-fast);
+    }
+    .card:hover {
+        transform: translateY(-4px); /* More noticeable lift */
+        box-shadow: 0 8px 25px rgba(11, 15, 30, 0.15);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-icon {
+        background: var(--card-icon-bg);
+        padding: var(--spacing-sm);
+        border-radius: var(--radius);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .card-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .card h3 {
+        font-size: 42px; /* Large, impressive number */
+        margin: var(--spacing-sm) 0 var(--spacing-sm) 0;
+        color: var(--text-primary); 
+        font-weight: 800;
+        line-height: 1.2;
+    }
+    .card p {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 15px;
+        text-transform: capitalize;
+        font-weight: 600;
+    }
+
+    /* Custom color accent for metrics (using text-primary for numbers, accent for text) */
+    #userCount, #recordCount, #staffCount, #logCount {
+        color: var(--accent); 
+    }
+
+    /* --- Responsiveness --- */
+    @media (max-width: 900px) {
+        .card-container {
+            gap: var(--spacing-md);
+        }
+        .card {
+            min-width: 45%; /* Two cards per row */
+        }
+    }
+
+    @media (max-width: 600px) {
+        .sidebar {
+            width: 100%;
+            height: auto;
+            position: relative;
+            padding: var(--spacing-md) 0;
+        }
+        .header {
+            display: none; 
+        }
+        .main {
+            margin-left: 0;
+            padding-top: var(--spacing-lg);
+            width: 100%;
+        }
+        .card-container {
+            flex-direction: column;
+        }
+    }
+</style>
+
+    <body onload="lucide.createIcons()">
+            <!-- Top Right Header -->
+        <div class="header">
+            <span>Welcome, Admin</span>
+            <a href="#" id="logoutBtn">Logout</a>
+        </div>
+        <div class="sidebar">
+            <h2>Admin Panel</h2>
+            <a href="admin_menu.html" >
+                <i data-lucide="layout-dashboard"></i>
+                Dashboard
+            </a> 
+            <a href="users.php">
+                <i data-lucide="users"></i>
+                Manage Users
+            </a>
+            <a href="reports_admin.html" class="active">
+                <i data-lucide="bar-chart-2"></i>
+                Reports
+            </a>
+            <a href="../login.php" id="logoutBtn">
+                <i data-lucide="log-out"></i>
+                Logout
+            </a>
+        </div>
+    
+      <div class="main-content">
+        <header class="topbar">
+          <div class="topbar-right">
+            <span id="userName" class="user-info">Welcome, User</span>
+            <button id="logoutBtn" class="btn logout-btn">Logout</button>
+          </div>
+        </header>
+
+        <main class="page-content">
+          <h2>Generate Reports & Analytics</h2>
+
+          <h3>Key Statistics</h3>
+          <div class="dashboard-grid">
+            <div class="stat-card report-stat">
+              <p class="stat-label">Total Population</p>
+              <p class="stat-value"><span>[1,560]</span></p>
+            </div>
+            <div class="stat-card report-stat">
+              <p class="stat-label">Total Households</p>
+              <p class="stat-value"><span>[350]</span></p>
+            </div>
+            <div class="stat-card report-stat">
+              <p class="stat-label">Senior Citizens (%)</p>
+              <p class="stat-value"><span>[12%]</span></p>
+            </div>
+            <div class="stat-card report-stat">
+              <p class="stat-label">Active Solo Parents</p>
+              <p class="stat-value"><span>[89]</span></p>
+            </div>
+          </div>
+
+          <div class="card chart-card">
+            <h3>Age Distribution (Visual)</h3>
+            <div class="chart-placeholder">
+              <p>
+                This area would display a Bar/Pie Chart showing population by
+                age group (e.g., 0-17, 18-59, 60+).
+              </p>
+              <img
+                src="https://via.placeholder.com/740x250?text=Bar+Chart+Placeholder"
+                alt="Age Distribution Chart Placeholder"
+              />
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Detailed Report Generator</h3>
+            <form id="reportGeneratorForm">
+              <div class="filter-dropdowns">
+                <div class="input-group">
+                  <label for="reportType">Report Type</label>
+                  <select id="reportType" required>
+                    <option value="">-- Select Report --</option>
+                    <option value="purok">Population by Purok</option>
+                    <option value="category">
+                      Resident Category Breakdown
+                    </option>
+                    <option value="voters">Registered Voters List</option>
+                    <option value="household">Household Head Directory</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label for="startDate">Start Date (Registration)</label>
+                  <input type="date" id="startDate" />
+                </div>
+                <div class="input-group">
+                  <label for="endDate">End Date (Registration)</label>
+                  <input type="date" id="endDate" />
+                </div>
+                <div class="input-group">
+                  <label for="targetPurok">Target Purok (Optional)</label>
+                  <select id="targetPurok">
+                    <option value="all">All Puroks</option>
+                    <option value="purok1">Purok 1</option>
+                    <option value="purok2">Purok 2</option>
+                    <option value="purok3">Purok 3</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-actions" style="margin-top: 20px">
+                <button type="submit" class="btn primary-btn create">
+                  Generate Report
+                </button>
+                <button type="button" class="btn secondary">
+                  Reset Filters
+                </button>
+              </div>
+            </form>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      function setupLogout() {
+        const logoutBtn = document.getElementById("logoutBtn");
+        logoutBtn.addEventListener("click", () => {
+          localStorage.removeItem("rms_user");
+          window.location.href = "login.html";
+        });
+      }
+
+      function showUser() {
+        const user = JSON.parse(localStorage.getItem("rms_user"));
+        const userNameSpan = document.getElementById("userName");
+        if (user && user.name) {
+          userNameSpan.textContent = `Welcome, ${user.name}`;
+        } else {
+          userNameSpan.textContent = `Welcome, Guest`;
+        }
+      }
+
+      window.onload = function () {
+        showUser();
+        setupLogout();
+
+        document
+          .getElementById("reportGeneratorForm")
+          .addEventListener("submit", function (event) {
+            event.preventDefault();
+            const reportType = document.getElementById("reportType").value;
+            if (reportType) {
+              alert(
+                `Generating report: ${reportType}. Check console for data!`
+              );
+            } else {
+              alert("Please select a Report Type.");
+            }
+          });
+      };
+    </script>
+  </body>
+</html>

@@ -1,52 +1,84 @@
 <?php
-include 'db_connect.php'; // makes $conn available
+include 'db_connect.php';
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Sanitize and assign POST data
-    $firstName = $conn->real_escape_string($_POST['firstName']);
-    $lastName = $conn->real_escape_string($_POST['lastName']);
-    $middleName = $conn->real_escape_string($_POST['middleName'] ?? '');
-    $suffix = $conn->real_escape_string($_POST['suffix'] ?? '');
-    $birthDate = $_POST['birthDate'];
-    $gender = $_POST['gender'];
+
+    // Collect fields from the form
+    $firstName   = $conn->real_escape_string($_POST['firstName']);
+    $middleName  = $conn->real_escape_string($_POST['middleName'] ?? '');
+    $lastName    = $conn->real_escape_string($_POST['lastName']);
+    $suffix      = $conn->real_escape_string($_POST['suffix'] ?? '');
+    $province    = $conn->real_escape_string($_POST['province']);
+    $city        = $conn->real_escape_string($_POST['city']);
+    $barangay    = $conn->real_escape_string($_POST['barangay']);
+
+    $gender      = $_POST['gender'];
     $civilStatus = $_POST['civilStatus'];
+    $birthDate   = $_POST['birthDate'];
     $citizenship = $conn->real_escape_string($_POST['citizenship']);
-    $contactNumber = $_POST['contactNumber'] ?? '';
-    $email = $_POST['email'] ?? '';
 
-    $houseNumber = $conn->real_escape_string($_POST['houseNumber'] ?? '');
-    $street = $conn->real_escape_string($_POST['street']);
-    $purok = $_POST['purok'];
-    $barangay = $conn->real_escape_string($_POST['barangay']);
-    $city = $conn->real_escape_string($_POST['city']);
-    $province = $conn->real_escape_string($_POST['province']);
+    // Create full name for NAME column
+    $fullName = trim("$firstName $middleName $lastName $suffix");
 
-    $category = $_POST['category'];
-    $idNumber = $_POST['idNumber'] ?? '';
-    $occupation = $conn->real_escape_string($_POST['occupation'] ?? '');
+    // Calculate age
+    $age = '';
+    if (!empty($birthDate)) {
+        $age = date_diff(date_create($birthDate), date_create('today'))->y;
+    }
 
-    // Insert into residents table
-    $sql_residents = "INSERT INTO residents (FIRST_NAME, LAST_NAME, MIDDLE_NAME, SUFFIX, BIRTH_DATE, GENDER, CIVIL_STATUS, CITIZENSHIP, CONTACT_NUMBER, EMAIL)
-                      VALUES ('$firstName', '$lastName', '$middleName', '$suffix', '$birthDate', '$gender', '$civilStatus', '$citizenship', '$contactNumber', '$email')";
-    if ($conn->query($sql_residents) === TRUE) {
-        $memberId = $conn->insert_id; // get last inserted ID
+    // Fields not in the form → set to NULL
+    $relationshipToHead = NULL;
+    $birthPlace = "$barangay, $city, $province";  // Best possible match
+    $ethnicity = NULL;
+    $religion = NULL;
+    $highestEducation = NULL;
+    $isEnrolled = NULL;
+    $schoolLevel = NULL;
+    $schoolAddress = NULL;
 
-        // Determine flags for demographics
-        $isSenior = ($category === 'senior') ? 1 : 0;
-        $isPWD = ($category === 'pwd') ? 1 : 0;
-        $residentType = ($category === 'solo_parent') ? 'Solo Parent' : (($category !== 'senior' && $category !== 'pwd') ? 'Regular' : '');
+    // Insert into household_members table
+    $sql = "
+        INSERT INTO household_members
+        (
+            IDENTIFICATION_ID,
+            RELATIONSHIP_TO_HEAD,
+            NAME,
+            SEX,
+            BIRTHDATE,
+            AGE,
+            BIRTHPLACE,
+            NATIONALITY,
+            ETHNICITY,
+            RELIGION,
+            `MARITAL-STATUS`,  -- 
+            HIGHEST_ATTAINED_EDUCATION,
+            IS_ENROLLED,
+            SCHOOL_LEVEL,
+            SCHOOL_ADDRESS
+        )
+        VALUES (
+            NULL,               -- Assuming ID is auto-generated
+            NULL,               -- Assuming no relationship to head provided
+            '$fullName',
+            '$gender',
+            '$birthDate',
+            '$age',
+            '$birthPlace',
+            '$citizenship',
+            NULL,
+            NULL,
+            '$civilStatus',     -- Adjusted column name to match `MARITAL_STATUS`
+            NULL,
+            NULL,
+            NULL,
+            NULL
+        )
+    ";
 
-        // Insert into demographics
-        $sql_demo = "INSERT INTO demographics (MEMBER_ID, IS_REGISTERED_SENIOR, IS_DISABLED, RESIDENT_TYPE, HEALTH_INSURANCE, PUROK)
-    VALUES ($memberId, $isSenior, $isPWD, '$residentType', '$idNumber', '$purok')";
-        if ($conn->query($sql_demo) === TRUE) {
-            $success = "Resident added successfully!";
-        } else {
-            $error = "Error adding to demographics: " . $conn->error;
-        }
+    if ($conn->query($sql) === TRUE) {
+        $success = "Resident added successfully!";
     } else {
-        $error = "Error adding resident: " . $conn->error;
+        $error = "Error inserting data: " . $conn->error;
     }
 }
 ?>
@@ -59,22 +91,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <title>Add New Resident</title>
 <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body>
 <div class="app-container">
   <aside class="sidebar">
         <div class="logo">Happy Hallow Barangay System</div>
         <nav class="main-nav">
             <ul>
-        
-                <li><a href="index.php" class="active">Dashboard</a></li>
+                <li><a href="index.php">Dashboard</a></li>
                 <li><a href="residents.php">Residents</a></li>
-                <li><a href="addnewresidents.php">Add Resident</a></li>
-                    <li><a href="deaths.php">Deaths</a></li>
-            <li><a href="documents.php">Documents</a></li>
+                <li><a href="addnewresidents.php"class="active">Add Resident</a></li>
+                <li><a href="deaths.php">Deaths</a></li>
+                <li><a href="documents.php">Documents</a></li>
                 <li class="nav-divider"></li>
             </ul>
         </nav>
-    </aside>
+  </aside>
+
   <div class="main-content">
     <header class="topbar">
       <div class="topbar-right">
@@ -86,219 +119,115 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <main class="page-content">
       <div class="add-resident-form-container">
         <div class="form-modal-card">
+
           <a href="residents.php" class="close-btn">&times;</a>
 
           <?php
           if(isset($success)) echo "<p style='color:green;'>$success</p>";
           if(isset($error)) echo "<p style='color:red;'>$error</p>";
           ?>
-
-          <form id="addResidentForm" method="POST" novalidate>
+<form id="addResidentForm" method="POST">
 
 <h2 class="form-title">Add New Resident</h2>
 
+<!-- PAGE 1 -->
 <div id="page1">
   <h2>A. Identification</h2>
 
   <div class="form-grid">
 
     <div class="input-group">
-      <label for="firstName">First Name</label>
-      <input type="text" id="newFirst" name="firstName" required>
+      <label>First Name</label>
+      <input type="text" name="firstName" id="firstName" required>
     </div>
 
     <div class="input-group">
-      <label for="middleName">Middle Name</label>
-      <input type="text" id="newMiddle" name="middleName">
+      <label>Middle Name</label>
+      <input type="text" name="middleName" id="middleName">
     </div>
 
     <div class="input-group">
-      <label for="lastName">Surname</label>
-      <input type="text" id="newLast" name="lastName" required>
+      <label>Surname</label>
+      <input type="text" name="lastName" id="lastName" required>
     </div>
 
     <div class="input-group">
-      <label for="suffix">Suffix</label>
-      <input type="text" id="newSuffix" name="suffix">
+      <label>Suffix</label>
+      <input type="text" name="suffix" id="suffix">
     </div>
 
     <div class="input-group">
       <label>Province</label>
-      <div class="suggestions">
-        <input type="text" id="newProvince" name="province" autocomplete="off" required>
-        <div id="provinceList" class="listbox hidden"></div>
-      </div>
+      <input type="text" name="province" id="province" required>
     </div>
 
     <div class="input-group">
       <label>City/Municipality</label>
-      <div class="suggestions">
-        <input type="text" id="newCity" name="city" autocomplete="off" required>
-        <div id="cityList" class="listbox hidden"></div>
-      </div>
+      <input type="text" name="city" id="city" required>
     </div>
 
     <div class="input-group">
       <label>Barangay</label>
-      <input type="text" id="newBarangay" name="barangay" required>
-    </div>
-
-    <div class="input-group">
-      <label>Address</label>
-      <input type="text" id="newAddress" name="street" required>
-    </div>
-
-    <div class="input-group">
-      <label>Household Head</label>
-      <input type="text" id="newHouseholdHead" name="houseNumber" required>
-    </div>
-
-    <div class="input-group">
-      <label>Total Number of Household Members</label>
-      <input type="text" id="newNumOfHouseholdMem" name="purok" required>
+      <input type="text" name="barangay" id="barangay" required>
     </div>
 
   </div>
 
   <div class="button-group">
-    <button type="reset" class="btn secondary">Clear</button>
     <button type="button" id="nextBtn1" class="btn">Next</button>
   </div>
 </div>
 
-<div id="page2" class="hidden">
-  <h2>B. Interview Information</h2>
+<!-- PAGE 2 -->
+<div id="page2" style="display:none">
+  <h2>B. Basic Details</h2>
 
-  <table class="interview-table">
-    <thead>
-      <tr>
-        <th>Visit</th>
-        <th>Date of Visit</th>
-        <th>Time Start</th>
-        <th>Time End</th>
-        <th>Result</th>
-        <th>Date of Next Visit</th>
-        <th>Name of Interviewer</th>
-        <th>Name of Supervisor</th>
-      </tr>
-    </thead>
-    <tbody>
+  <div class="form-grid">
+    <div class="input-group">
+      <label>Birth Date</label>
+      <input type="date" name="birthDate" required>
+    </div>
 
-      <tr>
-        <td>1st Visit</td>
-        <td><input type="date" id="visit1Date"></td>
-        <td><input type="time" id="visit1Start"></td>
-        <td><input type="time" id="visit1End"></td>
-        <td>
-          <select id="visit1Result">
-            <option value="">Select</option>
-            <option value="C">C</option>
-            <option value="CB">CB</option>
-            <option value="R">R</option>
-          </select>
-        </td>
-        <td><input type="date" id="visit1NextDate"></td>
-        <td><input type="text" id="visit1Interviewer"></td>
-        <td><input type="text" id="visit1Supervisor"></td>
-      </tr>
+    <div class="input-group">
+      <label>Gender</label>
+      <select name="gender" required>
+        <option value="">Select</option>
+        <option>Male</option>
+        <option>Female</option>
+      </select>
+    </div>
 
-      <tr>
-        <td>2nd Visit</td>
-        <td><input type="date" id="visit2Date"></td>
-        <td><input type="time" id="visit2Start"></td>
-        <td><input type="time" id="visit2End"></td>
-        <td>
-          <select id="visit2Result">
-            <option value="">Select</option>
-            <option value="C">C</option>
-            <option value="CB">CB</option>
-            <option value="R">R</option>
-          </select>
-        </td>
-        <td><input type="date" id="visit2NextDate"></td>
-        <td><input type="text" id="visit2Interviewer"></td>
-        <td><input type="text" id="visit2Supervisor"></td>
-      </tr>
+    <div class="input-group">
+      <label>Civil Status</label>
+      <select name="civilStatus" required>
+        <option value="">Select</option>
+        <option>Single</option>
+        <option>Married</option>
+        <option>Widowed</option>
+      </select>
+    </div>
 
-    </tbody>
-  </table>
+    <div class="input-group">
+      <label>Citizenship</label>
+      <select name="citizenship" required>
+        <option value="">Select</option>
+        <option>Filipino</option>
+        <option>American</option>
+        <option>Canadian</option>
+        <option>Japanese</option>
+        <option>Korean</option>
+        <option>Chinese</option>
+        <option>Australian</option>
+        <option>British</option>
+      </select>
+    </div>
+  </div>
 
-  <div class="button-group">
-    <button type="reset" class="btn secondary">Clear</button>
+   <div class="button-group">
     <button type="button" id="backBtn2" class="btn secondary">Back</button>
     <button type="button" id="nextBtn2" class="btn">Next</button>
   </div>
-</div>
 
-<div id="page3" class="hidden">
-
-  <h2>C. Encoding Information</h2>
-
-  <div class="input-group">
-    <label>Civil Status</label>
-    <select name="civilStatus" required>
-      <option value="">Select</option>
-      <option value="Single">Single</option>
-      <option value="Married">Married</option>
-      <option value="Widowed">Widowed</option>
-    </select>
-  </div>
-
-  <div class="input-group">
-    <label>Birth Date</label>
-    <input type="date" name="birthDate" required>
-  </div>
-
-  <div class="input-group">
-    <label>Gender</label>
-    <select name="gender" required>
-      <option value="">Select</option>
-      <option value="Male">Male</option>
-      <option value="Female">Female</option>
-    </select>
-  </div>
-
-  <div class="input-group">
-    <label>Citizenship</label>
-    <input type="text" name="citizenship" required>
-  </div>
-
-  <div class="input-group">
-    <label>Contact Number</label>
-    <input type="text" name="contactNumber">
-  </div>
-
-  <div class="input-group">
-    <label>Email</label>
-    <input type="email" name="email">
-  </div>
-
-  <div class="input-group">
-    <label>Category</label>
-    <select name="category" id="category" required>
-      <option value="">Select</option>
-      <option value="senior">Senior</option>
-      <option value="pwd">PWD</option>
-      <option value="solo_parent">Solo Parent</option>
-      <option value="regular">Regular</option>
-    </select>
-  </div>
-
-  <div class="input-group" id="idNumberGroup">
-    <label>ID Number</label>
-    <input type="text" id="idNumber" name="idNumber">
-  </div>
-
-  <div class="input-group">
-    <label>Occupation</label>
-    <input type="text" name="occupation">
-  </div>
-
-  <div class="button-group">
-    <button type="reset" class="btn secondary">Clear</button>
-    <button type="button" id="backBtn3" class="btn secondary">Back</button>
-    <button type="submit" id="submitBtn" class="btn">Submit</button>
-  </div>
 </div>
 
 </form>
@@ -309,41 +238,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
-function showUser() {
-  const user = JSON.parse(localStorage.getItem("rms_user"));
-  const userNameSpan = document.getElementById("userName");
-  userNameSpan.textContent = user && user.name ? Welcome, ${user.name} : "Welcome, Guest";
-}
+// Define all pages in order
+const pages = ["page1", "page2"];
+let currentPage = 0;
 
-function setupLogout() {
-  const logoutBtn = document.getElementById("logoutBtn");
-  logoutBtn.addEventListener("click", () => {
-    localStorage.removeItem("rms_user");
-    window.location.href = "login.html";
+// Show only the current page
+function showPage(index) {
+  pages.forEach((id, i) => {
+    const page = document.getElementById(id);
+    if (i === index) {
+      page.classList.remove("hidden");
+    } else {
+      page.classList.add("hidden");
+    }
   });
 }
 
-window.onload = function () {
-  showUser();
-  setupLogout();
+// VALIDATION FOR PAGE 1
+function isValidName(value) {
+  const pattern = /^[A-Za-z .'-]+$/;
+  const hasLetter = /[A-Za-z]/;
+  return pattern.test(value) && hasLetter.test(value);
+}
 
-  const categorySelect = document.getElementById('category');
-  const idGroup = document.getElementById('idNumberGroup');
-  const idInput = document.getElementById('idNumber');
-  function updateIdField() {
-    const value = categorySelect.value;
-    if (value === 'senior' || value === 'pwd') {
-      idGroup.style.display = 'block';
-      idInput.required = true;
-    } else {
-      idGroup.style.display = 'none';
-      idInput.required = false;
-      idInput.value = '';
-    }
+function validatePage1() {
+  const first = document.querySelector("input[name='firstName']").value.trim();
+  const last = document.querySelector("input[name='lastName']").value.trim();
+  const province = document.querySelector("input[name='province']").value.trim();
+  const city = document.querySelector("input[name='city']").value.trim();
+  const barangay = document.querySelector("input[name='barangay']").value.trim();
+
+  if (!isValidName(first)) {
+    alert("Enter a valid first name.");
+    return false;
   }
-  updateIdField();
-  categorySelect.addEventListener('change', updateIdField);
+  if (!isValidName(last)) {
+    alert("Enter a valid surname.");
+    return false;
+  }
+  if (province === "" || city === "" || barangay === "") {
+    alert("Fill out all required fields.");
+    return false;
+  }
+  return true;
+}
+
+// VALIDATION FOR PAGE 2
+function validatePage2() {
+  const birth = document.querySelector("input[name='birthDate']").value;
+  const gender = document.querySelector("select[name='gender']").value;
+  const civil = document.querySelector("select[name='civilStatus']").value;
+  const citizenship = document.querySelector("select[name='citizenship']").value;
+
+  if (birth === "" || gender === "" || civil === "" || citizenship === "") {
+    alert("Fill out all required fields.");
+    return false;
+  }
+  return true;
+}
+
+// PAGE 1 NEXT
+document.getElementById("nextBtn1").onclick = function () {
+  document.getElementById("page1").style.display = "none";
+  document.getElementById("page2").style.display = "block";
 };
+
+document.getElementById("backBtn2").onclick = function () {
+  document.getElementById("page2").style.display = "none";
+  document.getElementById("page1").style.display = "block";
+};
+
+
+// Show page 1 at start
+showPage(0);
 </script>
+
+
 </body>
 </html>

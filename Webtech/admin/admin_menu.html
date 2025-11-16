@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Record Management System</title>
-    <!-- Lucide Icons for professional UI elements -->
+   
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
@@ -49,7 +49,7 @@
             transition: color var(--transition-fast);
         }
 
-        /* --- Global Header (Top Bar) --- */
+        /* --- Global Header --- */
         .header {
             position: fixed;
             top: 0;
@@ -206,7 +206,7 @@
         }
 
         .card h3 {
-            font-size: 42px; /* Large, impressive number */
+            font-size: 42px; /* Large number */
             margin: var(--spacing-sm) 0 var(--spacing-sm) 0;
             color: var(--text-primary); 
             font-weight: 800;
@@ -220,7 +220,7 @@
             font-weight: 600;
         }
 
-        /* Custom color accent for metrics (using text-primary for numbers, accent for text) */
+    
         #userCount, #recordCount, #staffCount, #logCount {
             color: var(--accent); 
         }
@@ -261,7 +261,7 @@
     <!-- Top Right Header -->
     <div class="header">
         <span>Welcome, Admin</span>
-        <a href="#" id="logoutBtn">Logout</a>
+        <a href="../login.php" id="logoutBtn">Logout</a>
     </div>
 
     <!-- Sidebar Navigation -->
@@ -276,11 +276,11 @@
             <i data-lucide="users"></i>
             Manage Users
         </a>
-        <a href="reports.php">
+        <a href="reports_admin.html">
             <i data-lucide="bar-chart-2"></i>
             Reports
         </a>
-        <a href="#" id="logoutBtn">
+        <a href="../login.php" id="logoutBtn">
             <i data-lucide="log-out"></i>
             Logout
         </a>
