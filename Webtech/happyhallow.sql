@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 11, 2025 at 02:17 PM
+-- Generation Time: Nov 17, 2025 at 03:52 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS `household_members` (
   `AGE` tinyint NOT NULL,
   `BIRTHPLACE` varchar(100) NOT NULL,
   `NATIONALITY` varchar(100) NOT NULL,
-  `ETHNICITY` varchar(100) NOT NULL,
+  `ETHNICITY` varchar(255) DEFAULT NULL,
   `RELIGION` varchar(100) NOT NULL,
   `MARITAL-STATUS` varchar(50) NOT NULL,
   `HIGHEST_ATTAINED_EDUCATION` varchar(100) NOT NULL,
@@ -220,10 +220,30 @@ CREATE TABLE IF NOT EXISTS `identification` (
   `BARANGAY` varchar(50) NOT NULL,
   `ADDRESS` varchar(100) NOT NULL,
   `RESPONDENT_NAME` varchar(100) NOT NULL,
+  `GENDER` varchar(20) DEFAULT NULL,
+  `BIRTHDATE` date DEFAULT NULL,
+  `CIVIL_STATUS` varchar(50) DEFAULT NULL,
+  `CITIZENSHIP` varchar(100) DEFAULT NULL,
   `HOUSEHOLD_HEAD` varchar(100) NOT NULL,
   `HOUSEHOLD_MEMBERS` tinyint NOT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `identification`
+--
+
+INSERT INTO `identification` (`ID`, `PROVINCE`, `MUNICIPALITY`, `BARANGAY`, `ADDRESS`, `RESPONDENT_NAME`, `GENDER`, `BIRTHDATE`, `CIVIL_STATUS`, `CITIZENSHIP`, `HOUSEHOLD_HEAD`, `HOUSEHOLD_MEMBERS`) VALUES
+(1, 'Ifugao', 'Baguio', 'Km 4', '145A', 'Ira D Marcelo', NULL, NULL, NULL, NULL, 'Father', 4),
+(2, 'fsf', 'sfsf', 'sff', 'sfsf', 'dfss dfsdfsdf sdfsd fsdfsd', NULL, NULL, NULL, NULL, 'sfs', 127),
+(3, '131', '3123', 'qweqweq', 'weqwe', '12313 1231 123123 qwqeqwe', NULL, NULL, NULL, NULL, 'qweqwe', 127),
+(4, 'rw', 'erwer', 'werwer', 'werw', 'werwer werwer erwerwe rwerw', NULL, NULL, NULL, NULL, 'erwer', 5),
+(5, 'rw', 'erwer', 'werwer', 'werw', 'werwer werwer erwerwe rwerw', NULL, NULL, NULL, NULL, 'erwer', 5),
+(6, 'rw', 'erwer', 'werwer', 'werw', 'werwer werwer erwerwe rwerw', NULL, NULL, NULL, NULL, 'erwer', 5),
+(7, 'Ifugao', 'Baguio City', 'Km 4', 'Km 4, Baguio City, Ifugao', 'Ira D Marcleo Jr', NULL, NULL, NULL, NULL, 'Ira D Marcleo Jr', 0),
+(8, 'Ifugao', 'Baguio City', 'Km 4', 'Km 4, Baguio City, Ifugao', 'Ira D Marcleo Jr', NULL, NULL, NULL, NULL, 'Ira D Marcleo Jr', 0),
+(9, 'Ifugao', 'Baguio City', 'Km 4', 'Km 4, Baguio City, Ifugao', 'Ira D Marcleo Jr', NULL, NULL, NULL, NULL, 'Ira D Marcleo Jr', 0),
+(10, 'Ifugao', 'Baguio City', 'Km 4', 'Km 4, Baguio City, Ifugao', 'Ira D Marcleo Jr', 'Male', '2003-03-17', 'Married', 'British', 'Ira D Marcleo Jr', 1);
 
 -- --------------------------------------------------------
 
@@ -324,15 +344,13 @@ CREATE TABLE IF NOT EXISTS `users` (
   `role` enum('admin','client') NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `fullname`, `email`, `password`, `role`) VALUES
-(1, '', 'admin@happyhallow.com', '$2y$10$zGf9uFZKhYqX9x0g8aO63eAFeSxeZKPDnY7QhgrRZqWvOAzPll2Ui', 'admin'),
-(2, '', 'client@happyhallow.com', '$2y$10$zGf9uFZKhYqX9x0g8aO63eAFeSxeZKPDnY7QhgrRZqWvOAzPll2Ui', 'client'),
 (3, '', 'pol@gmail.com', '$2y$10$t/7G.9t9y4SYCwJNF4vRCOtH9NiixrnteB97AT3DJ6MoZyc0dCIim', 'client'),
 (4, '', 'doe@gmail.com', '$2y$10$rxsTL3Nfkk5hx/PB9Txc2OYXRbrG2FBMu1Of.riV.7ElwPMhPZDsO', 'client'),
 (5, '', 'levii@gmail.com', '$2y$10$K8XoXrP3y7fT6N2VEUbh3OY/5F3x84o6eMB8zfvZdaXjKQaIb8psq', 'client'),
@@ -342,8 +360,8 @@ INSERT INTO `users` (`id`, `fullname`, `email`, `password`, `role`) VALUES
 (10, '', 'testt@gmail.com', '$2y$10$JJO3ub5MT1vS5Dhnge4EfeCNYO1jz9Gb0SjOSfq7GhNfSTHhXSdZy', 'client'),
 (16, '', 'hell@gmail.com', '$2y$10$1Nvx4SRvRgvktgz1PHWPiuzziaAv0QCamQlxi9nTi2w.7DULQTvT.', 'admin'),
 (18, 'Jordan Bel', 'jordan@gmail.com', '$2y$10$5qJQlmdfLtHPLA1kdQ0truq3W3LFxKVqVjQUh2gmvF6H3hWJPuaqC', 'admin'),
-(19, 'Connor', 'connor@gmail.com', '$2y$10$v3Fj7HfKjMSX5z.8rPETaOCioiDRiO1fF.nlNHf3ebyP77Pf.be5G', 'client'),
-(20, 'Kara', 'kara@gmail.com', '$2y$10$ejiuKtST.2/74qsig2YPwOYX3NHF7A2MV.6v4B44vdctLb5seP7r2', 'client');
+(19, 'Connorrrrrrrrrrr', 'connor@gmail.com', '$2y$10$v3Fj7HfKjMSX5z.8rPETaOCioiDRiO1fF.nlNHf3ebyP77Pf.be5G', 'client'),
+(21, 'Suss', 'suss@gmail.com', '$2y$10$GSMp7rNBdKojO4BA/4HPEevdGbEALnec32WdsKsOe2dYsRoD7lAee', 'client');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

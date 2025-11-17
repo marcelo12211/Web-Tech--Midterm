@@ -3,11 +3,12 @@ include 'db_connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // Collect fields from the form
+    // Collect fields
     $firstName   = $conn->real_escape_string($_POST['firstName']);
     $middleName  = $conn->real_escape_string($_POST['middleName'] ?? '');
     $lastName    = $conn->real_escape_string($_POST['lastName']);
     $suffix      = $conn->real_escape_string($_POST['suffix'] ?? '');
+
     $province    = $conn->real_escape_string($_POST['province']);
     $city        = $conn->real_escape_string($_POST['city']);
     $barangay    = $conn->real_escape_string($_POST['barangay']);
@@ -17,71 +18,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $birthDate   = $_POST['birthDate'];
     $citizenship = $conn->real_escape_string($_POST['citizenship']);
 
-    // Create full name for NAME column
+    // FULL NAME
     $fullName = trim("$firstName $middleName $lastName $suffix");
 
-    // Calculate age
-    $age = '';
-    if (!empty($birthDate)) {
-        $age = date_diff(date_create($birthDate), date_create('today'))->y;
-    }
+    // ADDRESS
+    $fullAddress = "$barangay, $city, $province";
 
-    // Fields not in the form → set to NULL
-    $relationshipToHead = NULL;
-    $birthPlace = "$barangay, $city, $province";  // Best possible match
-    $ethnicity = NULL;
-    $religion = NULL;
-    $highestEducation = NULL;
-    $isEnrolled = NULL;
-    $schoolLevel = NULL;
-    $schoolAddress = NULL;
-
-    // Insert into household_members table
+    // Insert directly into IDENTIFICATION table
     $sql = "
-        INSERT INTO household_members
+        INSERT INTO identification
         (
-            IDENTIFICATION_ID,
-            RELATIONSHIP_TO_HEAD,
-            NAME,
-            SEX,
+            PROVINCE,
+            MUNICIPALITY,
+            BARANGAY,
+            ADDRESS,
+            RESPONDENT_NAME,
+            GENDER,
             BIRTHDATE,
-            AGE,
-            BIRTHPLACE,
-            NATIONALITY,
-            ETHNICITY,
-            RELIGION,
-            `MARITAL-STATUS`,  -- 
-            HIGHEST_ATTAINED_EDUCATION,
-            IS_ENROLLED,
-            SCHOOL_LEVEL,
-            SCHOOL_ADDRESS
+            CIVIL_STATUS,
+            CITIZENSHIP,
+            HOUSEHOLD_HEAD,
+            HOUSEHOLD_MEMBERS
         )
-        VALUES (
-            NULL,               -- Assuming ID is auto-generated
-            NULL,               -- Assuming no relationship to head provided
+        VALUES
+        (
+            '$province',
+            '$city',
+            '$barangay',
+            '$fullAddress',
             '$fullName',
             '$gender',
             '$birthDate',
-            '$age',
-            '$birthPlace',
+            '$civilStatus',
             '$citizenship',
-            NULL,
-            NULL,
-            '$civilStatus',     -- Adjusted column name to match `MARITAL_STATUS`
-            NULL,
-            NULL,
-            NULL,
-            NULL
+            '$fullName',
+            1
         )
     ";
 
-    if ($conn->query($sql) === TRUE) {
+    if ($conn->query($sql)) {
         $success = "Resident added successfully!";
     } else {
         $error = "Error inserting data: " . $conn->error;
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -223,10 +205,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </div>
 
-   <div class="button-group">
+<div class="button-group">
     <button type="button" id="backBtn2" class="btn secondary">Back</button>
-    <button type="button" id="nextBtn2" class="btn">Next</button>
-  </div>
+    <button type="submit" class="btn">Submit</button>
+</div>
 
 </div>
 
