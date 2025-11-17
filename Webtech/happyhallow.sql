@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 17, 2025 at 05:34 PM
+-- Generation Time: Nov 17, 2025 at 05:57 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -249,24 +249,27 @@ CREATE TABLE IF NOT EXISTS `identification` (
   `CITIZENSHIP` varchar(100) DEFAULT NULL,
   `HOUSEHOLD_HEAD` varchar(100) NOT NULL,
   `HOUSEHOLD_MEMBERS` tinyint NOT NULL,
+  `isPWD` tinyint(1) DEFAULT '0',
+  `pwdImage` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `identification`
 --
 
-INSERT INTO `identification` (`ID`, `PROVINCE`, `MUNICIPALITY`, `BARANGAY`, `ADDRESS`, `RESPONDENT_NAME`, `GENDER`, `BIRTHDATE`, `CIVIL_STATUS`, `CITIZENSHIP`, `HOUSEHOLD_HEAD`, `HOUSEHOLD_MEMBERS`) VALUES
-(1, 'Ifugao', 'Baguio', 'Km 4', '145A', 'Ira D Marcelo', NULL, NULL, NULL, NULL, 'Father', 4),
-(2, 'fsf', 'sfsf', 'sff', 'sfsf', 'dfss dfsdfsdf sdfsd fsdfsd', NULL, NULL, NULL, NULL, 'sfs', 127),
-(3, '131', '3123', 'qweqweq', 'weqwe', '12313 1231 123123 qwqeqwe', NULL, NULL, NULL, NULL, 'qweqwe', 127),
-(4, 'rw', 'erwer', 'werwer', 'werw', 'werwer werwer erwerwe rwerw', NULL, NULL, NULL, NULL, 'erwer', 5),
-(5, 'rw', 'erwer', 'werwer', 'werw', 'werwer werwer erwerwe rwerw', NULL, NULL, NULL, NULL, 'erwer', 5),
-(6, 'rw', 'erwer', 'werwer', 'werw', 'werwer werwer erwerwe rwerw', NULL, NULL, NULL, NULL, 'erwer', 5),
-(7, 'Ifugao', 'Baguio City', 'Km 4', 'Km 4, Baguio City, Ifugao', 'Ira D Marcleo Jr', NULL, NULL, NULL, NULL, 'Ira D Marcleo Jr', 0),
-(8, 'Ifugao', 'Baguio City', 'Km 4', 'Km 4, Baguio City, Ifugao', 'Ira D Marcleo Jr', NULL, NULL, NULL, NULL, 'Ira D Marcleo Jr', 0),
-(9, 'Ifugao', 'Baguio City', 'Km 4', 'Km 4, Baguio City, Ifugao', 'Ira D Marcleo Jr', NULL, NULL, NULL, NULL, 'Ira D Marcleo Jr', 0),
-(10, 'Ifugao', 'Baguio City', 'Km 4', 'Km 4, Baguio City, Ifugao', 'Ira D Marcleo Jr', 'Male', '2003-03-17', 'Married', 'British', 'Ira D Marcleo Jr', 1);
+INSERT INTO `identification` (`ID`, `PROVINCE`, `MUNICIPALITY`, `BARANGAY`, `ADDRESS`, `RESPONDENT_NAME`, `GENDER`, `BIRTHDATE`, `CIVIL_STATUS`, `CITIZENSHIP`, `HOUSEHOLD_HEAD`, `HOUSEHOLD_MEMBERS`, `isPWD`, `pwdImage`) VALUES
+(1, 'Ifugao', 'Baguio', 'Km 4', '145A', 'Ira D Marcelo', NULL, NULL, NULL, NULL, 'Father', 4, 0, NULL),
+(2, 'fsf', 'sfsf', 'sff', 'sfsf', 'dfss dfsdfsdf sdfsd fsdfsd', NULL, NULL, NULL, NULL, 'sfs', 127, 0, NULL),
+(3, '131', '3123', 'qweqweq', 'weqwe', '12313 1231 123123 qwqeqwe', NULL, NULL, NULL, NULL, 'qweqwe', 127, 0, NULL),
+(4, 'rw', 'erwer', 'werwer', 'werw', 'werwer werwer erwerwe rwerw', NULL, NULL, NULL, NULL, 'erwer', 5, 0, NULL),
+(5, 'rw', 'erwer', 'werwer', 'werw', 'werwer werwer erwerwe rwerw', NULL, NULL, NULL, NULL, 'erwer', 5, 0, NULL),
+(6, 'rw', 'erwer', 'werwer', 'werw', 'werwer werwer erwerwe rwerw', NULL, NULL, NULL, NULL, 'erwer', 5, 0, NULL),
+(7, 'Ifugao', 'Baguio City', 'Km 4', 'Km 4, Baguio City, Ifugao', 'Ira D Marcleo Jr', NULL, NULL, NULL, NULL, 'Ira D Marcleo Jr', 0, 0, NULL),
+(8, 'Ifugao', 'Baguio City', 'Km 4', 'Km 4, Baguio City, Ifugao', 'Ira D Marcleo Jr', NULL, NULL, NULL, NULL, 'Ira D Marcleo Jr', 0, 0, NULL),
+(9, 'Ifugao', 'Baguio City', 'Km 4', 'Km 4, Baguio City, Ifugao', 'Ira D Marcleo Jr', NULL, NULL, NULL, NULL, 'Ira D Marcleo Jr', 0, 0, NULL),
+(10, 'Ifugao', 'Baguio City', 'Km 4', 'Km 4, Baguio City, Ifugao', 'Ira D Marcleo Jr', 'Male', '2003-03-17', 'Married', 'British', 'Ira D Marcleo Jr', 1, 0, NULL),
+(11, 'Ifugao', 'Baguio City', 'Purok 1', 'Purok 1, Baguio City, Ifugao', 'Le M On jr', 'Male', '2025-11-01', 'Single', 'Canadian', 'Le M On jr', 1, 1, 'uploads/pwd_ids/1763402216_Screenshot 2025-11-09 195446.jpg');
 
 -- --------------------------------------------------------
 
