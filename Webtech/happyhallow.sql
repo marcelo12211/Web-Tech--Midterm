@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 17, 2025 at 03:52 PM
+-- Generation Time: Nov 17, 2025 at 05:34 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -86,6 +86,29 @@ CREATE TABLE IF NOT EXISTS `disabled_demographic` (
   `PWD_ID` int NOT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `documents`
+--
+
+DROP TABLE IF EXISTS `documents`;
+CREATE TABLE IF NOT EXISTS `documents` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `resident_name` varchar(255) NOT NULL,
+  `file_path` varchar(500) NOT NULL,
+  `purpose` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `documents`
+--
+
+INSERT INTO `documents` (`id`, `resident_name`, `file_path`, `purpose`, `created_at`) VALUES
+(1, 'Ira', 'uploads/documents/doc_691b5869e752f9.54261882.jpg', 'Certificate of Residency', '2025-11-17 17:16:25');
 
 -- --------------------------------------------------------
 

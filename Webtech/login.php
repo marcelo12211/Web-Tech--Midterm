@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($role == "admin") {
                 header("Location: admin/admin_menu.html");
             } else {
-                header("Location: addnewresidents.php");
+                header("Location: index.php");
             }
             exit;
         } else {

@@ -1,5 +1,5 @@
 <?php
-include 'db_connect.php'; // makes $conn available
+include __DIR__ . '/db_connect.php';
 
 // Fetch dashboard numbers via sql commansd
 $sql = "SELECT
