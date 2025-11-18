@@ -20,6 +20,10 @@ if (!empty($searchTerm)) {
 }
 
 // 3. Construct the final SQL query
+// NOTE: Since you only selected columns from the 'identification' table, 
+// the Age, Purok, and Category columns are NOT available in this version.
+// I have removed those columns from the table to match the SQL query.
+// To re-add them, you must include the JOIN query from the previous answer.
 $sql = "
     SELECT ID, PROVINCE, MUNICIPALITY, BARANGAY, ADDRESS, RESPONDENT_NAME, GENDER 
     FROM identification 
@@ -36,6 +40,38 @@ $result = $conn->query($sql);
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Residents Directory</title>
     <link rel="stylesheet" href="css/style.css" />
+    <style>
+        /* ADDED INLINE CSS FOR STRUCTURE AND BUTTONS */
+        .search-bar-group {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .filter-dropdowns {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .small-btn {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+            margin: 0 2px;
+        }
+        .edit-btn {
+            background-color: var(--warning-color, #ffc107);
+            color: #212529;
+            border: 1px solid var(--warning-color, #ffc107);
+        }
+        .delete-btn {
+            background-color: var(--danger-color, #dc3545);
+            color: white;
+            border: 1px solid var(--danger-color, #dc3545);
+        }
+    </style>
 </head>
 <body>
 <div class="app-container">
@@ -47,7 +83,7 @@ $result = $conn->query($sql);
             <li><a href="residents.php" class="active">Residents</a></li>
             <li><a href="addnewresidents.php">Add Resident</a></li>
             <li><a href="deaths.php">Deaths</a></li>
-            <li><a href="documents.php  ">Documents</a></li>
+            <li><a href="documents.php">Documents</a></li>
             <li class="nav-divider"></li>
           </ul>
         </nav>
@@ -78,12 +114,12 @@ $result = $conn->query($sql);
                     name="search"
                     value="<?php echo htmlspecialchars($searchTerm); ?>"
                 />
-                </form>
+            </form>
 
             <div class="filter-dropdowns">
               <div class="input-group">
                 <label for="category-filter">Category</label>
-                <select id="category-filter">
+                <select id="category-filter" disabled>
                   <option value="">-- Select Category --</option>
                   <option value="senior">Senior Citizen</option>
                   <option value="solo">Solo Parent</option>
@@ -92,7 +128,7 @@ $result = $conn->query($sql);
               </div>
               <div class="input-group">
                 <label for="purok-filter">Purok</label>
-                <select id="purok-filter">
+                <select id="purok-filter" disabled>
                   <option value="">-- Select Purok --</option>
                   <option value="1">Purok 1</option>
                   <option value="2">Purok 2</option>
@@ -103,7 +139,7 @@ $result = $conn->query($sql);
               </div>
               <div class="input-group">
                 <label for="period-filter">Period of Residence</label>
-                <select id="period-filter">
+                <select id="period-filter" disabled>
                   <option value="">-- Select Period of Residence --</option>
                   <option value="0-1">1-12 Months</option>
                   <option value="1-5">1-5 Years</option>
@@ -132,8 +168,9 @@ $result = $conn->query($sql);
                 <?php
                 if ($result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) {
+                        $residentId = htmlspecialchars($row['ID']); // Capture ID safely
                         echo "<tr>";
-                        echo "<td>{$row['ID']}</td>";
+                        echo "<td>{$residentId}</td>";
                         echo "<td>{$row['PROVINCE']}</td>";
                         echo "<td>{$row['MUNICIPALITY']}</td>";
                         echo "<td>{$row['BARANGAY']}</td>";
@@ -141,8 +178,14 @@ $result = $conn->query($sql);
                         echo "<td>{$row['RESPONDENT_NAME']}</td>";
                         echo "<td>{$row['GENDER']}</td>";
                         echo "<td>
-                                <button class='btn small-btn edit-btn'>Edit</button>
-                                <button class='btn small-btn delete-btn'>Delete</button>
+                                <button 
+                                    class='btn small-btn edit-btn' 
+                                    onclick='editResident(\"{$residentId}\")'
+                                >Edit</button>
+                                <button 
+                                    class='btn small-btn delete-btn' 
+                                    onclick='deleteResident(\"{$residentId}\")'
+                                >Delete</button>
                               </td>";
                         echo "</tr>";
                     }
@@ -162,6 +205,25 @@ $result = $conn->query($sql);
 // Declare a variable to hold the timer/timeout
 let searchTimeout = null;
 
+// --- Resident Action Functions ---
+
+// Function to handle the Edit action
+function editResident(id) {
+    // You must create an 'edit_resident.php' file to handle the form pre-population
+    window.location.href = `edit_resident.php?id=${id}`;
+}
+
+// Function to handle the Delete action
+function deleteResident(id) {
+    if (confirm(`Are you sure you want to delete resident with ID: ${id}? This action cannot be undone.`)) {
+        // Redirect to a PHP script that handles the database deletion
+        // You must create a 'delete_resident.php' file to execute the SQL DELETE command
+        window.location.href = `delete_resident.php?id=${id}`;
+    }
+}
+
+// --- General Utility Functions ---
+
 function setupLiveSearch() {
     const searchInput = document.getElementById("searchInput");
     const searchForm = document.getElementById("searchForm");
@@ -171,10 +233,9 @@ function setupLiveSearch() {
         clearTimeout(searchTimeout);
 
         // 2. Set a new timer
-        // The search will only be submitted if the user pauses typing for 500 milliseconds (0.5 seconds)
         searchTimeout = setTimeout(function() {
             searchForm.submit();
-        }, 500); // Adjust this delay (in milliseconds) as needed
+        }, 500); // Submits after 0.5 seconds of no typing
     });
 }
 
@@ -199,7 +260,6 @@ function showUser() {
 window.onload = function () {
     showUser();
     setupLogout();
-    // **NEW: Initialize the live search functionality**
     setupLiveSearch();
 };
 </script>
