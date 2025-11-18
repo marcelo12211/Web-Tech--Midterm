@@ -6,7 +6,7 @@ $sql = "SELECT
             COUNT(*) AS total_residents,
             SUM(IS_REGISTERED_SENIOR = 1) AS senior_count,
             SUM(IS_DISABLED = 1) AS pwd_count,
-            SUM(RESIDENT_TYPE = 'Solo Parent') AS solo_count,
+            SUM(is_solo_parent = 1) AS solo_count,
             SUM(PUROK = 1) AS purok1_count,
             SUM(PUROK = 2) AS purok2_count,
             SUM(PUROK = 3) AS purok3_count,
