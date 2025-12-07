@@ -5,6 +5,8 @@ $sql = "SELECT
     COUNT(*) AS total_residents,
     SUM(is_senior = 1) AS senior_count,
     SUM(is_disabled = 1) AS pwd_count,
+    SUM(is_pregnant = 1) AS pregnant_count,  -- ADDED: Count of pregnant residents
+    SUM(children_count) AS total_children,  -- ADDED: Sum of children from all residents
     SUM(PUROK = 1) AS purok1_count,
     SUM(PUROK = 2) AS purok2_count,
     SUM(PUROK = 3) AS purok3_count,
@@ -48,18 +50,37 @@ $stats = $result->fetch_assoc();
         <main class="page-content">
             <h2>Dashboard Overview</h2>
             <div class="dashboard-grid">
+                
+                <div class="stat-card">
+                    <p class="stat-label">Total Residents</p>
+                    <p class="stat-value"><span><?php echo $stats['total_residents']; ?></span></p>
+                </div>
+                
                 <div class="stat-card">
                     <p class="stat-label">Senior Citizen</p>
                     <p class="stat-value"><span><?php echo $stats['senior_count']; ?></span></p>
                 </div>
+                
                 <div class="stat-card">
                     <p class="stat-label">PWD</p>
                     <p class="stat-value"><span><?php echo $stats['pwd_count']; ?></span></p>
                 </div>
+                
+                <div class="stat-card">
+                    <p class="stat-label">Pregnant Residents</p>
+                    <p class="stat-value"><span><?php echo $stats['pregnant_count']; ?></span></p>
+                </div>
+
+                <div class="stat-card">
+                    <p class="stat-label">Total Children</p>
+                    <p class="stat-value"><span><?php echo $stats['total_children']; ?></span></p>
+                </div>
+                
                 <div class="card chart-card">
                     <h3>Population by Purok</h3>
                     <div class="purok-chart">
                         <?php
+                        // The loop now uses $stats['total_residents'] for the base count
                         for ($i = 1; $i <= 5; $i++) {
                             $count = $stats["purok{$i}_count"];
                             $width = $stats['total_residents'] > 0 ? ($count / $stats['total_residents']) * 100 : 0;
