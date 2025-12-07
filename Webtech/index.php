@@ -1,18 +1,16 @@
 <?php
 include __DIR__ . '/db_connect.php';
 
-// Fetch dashboard numbers via sql commansd
 $sql = "SELECT
-            COUNT(*) AS total_residents,
-            SUM(IS_REGISTERED_SENIOR = 1) AS senior_count,
-            SUM(IS_DISABLED = 1) AS pwd_count,
-            SUM(is_solo_parent = 1) AS solo_count,
-            SUM(PUROK = 1) AS purok1_count,
-            SUM(PUROK = 2) AS purok2_count,
-            SUM(PUROK = 3) AS purok3_count,
-            SUM(PUROK = 4) AS purok4_count,
-            SUM(PUROK = 5) AS purok5_count
-        FROM demographics";
+    COUNT(*) AS total_residents,
+    SUM(is_senior = 1) AS senior_count,
+    SUM(is_disabled = 1) AS pwd_count,
+    SUM(PUROK = 1) AS purok1_count,
+    SUM(PUROK = 2) AS purok2_count,
+    SUM(PUROK = 3) AS purok3_count,
+    SUM(PUROK = 4) AS purok4_count,
+    SUM(PUROK = 5) AS purok5_count
+FROM residents";
 
 $result = $conn->query($sql);
 $stats = $result->fetch_assoc();
@@ -31,17 +29,15 @@ $stats = $result->fetch_assoc();
         <div class="logo">Happy Hallow Barangay System</div>
         <nav class="main-nav">
             <ul>
-        
                 <li><a href="index.php" class="active">Dashboard</a></li>
                 <li><a href="residents.php">Residents</a></li>
                 <li><a href="addnewresidents.php">Add Resident</a></li>
-                    <li><a href="deaths.php">Deaths</a></li>
-            <li><a href="documents.php">Documents</a></li>
+                <li><a href="deaths.php">Deaths</a></li>
+                <li><a href="documents.php">Documents</a></li>
                 <li class="nav-divider"></li>
             </ul>
         </nav>
     </aside>
-
     <div class="main-content">
         <header class="topbar">
             <div class="topbar-right">
@@ -49,26 +45,17 @@ $stats = $result->fetch_assoc();
                 <button id="logoutBtn" class="btn logout-btn">Logout</button>
             </div>
         </header>
-
         <main class="page-content">
             <h2>Dashboard Overview</h2>
-
             <div class="dashboard-grid">
                 <div class="stat-card">
                     <p class="stat-label">Senior Citizen</p>
                     <p class="stat-value"><span><?php echo $stats['senior_count']; ?></span></p>
                 </div>
-
-                <div class="stat-card">
-                    <p class="stat-label">Solo Parents</p>
-                    <p class="stat-value"><span><?php echo $stats['solo_count']; ?></span></p>
-                </div>
-
                 <div class="stat-card">
                     <p class="stat-label">PWD</p>
                     <p class="stat-value"><span><?php echo $stats['pwd_count']; ?></span></p>
                 </div>
-
                 <div class="card chart-card">
                     <h3>Population by Purok</h3>
                     <div class="purok-chart">
@@ -99,7 +86,6 @@ function setupLogout() {
         window.location.href = "login.html";
     });
 }
-
 function showUser() {
     const user = JSON.parse(localStorage.getItem("rms_user"));
     const userNameSpan = document.getElementById("userName");
@@ -109,7 +95,6 @@ function showUser() {
         userNameSpan.textContent = `Welcome, Guest`;
     }
 }
-
 window.onload = function () {
     showUser();
     setupLogout();
