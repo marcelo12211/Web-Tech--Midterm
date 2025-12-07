@@ -1,5 +1,5 @@
 <?php
-include 'db_connect.php'; 
+include __DIR__ . '/db_connect.php'; 
 
 $searchTerm = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
 $selectedCategory = isset($_GET['category']) ? $conn->real_escape_string($_GET['category']) : '';
@@ -9,30 +9,24 @@ $whereClauses = [];
 
 if (!empty($searchTerm)) {
     $whereClauses[] = "
-        (T1.ID LIKE '%$searchTerm%' OR
-         T1.PROVINCE LIKE '%$searchTerm%' OR
-         T1.MUNICIPALITY LIKE '%$searchTerm%' OR
-         T1.BARANGAY LIKE '%$searchTerm%' OR
-         T1.ADDRESS LIKE '%$searchTerm%' OR
-         T1.RESPONDENT_NAME LIKE '%$searchTerm%')
+        (T1.person_id LIKE '%$searchTerm%' OR
+         T1.full_name LIKE '%$searchTerm%')
     ";
 }
 
 if (!empty($selectedPurok)) {
-    $whereClauses[] = "T2.PUROK = '$selectedPurok'";
+    $whereClauses[] = "T1.PUROK = '$selectedPurok'";
 }
 
 if (!empty($selectedCategory)) {
     switch ($selectedCategory) {
         case 'senior':
-            $whereClauses[] = "T2.IS_REGISTERED_SENIOR = 1";
+            $whereClauses[] = "T1.is_senior = 1"; 
             break;
         case 'solo':
-
-            $whereClauses[] = "T2.RESIDENT_TYPE = 'Solo Parent'";
-            break;
+            break; 
         case 'pwd':
-            $whereClauses[] = "T2.IS_DISABLED = 1";
+            $whereClauses[] = "T1.is_disabled = 1"; 
             break;
     }
 }
@@ -44,25 +38,22 @@ if (!empty($whereClauses)) {
 
 $sql = "
     SELECT 
-        T1.ID, T1.PROVINCE, T1.MUNICIPALITY, T1.BARANGAY, T1.ADDRESS, T1.RESPONDENT_NAME, T1.GENDER,
-        T2.RESIDENT_TYPE, T2.PUROK, T2.IS_DISABLED, T2.IS_REGISTERED_SENIOR
-    FROM identification T1 
-    LEFT JOIN demographics T2 ON T1.ID = T2.MEMBER_ID
+        T1.person_id AS ID, T1.full_name AS RESPONDENT_NAME, T1.sex AS GENDER,
+        T1.PUROK, T1.is_disabled, T1.is_senior
+    FROM residents T1 
     $whereClause
-    ORDER BY T1.ID ASC
+    ORDER BY T1.person_id ASC
 ";
 
 $result = $conn->query($sql);
+
 function getCategories($row) {
     $categories = [];
-    if (isset($row['IS_REGISTERED_SENIOR']) && $row['IS_REGISTERED_SENIOR'] == 1) {
+    if (isset($row['is_senior']) && $row['is_senior'] == 1) { 
         $categories[] = 'Senior';
     }
-    if (isset($row['IS_DISABLED']) && $row['IS_DISABLED'] == 1) {
+    if (isset($row['is_disabled']) && $row['is_disabled'] == 1) { 
         $categories[] = 'PWD';
-    }
-    if (isset($row['RESIDENT_TYPE']) && $row['RESIDENT_TYPE'] == 'Solo Parent') {
-        $categories[] = 'Solo Parent';
     }
     return empty($categories) ? 'Regular' : implode(', ', $categories);
 }
@@ -110,7 +101,7 @@ function getCategories($row) {
       <main class="page-content">
         <div class="residents-directory card">
           <div class="directory-header">
-            <h2>Resident Directory (Identification Data)</h2>
+            <h2>Resident Directory (Personal Data)</h2>
             <a href="addnewresidents.php" class="btn primary-btn">+ Add New</a>
           </div>
 
@@ -119,7 +110,7 @@ function getCategories($row) {
                 <div class="search-bar-group">
                     <input 
                         type="text" 
-                        placeholder="Search by name, ID, address, or location..." 
+                        placeholder="Search by name or ID..." 
                         class="search-input" 
                         id="searchInput"
                         name="search"
@@ -133,7 +124,6 @@ function getCategories($row) {
                         <select id="category-filter" name="category">
                             <option value="">-- Select Category --</option>
                             <option value="senior" <?php echo ($selectedCategory == 'senior') ? 'selected' : ''; ?>>Senior Citizen</option>
-                            <option value="solo" <?php echo ($selectedCategory == 'solo') ? 'selected' : ''; ?>>Solo Parent</option>
                             <option value="pwd" <?php echo ($selectedCategory == 'pwd') ? 'selected' : ''; ?>>PWD</option>
                         </select>
                     </div>
@@ -165,10 +155,6 @@ function getCategories($row) {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Province</th>
-                  <th>Municipality</th>
-                  <th>Barangay</th>
-                  <th>Address</th>
                   <th>Respondent Name</th>
                   <th>Gender</th>
                   <th>Purok</th> 
@@ -180,15 +166,11 @@ function getCategories($row) {
                 <?php
                 if ($result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) {
-                        $residentId = htmlspecialchars($row['ID']);
+                        $residentId = htmlspecialchars($row['ID']); 
                         echo "<tr>";
                         echo "<td>{$residentId}</td>";
-                        echo "<td>{$row['PROVINCE']}</td>";
-                        echo "<td>{$row['MUNICIPALITY']}</td>";
-                        echo "<td>{$row['BARANGAY']}</td>";
-                        echo "<td>{$row['ADDRESS']}</td>";
-                        echo "<td>{$row['RESPONDENT_NAME']}</td>";
-                        echo "<td>{$row['GENDER']}</td>";
+                        echo "<td>" . htmlspecialchars($row['RESPONDENT_NAME'] ?? 'N/A') . "</td>";
+                        echo "<td>" . htmlspecialchars($row['GENDER'] ?? 'N/A') . "</td>";
                         echo "<td>" . htmlspecialchars($row['PUROK'] ?? 'N/A') . "</td>";
                         echo "<td>" . getCategories($row) . "</td>"; 
                         echo "<td>
@@ -198,7 +180,7 @@ function getCategories($row) {
                         echo "</tr>";
                     }
                 } else {
-                    echo "<tr><td colspan='10'>No residents found matching the filters or search term: **" . htmlspecialchars($searchTerm) . "**</td></tr>";
+                    echo "<tr><td colspan='6'>No residents found matching the filters or search term: **" . htmlspecialchars($searchTerm) . "**</td></tr>";
                 }
                 ?>
               </tbody>
