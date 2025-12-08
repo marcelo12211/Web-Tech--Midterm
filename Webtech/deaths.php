@@ -78,15 +78,6 @@ include 'db_connect.php'; // make $conn available
                 </select>
               </div>
               <div class="input-group">
-                <label for="filterAgeStay">Min Age of Stay (Years)</label>
-                <input
-                  type="number"
-                  id="filterAgeStay"
-                  min="0"
-                  placeholder="e.g., 10"
-                />
-              </div>
-              <div class="input-group">
                 <label for="filterYear">Year of Death</label>
                 <input
                   type="number"
@@ -96,18 +87,9 @@ include 'db_connect.php'; // make $conn available
                   placeholder="e.g., 2024"
                 />
               </div>
-              <div
-                class="input-group"
-                style="
-                  grid-column: span 1;
-                  display: flex;
-                  align-items: flex-end;
-                "
-              >
-                <button
-                  class="btn primary-btn"
-                  style="width: 100%; min-width: 100px"
-                >
+              <div class="input-group">
+                <label>&nbsp;</label>
+                <button class="btn primary-btn" style="width: 100%">
                   Filter
                 </button>
               </div>
@@ -117,7 +99,7 @@ include 'db_connect.php'; // make $conn available
           <div class="card data-table-card">
             <h3>Death Record Details</h3>
             <div class="search-results-info">
-              Displaying **1-10** of **98** records.
+              Displaying 1-10 of 98 records.
             </div>
             <div class="table-responsive">
               <table>
@@ -126,7 +108,6 @@ include 'db_connect.php'; // make $conn available
                     <th>Rec. No.</th>
                     <th>Name</th>
                     <th>Age</th>
-                    <th>Stay (Yrs)</th>
                     <th>Cause of Death</th>
                     <th>Date of Death</th>
                     <th>Actions</th>
@@ -137,7 +118,6 @@ include 'db_connect.php'; // make $conn available
                     <td>D-001</td>
                     <td>Dela Cruz, Juan M.</td>
                     <td>78</td>
-                    <td>50</td>
                     <td>Old Age (Natural)</td>
                     <td>2024-03-15</td>
                     <td class="actions-cell">
@@ -153,7 +133,6 @@ include 'db_connect.php'; // make $conn available
                     <td>D-002</td>
                     <td>Santos, Maria F.</td>
                     <td>65</td>
-                    <td>25</td>
                     <td>Kidney Failure</td>
                     <td>2024-02-28</td>
                     <td class="actions-cell">
@@ -203,10 +182,6 @@ include 'db_connect.php'; // make $conn available
                 <div class="input-group">
                   <label for="residentAge">Age</label>
                   <input type="number" id="residentAge" min="1" required />
-                </div>
-                <div class="input-group">
-                  <label for="ageOfStay">Age of Stay in Barangay (Years)</label>
-                  <input type="number" id="ageOfStay" min="0" required />
                 </div>
                 <div class="input-group">
                   <label for="dateOfDeath">Date of Death</label>
@@ -305,7 +280,6 @@ include 'db_connect.php'; // make $conn available
         document.getElementById(modalId).classList.remove("show");
       }
 
-      // Existing functions...
       function setupLogout() {
         const logoutBtn = document.getElementById("logoutBtn");
         logoutBtn.addEventListener("click", () => {
@@ -327,7 +301,6 @@ include 'db_connect.php'; // make $conn available
       window.onload = function () {
         showUser();
         setupLogout();
-        // Assuming a function to load and display data exists
       };
     </script>
   </body>
