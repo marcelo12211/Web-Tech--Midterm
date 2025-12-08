@@ -1,12 +1,14 @@
 <?php
+// Ensure this file connects to your database successfully
 include __DIR__ . '/db_connect.php';
 
+// SQL query to fetch all necessary aggregate statistics
 $sql = "SELECT
-    COUNT(*) AS total_residents,
+    COUNT(*) AS primary_residents_count, -- Counts records in the 'residents' table (e.g., adults/households)
     SUM(is_senior = 1) AS senior_count,
     SUM(is_disabled = 1) AS pwd_count,
-    SUM(is_pregnant = 1) AS pregnant_count,  -- ADDED: Count of pregnant residents
-    SUM(children_count) AS total_children,  -- ADDED: Sum of children from all residents
+    SUM(is_pregnant = 1) AS pregnant_count, 
+    SUM(children_count) AS total_children, -- Sums the children listed by the primary residents
     SUM(PUROK = 1) AS purok1_count,
     SUM(PUROK = 2) AS purok2_count,
     SUM(PUROK = 3) AS purok3_count,
@@ -15,7 +17,21 @@ $sql = "SELECT
 FROM residents";
 
 $result = $conn->query($sql);
+
+if ($result === false) {
+    die("Error executing query: " . $conn->error);
+}
+
 $stats = $result->fetch_assoc();
+
+// --- CRITICAL CORRECTION: CALCULATE TRUE TOTAL RESIDENTS ---
+// Assuming children listed in children_count are NOT already separate records in the residents table.
+// The total resident count is the sum of primary records PLUS the total number of listed children.
+$stats['total_residents'] = $stats['primary_residents_count'] + $stats['total_children'];
+// ------------------------------------------------------------
+
+// Close the database connection
+$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -72,18 +88,21 @@ $stats = $result->fetch_assoc();
                 </div>
 
                 <div class="stat-card">
-                    <p class="stat-label">Total Children</p>
+                    <p class="stat-label">Total Children (Listed)</p>
                     <p class="stat-value"><span><?php echo $stats['total_children']; ?></span></p>
                 </div>
                 
                 <div class="card chart-card">
-                    <h3>Population by Purok</h3>
+                    <h3>Primary Residents by Purok</h3>
                     <div class="purok-chart">
                         <?php
-                        // The loop now uses $stats['total_residents'] for the base count
+                        // Check if there are any primary residents to avoid division by zero
+                        $primary_residents_count = $stats['primary_residents_count'] ?? 1; 
+
                         for ($i = 1; $i <= 5; $i++) {
-                            $count = $stats["purok{$i}_count"];
-                            $width = $stats['total_residents'] > 0 ? ($count / $stats['total_residents']) * 100 : 0;
+                            $count = $stats["purok{$i}_count"] ?? 0;
+                            // Width is calculated based on the count of primary residents in that purok
+                            $width = $primary_residents_count > 0 ? ($count / $primary_residents_count) * 100 : 0;
                             echo '<div class="purok-item">';
                             echo "<span class='purok-label'>Purok $i</span>";
                             echo "<div class='purok-bar-container'>";
