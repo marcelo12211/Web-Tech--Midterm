@@ -354,7 +354,7 @@ function showUser() {
     if (user && user.name) {
     userNameSpan.textContent = `Welcome, ${user.name}`;
     } else {
-    userNameSpan.textContent = `Welcome, Guest`;
+      userNameSpan.textContent = `Welcome, Guest`;
     }
 }
 

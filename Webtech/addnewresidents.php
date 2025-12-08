@@ -8,29 +8,47 @@ $resData = [];
 if ($residentId) {
     $editMode = true;
     $residentId = intval($residentId);
-    $resData = $conn->query("SELECT * FROM identification WHERE id=$residentId")->fetch_assoc();
+    $resData = $conn->query("SELECT * FROM residents WHERE resident_id=$residentId")->fetch_assoc();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// Fetch existing households for dropdown
+$householdsResult = $conn->query("SELECT household_id, household_head FROM household ORDER BY household_id ASC");
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $firstName   = $conn->real_escape_string($_POST['firstName']);
     $middleName  = $conn->real_escape_string($_POST['middleName'] ?? '');
     $lastName    = $conn->real_escape_string($_POST['lastName']);
     $suffix      = $conn->real_escape_string($_POST['suffix'] ?? '');
     $fullName    = trim("$firstName $middleName $lastName $suffix");
 
-    $province    = $conn->real_escape_string($_POST['province']);
-    $city        = $conn->real_escape_string($_POST['city']);
-    $barangay    = $conn->real_escape_string($_POST['barangay']);
-    $fullAddress = "$barangay, $city, $province";
+    $householdOption = $_POST['householdOption'];
+    $newHouseholdHead = null;
+    $householdId = null;
 
-    $gender      = $_POST['gender'];
-    $civilStatus = $_POST['civilStatus'];
-    $birthDate   = $_POST['birthDate'];
-    $citizenship = $conn->real_escape_string($_POST['citizenship']);
+    if ($householdOption == 'existing') {
+        $householdId = intval($_POST['existingHousehold']);
+    } else {
+        $newHouseholdHead = $fullName;
+        // Insert new household
+        $conn->query("INSERT INTO household (household_head) VALUES ('$newHouseholdHead')");
+        $householdId = $conn->insert_id;
+    }
 
-    $isPWD = isset($_POST['isPWD']) ? 1 : 0;
-    $pwdFilePath = $resData['pwdImage'] ?? null;
+    $purok      = $_POST['purok'];
+    $address    = $conn->real_escape_string($_POST['address']);
+    $birthDate  = $_POST['birthDate'];
+    $gender     = $_POST['gender'];
+    $civilStatus= $_POST['civilStatus'];
+    $education  = $_POST['educationLevel'];
+    $occupation = $_POST['occupation'];
+    $isSenior   = isset($_POST['isSenior']) ? 1 : 0;
+    $isPWD      = isset($_POST['isPWD']) ? 1 : 0;
+    $isPregnant = isset($_POST['isPregnant']) ? 1 : 0;
+    $childrenCount = intval($_POST['childrenCount'] ?? 0);
+    $healthInsurance = $_POST['healthInsurance'] ?? '';
+    $vaccination = $_POST['vaccination'] ?? '';
+
+    $pwdFilePath = $resData['pwd_image'] ?? null;
 
     // Handle PWD image upload
     if ($isPWD && isset($_FILES['pwdImage']) && $_FILES['pwdImage']['error'] === UPLOAD_ERR_OK) {
@@ -43,39 +61,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (move_uploaded_file($fileTmp, $filePath)) {
             $pwdFilePath = $filePath;
-        } else {
-            $error = "Failed to upload PWD ID.";
         }
     }
 
-    if (!isset($error)) {
-        if ($editMode) {
-            $sql = "UPDATE identification SET 
-                RESPONDENT_NAME='$fullName',
-                PROVINCE='$province',
-                MUNICIPALITY='$city',
-                BARANGAY='$barangay',
-                ADDRESS='$fullAddress',
-                GENDER='$gender',
-                BIRTHDATE='$birthDate',
-                CIVIL_STATUS='$civilStatus',
-                CITIZENSHIP='$citizenship',
-                isPWD=$isPWD,
-                pwdImage='$pwdFilePath'
-                WHERE id=$residentId";
-            $actionMsg = "updated";
-        } else {
-            $sql = "INSERT INTO identification
-                (PROVINCE, MUNICIPALITY, BARANGAY, ADDRESS, RESPONDENT_NAME, GENDER, BIRTHDATE, CIVIL_STATUS, CITIZENSHIP, HOUSEHOLD_HEAD, HOUSEHOLD_MEMBERS, isPWD, pwdImage)
-                VALUES ('$province','$city','$barangay','$fullAddress','$fullName','$gender','$birthDate','$civilStatus','$citizenship','$fullName',1,$isPWD,'$pwdFilePath')";
-            $actionMsg = "added";
-        }
+    if ($editMode) {
+        $sql = "UPDATE residents SET
+                household_id=$householdId,
+                first_name='$firstName',
+                middle_name='$middleName',
+                surname='$lastName',
+                suffix='$suffix',
+                sex='$gender',
+                birthdate='$birthDate',
+                civil_status='$civilStatus',
+                purok='$purok',
+                address='$address',
+                education_level='$education',
+                occupation='$occupation',
+                is_senior=$isSenior,
+                is_disabled=$isPWD,
+                is_pregnant=$isPregnant,
+                children_count=$childrenCount,
+                health_insurance='$healthInsurance',
+                vaccination='$vaccination',
+                pwd_image='$pwdFilePath'
+                WHERE resident_id=$residentId";
+        $actionMsg = "updated";
+    } else {
+        $sql = "INSERT INTO residents 
+                (household_id, first_name, middle_name, surname, suffix, sex, birthdate, civil_status, purok, address, education_level, occupation, is_senior, is_disabled, is_pregnant, children_count, health_insurance, vaccination, pwd_image)
+                VALUES
+                ($householdId, '$firstName', '$middleName', '$lastName', '$suffix', '$gender', '$birthDate', '$civilStatus', '$purok', '$address', '$education', '$occupation', $isSenior, $isPWD, $isPregnant, $childrenCount, '$healthInsurance', '$vaccination', '$pwdFilePath')";
+        $actionMsg = "added";
+    }
 
-        if ($conn->query($sql)) {
-            $success = "Resident $actionMsg successfully!";
-        } else {
-            $error = "Error: " . $conn->error;
-        }
+    if ($conn->query($sql)) {
+        $success = "Resident $actionMsg successfully!";
+    } else {
+        $error = "Error: " . $conn->error;
     }
 }
 ?>
@@ -83,10 +106,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?php echo $editMode ? "Edit" : "Add"; ?> Resident</title>
-<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div class="app-container">
@@ -124,112 +147,123 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
 <form id="addResidentForm" method="POST" enctype="multipart/form-data">
 <h2 class="form-title"><?php echo $editMode ? "Edit" : "Add New"; ?> Resident</h2>
 
-<!-- PAGE 1 -->
-<div id="page1">
-<h2>A. Identification</h2>
 <div class="form-grid">
 
+<!-- Household Selection -->
 <div class="input-group">
-  <label>First Name</label>
-  <input type="text" name="firstName" id="firstName" required value="<?php echo $resData['RESPONDENT_NAME'] ?? ''; ?>">
+<label>Household</label>
+<select name="householdOption" id="householdOption" required>
+    <option value="">Select</option>
+    <option value="existing" <?php if(isset($_POST['householdOption']) && $_POST['householdOption']=='existing') echo 'selected'; ?>>Existing Household</option>
+    <option value="new" <?php if(isset($_POST['householdOption']) && $_POST['householdOption']=='new') echo 'selected'; ?>>New Household</option>
+</select>
+</div>
+
+<div class="input-group" id="existingHouseholdGroup" style="display:none;">
+<label>Select Household</label>
+<select name="existingHousehold">
+<?php while($household = $householdsResult->fetch_assoc()): ?>
+    <option value="<?php echo $household['household_id']; ?>" <?php if(($resData['household_id'] ?? '')==$household['household_id']) echo 'selected'; ?>>
+        <?php echo $household['household_head'] . " (" . $household['household_id'] . ")"; ?>
+    </option>
+<?php endwhile; ?>
+</select>
+</div>
+
+<!-- Resident Details -->
+<div class="input-group">
+<label>First Name</label>
+<input type="text" name="firstName" required value="<?php echo $resData['first_name'] ?? ''; ?>">
 </div>
 <div class="input-group">
-  <label>Middle Name</label>
-  <input type="text" name="middleName" id="middleName" value="<?php echo $resData['middleName'] ?? ''; ?>">
+<label>Middle Name</label>
+<input type="text" name="middleName" value="<?php echo $resData['middle_name'] ?? ''; ?>">
 </div>
 <div class="input-group">
-  <label>Surname</label>
-  <input type="text" name="lastName" id="lastName" required value="<?php echo $resData['lastName'] ?? ''; ?>">
+<label>Last Name</label>
+<input type="text" name="lastName" required value="<?php echo $resData['surname'] ?? ''; ?>">
 </div>
 <div class="input-group">
-  <label>Suffix</label>
-  <input type="text" name="suffix" id="suffix" value="<?php echo $resData['suffix'] ?? ''; ?>">
+<label>Suffix</label>
+<input type="text" name="suffix" value="<?php echo $resData['suffix'] ?? ''; ?>">
 </div>
 <div class="input-group">
-  <label>Province</label>
-  <input type="text" name="province" id="province" required value="<?php echo $resData['PROVINCE'] ?? ''; ?>">
+<label>Purok</label>
+<select name="purok" required>
+    <option value="">Select</option>
+    <?php for($i=1;$i<=5;$i++): ?>
+    <option value="<?php echo $i; ?>" <?php if(($resData['purok']??'')==$i) echo 'selected'; ?>>Purok <?php echo $i; ?></option>
+    <?php endfor; ?>
+</select>
 </div>
 <div class="input-group">
-  <label>City/Municipality</label>
-  <input type="text" name="city" id="city" required value="<?php echo $resData['MUNICIPALITY'] ?? ''; ?>">
+<label>Address</label>
+<input type="text" name="address" required value="<?php echo $resData['address'] ?? ''; ?>">
 </div>
 <div class="input-group">
-  <label>Barangay</label>
-  <input type="text" name="barangay" id="barangay" required value="<?php echo $resData['BARANGAY'] ?? ''; ?>">
+<label>Birth Date</label>
+<input type="date" name="birthDate" required value="<?php echo $resData['birthdate'] ?? ''; ?>">
+</div>
+<div class="input-group">
+<label>Gender</label>
+<select name="gender" required>
+<option value="">Select</option>
+<option value="M" <?php if(($resData['sex']??'')=='M') echo 'selected'; ?>>Male</option>
+<option value="F" <?php if(($resData['sex']??'')=='F') echo 'selected'; ?>>Female</option>
+</select>
+</div>
+<div class="input-group">
+<label>Civil Status</label>
+<select name="civilStatus" required>
+<option value="">Select</option>
+<option value="Single" <?php if(($resData['civil_status']??'')=='Single') echo 'selected'; ?>>Single</option>
+<option value="Married" <?php if(($resData['civil_status']??'')=='Married') echo 'selected'; ?>>Married</option>
+<option value="Widowed" <?php if(($resData['civil_status']??'')=='Widowed') echo 'selected'; ?>>Widowed</option>
+</select>
+</div>
+<div class="input-group">
+<label>Education Level</label>
+<input type="text" name="educationLevel" value="<?php echo $resData['education_level'] ?? ''; ?>">
+</div>
+<div class="input-group">
+<label>Occupation</label>
+<input type="text" name="occupation" value="<?php echo $resData['occupation'] ?? ''; ?>">
+</div>
+<div class="input-group">
+<label>Senior Citizen</label>
+<input type="checkbox" name="isSenior" value="1" <?php if(!empty($resData['is_senior'])) echo 'checked'; ?>>
+</div>
+<div class="input-group">
+<label>PWD</label>
+<input type="checkbox" name="isPWD" id="isPWD" value="1" <?php if(!empty($resData['is_disabled'])) echo 'checked'; ?>>
+</div>
+<div class="input-group" id="pwdUploadGroup" style="display:none;">
+<label>Upload PWD ID</label>
+<input type="file" name="pwdImage" accept="image/*">
+<?php if(!empty($resData['pwd_image'])) echo "<p>Current: <a href='{$resData['pwd_image']}' target='_blank'>View</a></p>"; ?>
+</div>
+<div class="input-group">
+<label>Pregnant</label>
+<input type="checkbox" name="isPregnant" value="1" <?php if(!empty($resData['is_pregnant'])) echo 'checked'; ?>>
+</div>
+<div class="input-group">
+<label>Children Count</label>
+<input type="number" name="childrenCount" min="0" value="<?php echo $resData['children_count'] ?? 0; ?>">
+</div>
+<div class="input-group">
+<label>Health Insurance</label>
+<input type="text" name="healthInsurance" value="<?php echo $resData['health_insurance'] ?? ''; ?>">
+</div>
+<div class="input-group">
+<label>Vaccination Status</label>
+<input type="text" name="vaccination" value="<?php echo $resData['vaccination'] ?? ''; ?>">
 </div>
 
 </div>
+
 <div class="button-group">
-  <button type="button" id="nextBtn1" class="btn">Next</button>
+<button type="submit" class="btn"><?php echo $editMode ? "Update" : "Submit"; ?></button>
 </div>
-</div>
-
-<!-- PAGE 2 -->
-<div id="page2" style="display:none">
-<h2>B. Basic Details</h2>
-<div class="form-grid">
-
-<div class="input-group">
-  <label>Birth Date</label>
-  <input type="date" name="birthDate" required value="<?php echo $resData['BIRTHDATE'] ?? ''; ?>">
-</div>
-
-<div class="input-group">
-  <label>Gender</label>
-  <select name="gender" required>
-    <option value="">Select</option>
-    <option value="Male" <?php if(($resData['GENDER'] ?? '')=='Male') echo 'selected'; ?>>Male</option>
-    <option value="Female" <?php if(($resData['GENDER'] ?? '')=='Female') echo 'selected'; ?>>Female</option>
-  </select>
-</div>
-
-<div class="input-group">
-  <label>Civil Status</label>
-  <select name="civilStatus" required>
-    <option value="">Select</option>
-    <option value="Single" <?php if(($resData['CIVIL_STATUS'] ?? '')=='Single') echo 'selected'; ?>>Single</option>
-    <option value="Married" <?php if(($resData['CIVIL_STATUS'] ?? '')=='Married') echo 'selected'; ?>>Married</option>
-    <option value="Widowed" <?php if(($resData['CIVIL_STATUS'] ?? '')=='Widowed') echo 'selected'; ?>>Widowed</option>
-  </select>
-</div>
-
-<div class="input-group">
-  <label>Citizenship</label>
-  <select name="citizenship" required>
-    <option value="">Select</option>
-    <option value="Filipino" <?php if(($resData['CITIZENSHIP'] ?? '')=='Filipino') echo 'selected'; ?>>Filipino</option>
-    <option value="American" <?php if(($resData['CITIZENSHIP'] ?? '')=='American') echo 'selected'; ?>>American</option>
-    <option value="Canadian" <?php if(($resData['CITIZENSHIP'] ?? '')=='Canadian') echo 'selected'; ?>>Canadian</option>
-    <option value="Japanese" <?php if(($resData['CITIZENSHIP'] ?? '')=='Japanese') echo 'selected'; ?>>Japanese</option>
-    <option value="Korean" <?php if(($resData['CITIZENSHIP'] ?? '')=='Korean') echo 'selected'; ?>>Korean</option>
-    <option value="Chinese" <?php if(($resData['CITIZENSHIP'] ?? '')=='Chinese') echo 'selected'; ?>>Chinese</option>
-    <option value="Australian" <?php if(($resData['CITIZENSHIP'] ?? '')=='Australian') echo 'selected'; ?>>Australian</option>
-    <option value="British" <?php if(($resData['CITIZENSHIP'] ?? '')=='British') echo 'selected'; ?>>British</option>
-  </select>
-</div>
-
-
-<div class="input-group" style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px; align-items: center;">
-  <div>
-    <label>Are you a PWD?</label>
-    <input type="checkbox" name="isPWD" id="isPWD" value="1"
-      <?php if(!empty($resData['isPWD']) && $resData['isPWD']==1) echo 'checked'; ?>>
-  </div>
-
-  <div id="pwdUploadGroup" style="display:none;">
-    <label>Upload PWD ID</label>
-    <input type="file" name="pwdImage" id="pwdImage" accept="image/*">
-    <?php if(!empty($resData['pwdImage'])) echo "<p>Current: <a href='{$resData['pwdImage']}' target='_blank'>View</a></p>"; ?>
-  </div>
-</div>
-
-
-<div class="button-group">
-  <button type="button" id="backBtn2" class="btn secondary">Back</button>
-  <button type="submit" class="btn"><?php echo $editMode ? "Update" : "Submit"; ?></button>
-</div>
-</div>
-
 </form>
 </div>
 </div>
@@ -238,31 +272,26 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
 </div>
 
 <script>
-// Multi-page navigation
-document.getElementById("nextBtn1").onclick = function() {
-    document.getElementById("page1").style.display = "none";
-    document.getElementById("page2").style.display = "block";
-};
-document.getElementById("backBtn2").onclick = function() {
-    document.getElementById("page2").style.display = "none";
-    document.getElementById("page1").style.display = "block";
-};
+const householdOption = document.getElementById("householdOption");
+const existingHouseholdGroup = document.getElementById("existingHouseholdGroup");
 
-// Show page 1 at start
-document.getElementById("page1").style.display = "block";
-document.getElementById("page2").style.display = "none";
+function toggleHousehold() {
+    if(householdOption.value === 'existing') {
+        existingHouseholdGroup.style.display = 'block';
+    } else {
+        existingHouseholdGroup.style.display = 'none';
+    }
+}
+householdOption.addEventListener('change', toggleHousehold);
+toggleHousehold();
 
-// PWD toggle
 const isPWDCheckbox = document.getElementById("isPWD");
 const pwdUploadGroup = document.getElementById("pwdUploadGroup");
 
 function togglePWD() {
-    if (isPWDCheckbox.checked) pwdUploadGroup.style.display = "block";
-    else pwdUploadGroup.style.display = "none";
+    pwdUploadGroup.style.display = isPWDCheckbox.checked ? 'block' : 'none';
 }
-isPWDCheckbox.addEventListener("change", togglePWD);
-
-// Show upload if editing and isPWD
+isPWDCheckbox.addEventListener('change', togglePWD);
 togglePWD();
 </script>
 </body>
