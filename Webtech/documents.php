@@ -3,10 +3,21 @@ include 'db_connect.php';
 
 // Function to generate next document number
 function getNextDocNumber($conn) {
-    $result = $conn->query("SELECT id FROM documents ORDER BY id DESC LIMIT 1");
-    if ($row = $result->fetch_assoc()) {
-        return 'IMG-' . str_pad($row['id'] + 1, 3, '0', STR_PAD_LEFT);
+    // Check if the connection is valid
+    if (!$conn) {
+        return 'IMG-ERR';
+    }
+    
+    // FIX: Changed 'id' to 'person_id' in the SELECT statement
+    $result = $conn->query("SELECT person_id FROM documents ORDER BY person_id DESC LIMIT 1");
+    
+    // Check if the query succeeded and returned a result
+    if ($result && $row = $result->fetch_assoc()) {
+        // FIX: The auto-incrementing column is now 'person_id'
+        // Increment the last ID found and format it
+        return 'IMG-' . str_pad($row['person_id'] + 1, 3, '0', STR_PAD_LEFT);
     } else {
+        // If no records are found (first document), start at 001
         return 'IMG-001';
     }
 }
@@ -37,7 +48,7 @@ $success = isset($_GET['success']) ? true : false;
             <li class="nav-divider"></li>
           </ul>
         </nav>
-      </aside>  
+      </aside> 	
 
       <div class="main-content">
         <header class="topbar">
@@ -54,8 +65,9 @@ $success = isset($_GET['success']) ? true : false;
             <div class="alert success">Document uploaded successfully!</div>
           <?php endif; ?>
 
+          <?php $next_doc_number = getNextDocNumber($conn); ?>
+
           <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr">
-            <!-- Upload Form -->
             <div class="card">
               <h3>Upload Document Image</h3>
               <form action="upload_document.php" method="POST" enctype="multipart/form-data">
@@ -65,20 +77,24 @@ $success = isset($_GET['success']) ? true : false;
                     <input
                       type="text"
                       id="residentSearch"
-                      name="resident"
+                      name="resident_name" 
                       placeholder="Search and Select Resident"
                       required
                     />
                   </div>
 
                   <div class="input-group">
-                    <label for="docNumber">Document Number (Auto)</label>
+                    <label for="docNumberDisplay">Document Number (Auto)</label>
                     <input
                       type="text"
-                      id="docNumber"
+                      id="docNumberDisplay"
+                      value="<?php echo $next_doc_number; ?>"
+                      readonly 
+                    />
+                    <input
+                      type="hidden"
                       name="docNumber"
-                      value="<?php echo getNextDocNumber($conn); ?>"
-                      disabled
+                      value="<?php echo $next_doc_number; ?>"
                     />
                   </div>
 
@@ -107,7 +123,6 @@ $success = isset($_GET['success']) ? true : false;
               </form>
             </div>
 
-            <!-- Stored Documents Table -->
             <div class="card">
               <h3>🗄️ Stored Documents</h3>
               <div class="table-responsive">
@@ -123,17 +138,26 @@ $success = isset($_GET['success']) ? true : false;
                   </thead>
                   <tbody id="documentStorageTable">
                   <?php
+                  // Retrieve documents for the table display
                   $result = $conn->query("SELECT * FROM documents ORDER BY created_at DESC");
-                  while ($row = $result->fetch_assoc()) {
-                      echo "<tr>
-                        <td>IMG-" . str_pad($row['id'], 3, '0', STR_PAD_LEFT) . "</td>
-                        <td>{$row['resident_name']}</td>
-                        <td>Image</td>
-                        <td>{$row['created_at']}</td>
-                        <td class='actions-cell'>
-                          <a href='{$row['file_path']}' class='action-link view' target='_blank'>View</a>
-                        </td>
-                      </tr>";
+                  
+                  // Check if the query was successful before fetching results
+                  if ($result) {
+                    while ($row = $result->fetch_assoc()) {
+                        // Display the row data
+                        echo "<tr>
+                            <td>{$row['doc_number']}</td>
+                            <td>{$row['resident_name']}</td>
+                            <td>Image</td>
+                            <td>{$row['created_at']}</td>
+                            <td class='actions-cell'>
+                                <a href='{$row['file_path']}' class='action-link view' target='_blank'>View</a>
+                            </td>
+                        </tr>";
+                    }
+                  } else {
+                      // Optional: Display an error if the query fails 
+                      echo "<tr><td colspan='5'>Error loading documents.</td></tr>";
                   }
                   ?>
                   </tbody>
