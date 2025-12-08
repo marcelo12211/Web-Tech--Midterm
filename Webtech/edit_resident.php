@@ -14,7 +14,7 @@ $sql = "
     SELECT 
         T1.*, 
         T2.IS_DISABLED, T2.IS_REGISTERED_SENIOR, T2.RESIDENT_TYPE, T2.PUROK
-    FROM identification T1
+    FROM residents T1
     LEFT JOIN demographics T2 ON T1.ID = T2.MEMBER_ID
     WHERE T1.ID = '$residentId'
 ";

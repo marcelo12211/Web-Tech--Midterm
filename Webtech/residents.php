@@ -15,7 +15,7 @@ if (!empty($searchTerm)) {
 }
 
 if (!empty($selectedPurok)) {
-    $whereClauses[] = "T1.PUROK = '$selectedPurok'";
+    $whereClauses[] = "T1.purok = '$selectedPurok'";
 }
 
 if (!empty($selectedCategory)) {
@@ -23,10 +23,11 @@ if (!empty($selectedCategory)) {
         case 'senior':
             $whereClauses[] = "T1.is_senior = 1"; 
             break;
-        case 'solo':
-            break; 
         case 'pwd':
             $whereClauses[] = "T1.is_disabled = 1"; 
+            break;
+        case 'pregnant':
+            $whereClauses[] = "T1.is_pregnant = 1"; 
             break;
     }
 }
@@ -38,8 +39,25 @@ if (!empty($whereClauses)) {
 
 $sql = "
     SELECT 
-        T1.person_id AS ID, T1.full_name AS RESPONDENT_NAME, T1.sex AS GENDER,
-        T1.PUROK, T1.is_disabled, T1.is_senior
+        T1.person_id AS ID, 
+        T1.household_id,
+        T1.full_name,
+        T1.sex,
+        T1.birthdate,
+        T1.civil_status,
+        T1.nationality,
+        T1.religion,
+        T1.purok,
+        T1.address,
+        T1.education_level,
+        T1.occupation,
+        T1.is_senior,
+        T1.is_disabled,
+        T1.disability_type,
+        T1.health_insurance,
+        T1.vaccination,
+        T1.is_pregnant,
+        T1.children_count
     FROM residents T1 
     $whereClause
     ORDER BY T1.person_id ASC
@@ -47,17 +65,19 @@ $sql = "
 
 $result = $conn->query($sql);
 
-function getCategories($row) {
-    $categories = [];
-    if (isset($row['is_senior']) && $row['is_senior'] == 1) { 
-        $categories[] = 'Senior';
-    }
-    if (isset($row['is_disabled']) && $row['is_disabled'] == 1) { 
-        $categories[] = 'PWD';
-    }
-    return empty($categories) ? 'Regular' : implode(', ', $categories);
+function calculateAge($birthdate) {
+    if (empty($birthdate) || $birthdate == '0000-00-00') return 'N/A';
+    $birthDate = new DateTime($birthdate);
+    $today = new DateTime();
+    return $birthDate->diff($today)->y . ' years old';
+}
+
+function formatDate($date) {
+    if (empty($date) || $date == '0000-00-00') return 'N/A';
+    return date('M d, Y', strtotime($date));
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,14 +85,6 @@ function getCategories($row) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Residents Directory</title>
     <link rel="stylesheet" href="css/style.css" />
-    <style>
-        .filter-dropdowns {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-    </style>
 </head>
 <body>
 <div class="app-container">
@@ -101,7 +113,7 @@ function getCategories($row) {
       <main class="page-content">
         <div class="residents-directory card">
           <div class="directory-header">
-            <h2>Resident Directory (Personal Data)</h2>
+            <h2>Resident Directory</h2>
             <a href="addnewresidents.php" class="btn primary-btn">+ Add New</a>
           </div>
 
@@ -125,6 +137,7 @@ function getCategories($row) {
                             <option value="">-- Select Category --</option>
                             <option value="senior" <?php echo ($selectedCategory == 'senior') ? 'selected' : ''; ?>>Senior Citizen</option>
                             <option value="pwd" <?php echo ($selectedCategory == 'pwd') ? 'selected' : ''; ?>>PWD</option>
+                            <option value="pregnant" <?php echo ($selectedCategory == 'pregnant') ? 'selected' : ''; ?>>Pregnant</option>
                         </select>
                     </div>
                     <div class="input-group">
@@ -154,33 +167,160 @@ function getCategories($row) {
             <table>
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Respondent Name</th>
-                  <th>Gender</th>
-                  <th>Purok</th> 
-                  <th>Categories</th> 
+                  <th>Full Name</th>
+                  <th>Sex</th>
+                  <th>Birthdate</th>
+                  <th>Civil Status</th>
+                  <th>Nationality</th>
+                  <th>Purok</th>
+                  <th>Address</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="residentsTableBody">
                 <?php
                 if ($result->num_rows > 0) {
+                    $counter = 0;
                     while($row = $result->fetch_assoc()) {
                         $residentId = htmlspecialchars($row['ID']); 
-                        echo "<tr>";
-                        echo "<td>{$residentId}</td>";
-                        echo "<td>" . htmlspecialchars($row['RESPONDENT_NAME'] ?? 'N/A') . "</td>";
-                        echo "<td>" . htmlspecialchars($row['GENDER'] ?? 'N/A') . "</td>";
-                        echo "<td>" . htmlspecialchars($row['PUROK'] ?? 'N/A') . "</td>";
-                        echo "<td>" . getCategories($row) . "</td>"; 
+                        $rowId = "row-" . $counter;
+                        $detailsId = "details-" . $counter;
+                        
+                        echo "<tr class='expandable-row' onclick='toggleDetails(\"$detailsId\", \"$rowId\")'>";
+                        echo "<td><div class='name-cell'><span class='expand-icon' id='icon-$rowId'>▶</span><span>" . htmlspecialchars($row['full_name'] ?? 'N/A') . "</span></div></td>";
+                        echo "<td>" . htmlspecialchars($row['sex'] ?? 'N/A') . "</td>";
+                        echo "<td>" . formatDate($row['birthdate']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['civil_status'] ?? 'N/A') . "</td>";
+                        echo "<td>" . htmlspecialchars($row['nationality'] ?? 'N/A') . "</td>";
+                        echo "<td>" . htmlspecialchars($row['purok'] ?? 'N/A') . "</td>";
+                        echo "<td>" . htmlspecialchars($row['address'] ?? 'N/A') . "</td>";
                         echo "<td>
-                                <button class='btn small-btn edit-btn' onclick='editResident(\"{$residentId}\")'>Edit</button>
-                                <button class='btn small-btn delete-btn' onclick='deleteResident(\"{$residentId}\")'>Delete</button>
+                                <button class='btn small-btn edit-btn' onclick='event.stopPropagation(); editResident(\"{$residentId}\")'>Edit</button>
+                                <button class='btn small-btn delete-btn' onclick='event.stopPropagation(); deleteResident(\"{$residentId}\")'>Delete</button>
                               </td>";
                         echo "</tr>";
+                        
+                        echo "<tr class='details-row' id='$detailsId'>";
+                        echo "<td colspan='8' class='details-cell'>";
+                        echo "<div class='details-content'>";
+                        
+                        $isSenior = $row['is_senior'] == 1;
+                        $isPWD = $row['is_disabled'] == 1;
+                        $isPregnant = $row['is_pregnant'] == 1;
+                        $isVaccinated = $row['vaccination'] == 1;
+                        
+                        echo "<div class='status-summary'>";
+                        if ($isSenior) echo "<div class='status-item'><span class='status-icon'></span> Senior Citizen</div>";
+                        if ($isPWD) echo "<div class='status-item'><span class='status-icon'></span> PWD</div>";
+                        if ($isPregnant) echo "<div class='status-item'><span class='status-icon'></span> Pregnant</div>";
+                        if ($isVaccinated) echo "<div class='status-item'><span class='status-icon'></span> Vaccinated</div>";
+                        if (!$isSenior && !$isPWD && !$isPregnant && !$isVaccinated) {
+                            echo "<div class='status-item'><span class='status-icon'></span> No Special Status</div>";
+                        }
+                        echo "</div>";
+                        
+                        echo "<div class='tab-navigation'>";
+                        echo "<button class='tab-button active' onclick='switchTab(event, \"personal-$counter\")'>Personal Info</button>";
+                        echo "<button class='tab-button' onclick='switchTab(event, \"health-$counter\")'>Health & Status</button>";
+                        echo "<button class='tab-button' onclick='switchTab(event, \"education-$counter\")'>Education & Work</button>";
+                        echo "<button class='tab-button' onclick='switchTab(event, \"family-$counter\")'>Family</button>";
+                        echo "</div>";
+                        
+                        echo "<div id='personal-$counter' class='tab-content active'>";
+                        echo "<div class='info-grid'>";
+                        
+                        echo "<div class='info-card'>";
+                        echo "<h4>Identification</h4>";
+                        echo "<div class='detail-item'><span class='detail-label'>Person ID:</span><span class='detail-value'>" . htmlspecialchars($row['ID']) . "</span></div>";
+                        echo "<div class='detail-item'><span class='detail-label'>Household ID:</span><span class='detail-value'>" . htmlspecialchars($row['household_id'] ?? 'N/A') . "</span></div>";
+                        echo "</div>";
+                        
+                        echo "<div class='info-card'>";
+                        echo "<h4>Personal Details</h4>";
+                        echo "<div class='detail-item'><span class='detail-label'>Full Name:</span><span class='detail-value'>" . htmlspecialchars($row['full_name']) . "</span></div>";
+                        echo "<div class='detail-item'><span class='detail-label'>Sex:</span><span class='detail-value'>" . htmlspecialchars($row['sex'] ?? 'N/A') . "</span></div>";
+                        echo "<div class='detail-item'><span class='detail-label'>Birthdate:</span><span class='detail-value'>" . formatDate($row['birthdate']) . "</span></div>";
+                        echo "<div class='detail-item'><span class='detail-label'>Age:</span><span class='detail-value'>" . calculateAge($row['birthdate']) . "</span></div>";
+                        echo "<div class='detail-item'><span class='detail-label'>Civil Status:</span><span class='detail-value'>" . htmlspecialchars($row['civil_status'] ?? 'N/A') . "</span></div>";
+                        echo "</div>";
+                        
+                        echo "<div class='info-card'>";
+                        echo "<h4>Location & Background</h4>";
+                        echo "<div class='detail-item'><span class='detail-label'>Purok:</span><span class='detail-value'>" . htmlspecialchars($row['purok'] ?? 'N/A') . "</span></div>";
+                        echo "<div class='detail-item'><span class='detail-label'>Address:</span><span class='detail-value'>" . htmlspecialchars($row['address'] ?? 'N/A') . "</span></div>";
+                        echo "<div class='detail-item'><span class='detail-label'>Nationality:</span><span class='detail-value'>" . htmlspecialchars($row['nationality'] ?? 'N/A') . "</span></div>";
+                        echo "<div class='detail-item'><span class='detail-label'>Religion:</span><span class='detail-value'>" . htmlspecialchars($row['religion'] ?? 'N/A') . "</span></div>";
+                        echo "</div>";
+                        
+                        echo "</div>"; 
+                        echo "</div>";
+                        
+                        echo "<div id='health-$counter' class='tab-content'>";
+                        echo "<div class='info-grid'>";
+                        
+                        echo "<div class='info-card'>";
+                        echo "<h4>Health Status</h4>";
+                        echo "<div class='detail-item'><span class='detail-label'>Vaccination:</span><span class='detail-value'><span class='badge " . ($isVaccinated ? "badge-yes" : "badge-no") . "'>" . ($isVaccinated ? "Vaccinated" : "Not Vaccinated") . "</span></span></div>";
+                        
+                        $healthInsurance = !empty($row['health_insurance']) && $row['health_insurance'] != 'None' ? $row['health_insurance'] : 'None';
+                        echo "<div class='detail-item'><span class='detail-label'>Health Insurance:</span><span class='detail-value'>" . htmlspecialchars($healthInsurance) . "</span></div>";
+                        echo "</div>";
+                        
+                        echo "<div class='info-card'>";
+                        echo "<h4>Special Categories</h4>";
+                        echo "<div class='detail-item'><span class='detail-label'>Senior Citizen:</span><span class='detail-value'><span class='badge " . ($isSenior ? "badge-yes" : "badge-no") . "'>" . ($isSenior ? "Yes" : "No") . "</span></span></div>";
+                        
+                        if ($isPWD) {
+                            $disabilityType = !empty($row['disability_type']) && $row['disability_type'] != 'NULL' ? $row['disability_type'] : 'Not specified';
+                            echo "<div class='detail-item'><span class='detail-label'>PWD Status:</span><span class='detail-value'><span class='badge badge-yes'>Yes</span></span></div>";
+                            echo "<div class='detail-item'><span class='detail-label'>Disability Type:</span><span class='detail-value'><span class='badge badge-info'>$disabilityType</span></span></div>";
+                        } else {
+                            echo "<div class='detail-item'><span class='detail-label'>PWD Status:</span><span class='detail-value'><span class='badge badge-no'>No</span></span></div>";
+                        }
+                        
+                        echo "<div class='detail-item'><span class='detail-label'>Pregnant:</span><span class='detail-value'><span class='badge " . ($isPregnant ? "badge-yes" : "badge-no") . "'>" . ($isPregnant ? "Yes" : "No") . "</span></span></div>";
+                        echo "</div>";
+                        
+                        echo "</div>";
+                        echo "</div>";
+                        
+                        echo "<div id='education-$counter' class='tab-content'>";
+                        echo "<div class='info-grid'>";
+                        
+                        echo "<div class='info-card'>";
+                        echo "<h4>Education</h4>";
+                        echo "<div class='detail-item'><span class='detail-label'>Education Level:</span><span class='detail-value'>" . htmlspecialchars($row['education_level'] ?? 'N/A') . "</span></div>";
+                        echo "</div>";
+                        
+                        echo "<div class='info-card'>";
+                        echo "<h4>Employment</h4>";
+                        echo "<div class='detail-item'><span class='detail-label'>Occupation:</span><span class='detail-value'>" . htmlspecialchars($row['occupation'] ?? 'N/A') . "</span></div>";
+                        echo "</div>";
+                        
+                        echo "</div>";
+                        echo "</div>"; 
+                        
+                        echo "<div id='family-$counter' class='tab-content'>";
+                        echo "<div class='info-grid'>";
+                        
+                        echo "<div class='info-card'>";
+                        echo "<h4>Family Information</h4>";
+                        $childrenCount = isset($row['children_count']) ? $row['children_count'] : 0;
+                        echo "<div class='detail-item'><span class='detail-label'>Number of Children:</span><span class='detail-value'>" . htmlspecialchars($childrenCount) . "</span></div>";
+                        echo "<div class='detail-item'><span class='detail-label'>Civil Status:</span><span class='detail-value'>" . htmlspecialchars($row['civil_status'] ?? 'N/A') . "</span></div>";
+                        echo "</div>";
+                        
+                        echo "</div>"; 
+                        echo "</div>";
+                        
+                        echo "</div>";
+                        echo "</td>";
+                        echo "</tr>";
+                        
+                        $counter++;
                     }
                 } else {
-                    echo "<tr><td colspan='6'>No residents found matching the filters or search term: **" . htmlspecialchars($searchTerm) . "**</td></tr>";
+                    echo "<tr><td colspan='8'>No residents found matching the filters or search term.</td></tr>";
                 }
                 ?>
               </tbody>
@@ -195,6 +335,35 @@ function getCategories($row) {
 let searchTimeout = null;
 const filterForm = document.getElementById("filterForm");
 
+function toggleDetails(detailsId, rowId) {
+    const detailsRow = document.getElementById(detailsId);
+    const icon = document.getElementById('icon-' + rowId);
+    
+    if (detailsRow.classList.contains('show')) {
+        detailsRow.classList.remove('show');
+        icon.classList.remove('expanded');
+    } else {
+        detailsRow.classList.add('show');
+        icon.classList.add('expanded');
+    }
+}
+
+function switchTab(event, tabId) {
+    event.stopPropagation();
+    
+    const tabButton = event.currentTarget;
+    const detailsContent = tabButton.closest('.details-content');
+    
+    const tabButtons = detailsContent.querySelectorAll('.tab-button');
+    const tabContents = detailsContent.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    tabContents.forEach(content => content.classList.remove('active'));
+    
+    tabButton.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+}
+
 function editResident(id) {
     window.location.href = `edit_resident.php?id=${id}`;
 }
@@ -204,6 +373,7 @@ function deleteResident(id) {
         window.location.href = `delete_resident.php?id=${id}`;
     }
 }
+
 function setupLiveSearch() {
     const searchInput = document.getElementById("searchInput");
 
@@ -225,7 +395,6 @@ function setupFilterSubmit() {
         filterForm.submit();
     });
 }
-
 
 function setupLogout() {
     const logoutBtn = document.getElementById("logoutBtn");
