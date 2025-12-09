@@ -69,7 +69,7 @@ a {
 .main-nav li a {
   display: flex;
   align-items: center;
-  gap: 12px; /* Added gap for icon and text */
+  gap: 12px;
   padding: 14px 30px;
   color: #f4f3ef;
   transition: background-color 0.25s ease, color 0.25s ease;
@@ -295,7 +295,7 @@ h2 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px; /* Added gap for icons */
+  gap: 8px;
 }
 
 .btn:hover {
@@ -357,7 +357,7 @@ h2 {
   padding: 12px 15px;
   border-radius: 8px;
   border: 1px solid var(--border-color);
-  width: 100%; /* Make search input full width in its container */
+  width: 100%;
 }
 
 table {
@@ -447,7 +447,6 @@ tr:hover {
   color: #388e3c;
 }
 
-/* Search Layout Specifics */
 .search-controls {
   display: flex;
   gap: 20px;
@@ -462,7 +461,6 @@ tr:hover {
   margin-bottom: 15px;
 }
 
-/* --- Modal Styles --- */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -524,7 +522,6 @@ tr:hover {
   justify-content: flex-end;
   margin-top: 20px;
 }
-/* End Modal Styles */
 
 @media (max-width: 1200px) {
   .dashboard-grid {
@@ -570,7 +567,7 @@ tr:hover {
     padding: 10px 10px;
     border-left: none;
     border-bottom: 3px solid transparent;
-    flex-direction: column; /* Stack icon and text on mobile */
+    flex-direction: column;
     font-size: 0.8rem;
     gap: 5px;
   }
@@ -596,7 +593,7 @@ tr:hover {
   }
 
   .user-info {
-    display: none; /* Hide on mobile */
+    display: none;
   }
 
   h2 {
@@ -628,7 +625,7 @@ tr:hover {
 }
 
 .residents-directory {
-  padding: 0;
+  padding: 25px 30px;
 }
 
 .directory-header {
@@ -1100,13 +1097,11 @@ table td:nth-child(6) {
   }
 }
 
-/* --- New Styles for Deaths and Documents pages --- */
-
 .directory-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 0 20px 0; /* Adjusted for page-content padding */
+  padding: 0 0 20px 0;
   border-bottom: 2px solid var(--border-color);
   margin-bottom: 30px;
 }
@@ -1141,10 +1136,9 @@ table td:nth-child(6) {
 }
 
 .data-table-card table {
-  min-width: 800px; /* Ensure table is wide enough for tablet view */
+  min-width: 800px;
 }
 
-/* Specific styles for PWD/SC conditional fields */
 .form-grid > #pwdIdField,
 .form-grid > #seniorCitizenIdFields {
   grid-column: 1 / -1;
@@ -1152,7 +1146,6 @@ table td:nth-child(6) {
   flex-direction: column;
 }
 
-/* Tablet Optimization for the new pages (768px - 1024px) */
 @media (min-width: 768px) and (max-width: 1024px) {
   .sidebar {
     width: 200px;
@@ -1168,7 +1161,6 @@ table td:nth-child(6) {
   }
 }
 
-/* Mobile/Smaller Tablet Optimization (max-width: 767px) */
 @media (max-width: 767px) {
   .dashboard-grid {
     grid-template-columns: 1fr;
@@ -1184,19 +1176,16 @@ table td:nth-child(6) {
   .directory-header .btn {
     width: 100%;
   }
-  /* Table will rely on overflow-x: auto, but make sure cells are readable */
+
   .data-table-card table {
     min-width: 600px;
   }
 
   .form-grid > #seniorCitizenIdFields {
-    grid-template-columns: 1fr; /* Stack the two ID inputs */
+    grid-template-columns: 1fr;
   }
 }
 
-/* === Residents Directory Expandable Table Styles === */
-
-/* Filter Dropdowns Grid */
 .filter-dropdowns {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1204,7 +1193,6 @@ table td:nth-child(6) {
   margin-bottom: 20px;
 }
 
-/* Data Table Responsiveness */
 .data-table-card {
   overflow-x: auto;
 }
@@ -1223,7 +1211,6 @@ table td:nth-child(6) {
   white-space: nowrap;
 }
 
-/* Column Width Specifications */
 .data-table-card th:nth-child(1),
 .data-table-card td:nth-child(1) {
   min-width: 200px;
@@ -1266,7 +1253,6 @@ table td:nth-child(6) {
   min-width: 150px;
 }
 
-/* Table Header Styling */
 .data-table-card th {
   background: #f8f9fa;
   font-weight: 600;
@@ -1278,7 +1264,6 @@ table td:nth-child(6) {
   border-bottom: 1px solid #dee2e6;
 }
 
-/* Expandable Row Styles */
 .expandable-row {
   cursor: pointer;
   transition: background-color 0.2s;
@@ -1308,7 +1293,6 @@ table td:nth-child(6) {
   transform: rotate(90deg);
 }
 
-/* Details Row */
 .details-row {
   display: none;
   background-color: #f9f9f9;
@@ -1327,7 +1311,6 @@ table td:nth-child(6) {
   background: white;
 }
 
-/* Tab Navigation */
 .tab-navigation {
   display: flex;
   background: #f8f9fa;
@@ -1358,7 +1341,6 @@ table td:nth-child(6) {
   border-bottom-color: #1565c0;
 }
 
-/* Tab Content */
 .tab-content {
   display: none;
   padding: 30px;
@@ -1380,7 +1362,6 @@ table td:nth-child(6) {
   }
 }
 
-/* Info Grid and Cards */
 .info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -1403,7 +1384,6 @@ table td:nth-child(6) {
   letter-spacing: 0.5px;
 }
 
-/* Detail Items */
 .detail-item {
   display: flex;
   justify-content: space-between;
@@ -1432,7 +1412,6 @@ table td:nth-child(6) {
   font-weight: 500;
 }
 
-/* Badge Styles */
 .badge {
   display: inline-block;
   padding: 5px 12px;
@@ -1458,12 +1437,10 @@ table td:nth-child(6) {
   color: #1565c0;
 }
 
-/* Button Spacing in Expandable Rows */
 .expandable-row td button {
   margin: 0 4px;
 }
 
-/* Status Summary Bar */
 .status-summary {
   display: flex;
   gap: 15px;
