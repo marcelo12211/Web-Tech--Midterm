@@ -46,19 +46,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body class="auth-page">
   <main class="auth-card">
     <div class="brand">
-      <img src="assets/logo.png" alt="Logo" class="logo">
       <h1>Create Account</h1>
     </div>
 
     <form method="POST" class="form-grid">
       <label>Full name
-        <input type="text" name="name" required placeholder="Jane Doe">
+        <input type="text" name="name">
       </label>
-      <label>Email
-        <input type="email" name="email" required placeholder="you@gmail.com">
+      <label>ID
+        <input type="email" name="email">
       </label>
       <label>Password
-        <input type="password" name="password" required placeholder="Choose a password">
+        <input type="password" name="password">
       </label>
 
       <button type="submit" class="btn primary">Register</button>
