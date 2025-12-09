@@ -1,7 +1,6 @@
 <?php
-include 'db_connect.php'; 
+include __DIR__ . '/db_connect.php'; 
 
-// 1. Get the Resident ID from the URL
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     header('Location: residents.php');
     exit();
@@ -9,14 +8,31 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 
 $residentId = $conn->real_escape_string($_GET['id']);
 
-// 2. Fetch the resident's data from both tables
 $sql = "
     SELECT 
-        T1.*, 
-        T2.IS_DISABLED, T2.IS_REGISTERED_SENIOR, T2.RESIDENT_TYPE, T2.PUROK
-    FROM residents T1
-    LEFT JOIN demographics T2 ON T1.ID = T2.MEMBER_ID
-    WHERE T1.ID = '$residentId'
+        person_id,
+        household_id,
+        first_name,
+        middle_name,
+        surname,
+        suffix,
+        sex,
+        birthdate,
+        civil_status,
+        nationality,
+        religion,
+        purok,
+        address,
+        education_level,
+        occupation,
+        is_senior,
+        is_disabled,
+        health_insurance,
+        vaccination,
+        is_pregnant,
+        children_count
+    FROM residents
+    WHERE person_id = '$residentId'
 ";
 
 $result = $conn->query($sql);
@@ -28,17 +44,11 @@ if ($result->num_rows === 0) {
 
 $residentData = $result->fetch_assoc();
 
-/**
- * Helper function to check for selected option, safely handles NULL values.
- */
 function isSelected($currentValue, $targetValue) {
     $safeCurrentValue = $currentValue ?? '';
     return ($safeCurrentValue == $targetValue) ? 'selected' : '';
 }
 
-/**
- * Helper function to safely output HTML data, treating NULL as an empty string.
- */
 function safeHtml($value) {
     return htmlspecialchars($value ?? '');
 }
@@ -49,10 +59,9 @@ function safeHtml($value) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Edit Resident: <?php echo $residentId; ?></title>
+    <title>Edit Resident: <?php echo safeHtml($residentData['first_name'] . ' ' . $residentData['surname']); ?></title>
     <link rel="stylesheet" href="css/style.css" />
     <style>
-        /* Styles added for form layout */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -66,9 +75,17 @@ function safeHtml($value) {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
+            margin-top: 30px;
         }
         .form-card {
             padding: 30px;
+        }
+        .section-title {
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
         }
     </style>
 </head>
@@ -99,90 +116,173 @@ function safeHtml($value) {
 
         <main class="page-content">
             <div class="card form-card">
-                <h2>Edit Resident Information (ID: <?php echo $residentId; ?>)</h2>
-                <p>Update the identification and demographic details below.</p>
+                <h2>Edit Resident Information</h2>
+                <p>ID: <?php echo safeHtml($residentData['person_id']); ?> - <?php echo safeHtml($residentData['first_name'] . ' ' . $residentData['surname']); ?></p>
                 <hr>
                 
                 <form action="update_resident.php" method="POST">
-                    <input type="hidden" name="resident_id" value="<?php echo $residentId; ?>">
+                    <input type="hidden" name="person_id" value="<?php echo safeHtml($residentData['person_id']); ?>">
 
-                    <h3>Personal Identification</h3>
+                    <h3 class="section-title">Personal Information</h3>
                     <div class="form-grid">
                         <div class="input-group">
-                            <label for="respondent_name">Respondent Name</label>
-                            <input type="text" id="respondent_name" name="RESPONDENT_NAME" 
-                                   value="<?php echo safeHtml($residentData['RESPONDENT_NAME']); ?>" required>
+                            <label for="first_name">First Name *</label>
+                            <input type="text" id="first_name" name="first_name" 
+                                   value="<?php echo safeHtml($residentData['first_name']); ?>" required>
                         </div>
                         
                         <div class="input-group">
-                            <label for="gender">Gender</label>
-                            <select id="gender" name="GENDER" required>
-                                <option value="">Select Gender</option>
-                                <option value="Male" <?php echo isSelected($residentData['GENDER'], 'Male'); ?>>Male</option>
-                                <option value="Female" <?php echo isSelected($residentData['GENDER'], 'Female'); ?>>Female</option>
+                            <label for="middle_name">Middle Name</label>
+                            <input type="text" id="middle_name" name="middle_name" 
+                                   value="<?php echo safeHtml($residentData['middle_name']); ?>">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="surname">Surname *</label>
+                            <input type="text" id="surname" name="surname" 
+                                   value="<?php echo safeHtml($residentData['surname']); ?>" required>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="suffix">Suffix</label>
+                            <input type="text" id="suffix" name="suffix" 
+                                   value="<?php echo safeHtml($residentData['suffix']); ?>" 
+                                   placeholder="Jr., Sr., III, etc.">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="sex">Sex *</label>
+                            <select id="sex" name="sex" required>
+                                <option value="">Select Sex</option>
+                                <option value="M" <?php echo isSelected($residentData['sex'], 'M'); ?>>Male</option>
+                                <option value="F" <?php echo isSelected($residentData['sex'], 'F'); ?>>Female</option>
                             </select>
                         </div>
                         
                         <div class="input-group">
-                            <label for="address">Address</label>
-                            <input type="text" id="address" name="ADDRESS" 
-                                   value="<?php echo safeHtml($residentData['ADDRESS']); ?>" required>
+                            <label for="birthdate">Birthdate *</label>
+                            <input type="date" id="birthdate" name="birthdate" 
+                                   value="<?php echo safeHtml($residentData['birthdate']); ?>" required>
                         </div>
                         
                         <div class="input-group">
-                            <label for="province">Province</label>
-                            <input type="text" id="province" name="PROVINCE" 
-                                   value="<?php echo safeHtml($residentData['PROVINCE']); ?>" required>
+                            <label for="civil_status">Civil Status *</label>
+                            <select id="civil_status" name="civil_status" required>
+                                <option value="">Select Civil Status</option>
+                                <option value="Single" <?php echo isSelected($residentData['civil_status'], 'Single'); ?>>Single</option>
+                                <option value="Married" <?php echo isSelected($residentData['civil_status'], 'Married'); ?>>Married</option>
+                                <option value="Widowed" <?php echo isSelected($residentData['civil_status'], 'Widowed'); ?>>Widowed</option>
+                                <option value="Separated" <?php echo isSelected($residentData['civil_status'], 'Separated'); ?>>Separated</option>
+                                <option value="Divorced" <?php echo isSelected($residentData['civil_status'], 'Divorced'); ?>>Divorced</option>
+                            </select>
                         </div>
                         
                         <div class="input-group">
-                            <label for="municipality">Municipality</label>
-                            <input type="text" id="municipality" name="MUNICIPALITY" 
-                                   value="<?php echo safeHtml($residentData['MUNICIPALITY']); ?>" required>
+                            <label for="nationality">Nationality</label>
+                            <input type="text" id="nationality" name="nationality" 
+                                   value="<?php echo safeHtml($residentData['nationality']); ?>">
                         </div>
                         
                         <div class="input-group">
-                            <label for="barangay">Barangay</label>
-                            <input type="text" id="barangay" name="BARANGAY" 
-                                   value="<?php echo safeHtml($residentData['BARANGAY']); ?>" required>
+                            <label for="religion">Religion</label>
+                            <input type="text" id="religion" name="religion" 
+                                   value="<?php echo safeHtml($residentData['religion']); ?>">
                         </div>
                         
+                        <div class="input-group">
+                            <label for="children_count">Number of Children</label>
+                            <input type="number" id="children_count" name="children_count" 
+                                   value="<?php echo safeHtml($residentData['children_count']); ?>" min="0">
+                        </div>
                     </div>
 
-                    <h3>Demographics & Status</h3>
+                    <h3 class="section-title">Address & Location</h3>
                     <div class="form-grid">
                         <div class="input-group">
-                            <label for="purok">Purok</label>
-                            <select id="purok" name="PUROK">
+                            <label for="household_id">Household ID</label>
+                            <input type="text" id="household_id" name="household_id" 
+                                   value="<?php echo safeHtml($residentData['household_id']); ?>">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="purok">Purok *</label>
+                            <select id="purok" name="purok" required>
                                 <option value="">Select Purok</option>
-                                <?php for ($i = 1; $i <= 5; $i++): ?>
-                                    <option value="<?php echo $i; ?>" <?php echo isSelected($residentData['PUROK'], $i); ?>>Purok <?php echo $i; ?></option>
+                                <?php for ($i = 0; $i <= 5; $i++): ?>
+                                    <option value="<?php echo $i; ?>" <?php echo isSelected($residentData['purok'], $i); ?>>
+                                        <?php echo $i == 0 ? 'None' : "Purok $i"; ?>
+                                    </option>
                                 <?php endfor; ?>
                             </select>
                         </div>
                         
+                        <div class="input-group form-group-full">
+                            <label for="address">Address *</label>
+                            <input type="text" id="address" name="address" 
+                                   value="<?php echo safeHtml($residentData['address']); ?>" required>
+                        </div>
+                    </div>
+
+                    <h3 class="section-title">Education & Employment</h3>
+                    <div class="form-grid">
                         <div class="input-group">
-                            <label for="resident_type">Resident Type (e.g., Solo Parent)</label>
-                            <select id="resident_type" name="RESIDENT_TYPE" required>
-                                <option value="Regular" <?php echo isSelected($residentData['RESIDENT_TYPE'], 'Regular'); ?>>Regular</option>
-                                <option value="Solo Parent" <?php echo isSelected($residentData['RESIDENT_TYPE'], 'Solo Parent'); ?>>Solo Parent</option>
+                            <label for="education_level">Education Level</label>
+                            <select id="education_level" name="education_level">
+                                <option value="">Select Education Level</option>
+                                <option value="Elementary" <?php echo isSelected($residentData['education_level'], 'Elementary'); ?>>Elementary</option>
+                                <option value="High School" <?php echo isSelected($residentData['education_level'], 'High School'); ?>>High School</option>
+                                <option value="College" <?php echo isSelected($residentData['education_level'], 'College'); ?>>College</option>
+                                <option value="Vocational" <?php echo isSelected($residentData['education_level'], 'Vocational'); ?>>Vocational</option>
+                                <option value="Graduate" <?php echo isSelected($residentData['education_level'], 'Graduate'); ?>>Graduate</option>
                             </select>
                         </div>
                         
                         <div class="input-group">
-                            <label for="senior_status">Registered Senior Citizen?</label>
-                            <select id="senior_status" name="IS_REGISTERED_SENIOR">
-                                <option value="0" <?php echo isSelected($residentData['IS_REGISTERED_SENIOR'], '0'); ?>>No</option>
-                                <option value="1" <?php echo isSelected($residentData['IS_REGISTERED_SENIOR'], '1'); ?>>Yes</option>
+                            <label for="occupation">Occupation</label>
+                            <input type="text" id="occupation" name="occupation" 
+                                   value="<?php echo safeHtml($residentData['occupation']); ?>">
+                        </div>
+                    </div>
+
+                    <h3 class="section-title">Health & Status</h3>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="is_senior">Senior Citizen?</label>
+                            <select id="is_senior" name="is_senior">
+                                <option value="0" <?php echo isSelected($residentData['is_senior'], '0'); ?>>No</option>
+                                <option value="1" <?php echo isSelected($residentData['is_senior'], '1'); ?>>Yes</option>
                             </select>
                         </div>
                         
                         <div class="input-group">
-                            <label for="disabled_status">Person With Disability (PWD)?</label>
-                            <select id="disabled_status" name="IS_DISABLED">
-                                <option value="0" <?php echo isSelected($residentData['IS_DISABLED'], '0'); ?>>No</option>
-                                <option value="1" <?php echo isSelected($residentData['IS_DISABLED'], '1'); ?>>Yes</option>
+                            <label for="is_disabled">Person With Disability (PWD)?</label>
+                            <select id="is_disabled" name="is_disabled">
+                                <option value="0" <?php echo isSelected($residentData['is_disabled'], '0'); ?>>No</option>
+                                <option value="1" <?php echo isSelected($residentData['is_disabled'], '1'); ?>>Yes</option>
                             </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="is_pregnant">Pregnant?</label>
+                            <select id="is_pregnant" name="is_pregnant">
+                                <option value="0" <?php echo isSelected($residentData['is_pregnant'], '0'); ?>>No</option>
+                                <option value="1" <?php echo isSelected($residentData['is_pregnant'], '1'); ?>>Yes</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="vaccination">Vaccinated?</label>
+                            <select id="vaccination" name="vaccination">
+                                <option value="0" <?php echo isSelected($residentData['vaccination'], '0'); ?>>No</option>
+                                <option value="1" <?php echo isSelected($residentData['vaccination'], '1'); ?>>Yes</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group form-group-full">
+                            <label for="health_insurance">Health Insurance</label>
+                            <input type="text" id="health_insurance" name="health_insurance" 
+                                   value="<?php echo safeHtml($residentData['health_insurance']); ?>" 
+                                   placeholder="e.g., PhilHealth, Private Insurance">
                         </div>
                     </div>
                     
