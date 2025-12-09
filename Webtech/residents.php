@@ -87,6 +87,7 @@ function formatDate($date) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Residents Directory</title>
     <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/residents-details.css" />
 </head>
 <body>
 <div class="app-container">
@@ -188,9 +189,8 @@ function formatDate($date) {
                         $rowId = "row-" . $counter;
                         $detailsId = "details-" . $counter;
 
-                        // Concatenate full name
                         $full_name = trim($row['first_name'] . ' ' . $row['middle_name'] . ' ' . $row['surname'] . ' ' . ($row['suffix'] ?? ''));
-
+                        
                         echo "<tr class='expandable-row' onclick='toggleDetails(\"$detailsId\", \"$rowId\")'>";
                         echo "<td><div class='name-cell'><span class='expand-icon' id='icon-$rowId'>▶</span><span>" . htmlspecialchars($full_name ?: 'N/A') . "</span></div></td>";
                         echo "<td>" . htmlspecialchars($row['sex'] ?? 'N/A') . "</td>";
@@ -204,34 +204,32 @@ function formatDate($date) {
                                 <button class='btn small-btn delete-btn' onclick='event.stopPropagation(); deleteResident(\"{$residentId}\")'>Delete</button>
                               </td>";
                         echo "</tr>";
-
-                        // Details row (you can also use $full_name here)
+                        
                         echo "<tr class='details-row' id='$detailsId'>";
                         echo "<td colspan='8' class='details-cell'>";
                         echo "<div class='details-content'>";
-
+                        
                         $isSenior = $row['is_senior'] == 1;
                         $isPWD = $row['is_disabled'] == 1;
                         $isPregnant = $row['is_pregnant'] == 1;
                         $isVaccinated = $row['vaccination'] == 1;
-
+                        
                         echo "<div class='status-summary'>";
                         if ($isSenior) echo "<div class='status-item'><span class='status-icon'></span> Senior Citizen</div>";
                         if ($isPWD) echo "<div class='status-item'><span class='status-icon'></span> PWD</div>";
                         if ($isPregnant) echo "<div class='status-item'><span class='status-icon'></span> Pregnant</div>";
-                        if ($isVaccinated) echo "<div class='status-item'><span class='status-icon'></span> Vaccinated</div>";
-                        if (!$isSenior && !$isPWD && !$isPregnant && !$isVaccinated) {
+                        if (!$isSenior && !$isPWD && !$isPregnant) {
                             echo "<div class='status-item'><span class='status-icon'></span> No Special Status</div>";
                         }
                         echo "</div>";
-
+                        
                         echo "<div class='tab-navigation'>";
                         echo "<button class='tab-button active' onclick='switchTab(event, \"personal-$counter\")'>Personal Info</button>";
                         echo "<button class='tab-button' onclick='switchTab(event, \"health-$counter\")'>Health & Status</button>";
                         echo "<button class='tab-button' onclick='switchTab(event, \"education-$counter\")'>Education & Work</button>";
                         echo "<button class='tab-button' onclick='switchTab(event, \"family-$counter\")'>Family</button>";
                         echo "</div>";
-
+                        
                         echo "<div id='personal-$counter' class='tab-content active'>";
                         echo "<div class='info-grid'>";
                         echo "<div class='info-card'>";
@@ -239,7 +237,7 @@ function formatDate($date) {
                         echo "<div class='detail-item'><span class='detail-label'>Person ID:</span><span class='detail-value'>" . htmlspecialchars($row['ID']) . "</span></div>";
                         echo "<div class='detail-item'><span class='detail-label'>Household ID:</span><span class='detail-value'>" . htmlspecialchars($row['household_id'] ?? 'N/A') . "</span></div>";
                         echo "</div>";
-
+                        
                         echo "<div class='info-card'>";
                         echo "<h4>Personal Details</h4>";
                         echo "<div class='detail-item'><span class='detail-label'>Full Name:</span><span class='detail-value'>" . htmlspecialchars($full_name ?: 'N/A') . "</span></div>";
@@ -248,7 +246,7 @@ function formatDate($date) {
                         echo "<div class='detail-item'><span class='detail-label'>Age:</span><span class='detail-value'>" . calculateAge($row['birthdate']) . "</span></div>";
                         echo "<div class='detail-item'><span class='detail-label'>Civil Status:</span><span class='detail-value'>" . htmlspecialchars($row['civil_status'] ?? 'N/A') . "</span></div>";
                         echo "</div>";
-
+                        
                         echo "<div class='info-card'>";
                         echo "<h4>Location & Background</h4>";
                         echo "<div class='detail-item'><span class='detail-label'>Purok:</span><span class='detail-value'>" . htmlspecialchars($row['purok'] ?? 'N/A') . "</span></div>";
@@ -257,10 +255,56 @@ function formatDate($date) {
                         echo "<div class='detail-item'><span class='detail-label'>Religion:</span><span class='detail-value'>" . htmlspecialchars($row['religion'] ?? 'N/A') . "</span></div>";
                         echo "</div>";
                         echo "</div>";
-
-                        // Other tabs remain the same...
-                        echo "</div></td></tr>";
-
+                        echo "</div>";
+                        
+                        echo "<div id='health-$counter' class='tab-content'>";
+                        echo "<div class='info-grid'>";
+                        echo "<div class='info-card'>";
+                        echo "<h4>Health Status</h4>";
+                        echo "<div class='detail-item'><span class='detail-label'>Vaccination:</span><span class='detail-value'><span class='badge " . ($isVaccinated ? "badge-yes" : "badge-no") . "'>" . ($isVaccinated ? "Vaccinated" : "Not Vaccinated") . "</span></span></div>";
+                        
+                        $healthInsurance = !empty($row['health_insurance']) && $row['health_insurance'] != 'None' ? $row['health_insurance'] : 'None';
+                        echo "<div class='detail-item'><span class='detail-label'>Health Insurance:</span><span class='detail-value'>" . htmlspecialchars($healthInsurance) . "</span></div>";
+                        echo "</div>";
+                        
+                        echo "<div class='info-card'>";
+                        echo "<h4>Special Categories</h4>";
+                        echo "<div class='detail-item'><span class='detail-label'>Senior Citizen:</span><span class='detail-value'><span class='badge " . ($isSenior ? "badge-yes" : "badge-no") . "'>" . ($isSenior ? "Yes" : "No") . "</span></span></div>";
+                        echo "<div class='detail-item'><span class='detail-label'>PWD Status:</span><span class='detail-value'><span class='badge " . ($isPWD ? "badge-yes" : "badge-no") . "'>" . ($isPWD ? "Yes" : "No") . "</span></span></div>";
+                        echo "<div class='detail-item'><span class='detail-label'>Pregnant:</span><span class='detail-value'><span class='badge " . ($isPregnant ? "badge-yes" : "badge-no") . "'>" . ($isPregnant ? "Yes" : "No") . "</span></span></div>";
+                        echo "</div>";
+                        echo "</div>";
+                        echo "</div>";
+                        
+                        echo "<div id='education-$counter' class='tab-content'>";
+                        echo "<div class='info-grid'>";
+                        echo "<div class='info-card'>";
+                        echo "<h4>Education</h4>";
+                        echo "<div class='detail-item'><span class='detail-label'>Education Level:</span><span class='detail-value'>" . htmlspecialchars($row['education_level'] ?? 'N/A') . "</span></div>";
+                        echo "</div>";
+                        
+                        echo "<div class='info-card'>";
+                        echo "<h4>Employment</h4>";
+                        echo "<div class='detail-item'><span class='detail-label'>Occupation:</span><span class='detail-value'>" . htmlspecialchars($row['occupation'] ?? 'N/A') . "</span></div>";
+                        echo "</div>";
+                        echo "</div>";
+                        echo "</div>";
+                        
+                        echo "<div id='family-$counter' class='tab-content'>";
+                        echo "<div class='info-grid'>";
+                        echo "<div class='info-card'>";
+                        echo "<h4>Family Information</h4>";
+                        $childrenCount = isset($row['children_count']) ? $row['children_count'] : 0;
+                        echo "<div class='detail-item'><span class='detail-label'>Number of Children:</span><span class='detail-value'>" . htmlspecialchars($childrenCount) . "</span></div>";
+                        echo "<div class='detail-item'><span class='detail-label'>Civil Status:</span><span class='detail-value'>" . htmlspecialchars($row['civil_status'] ?? 'N/A') . "</span></div>";
+                        echo "</div>";
+                        echo "</div>";
+                        echo "</div>";
+                        
+                        echo "</div>"; 
+                        echo "</td>";
+                        echo "</tr>";
+                        
                         $counter++;
                     }
                 } else {
@@ -320,7 +364,6 @@ function deleteResident(id) {
 
 function setupLiveSearch() {
     const searchInput = document.getElementById("searchInput");
-
     searchInput.addEventListener("input", function() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(function() {
@@ -343,8 +386,8 @@ function setupFilterSubmit() {
 function setupLogout() {
     const logoutBtn = document.getElementById("logoutBtn");
     logoutBtn.addEventListener("click", () => {
-    localStorage.removeItem("rms_user");
-    window.location.href = "login.html";
+      localStorage.removeItem("rms_user");
+      window.location.href = "login.html";
     });
 }
 
@@ -352,7 +395,7 @@ function showUser() {
     const user = JSON.parse(localStorage.getItem("rms_user"));
     const userNameSpan = document.getElementById("userName");
     if (user && user.name) {
-    userNameSpan.textContent = `Welcome, ${user.name}`;
+      userNameSpan.textContent = `Welcome, ${user.name}`;
     } else {
       userNameSpan.textContent = `Welcome, Guest`;
     }
