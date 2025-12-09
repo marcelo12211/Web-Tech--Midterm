@@ -4,7 +4,6 @@ include __DIR__ . '/db_connect.php';
 
 $message = "";
 
-// LOGIN HANDLING
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
@@ -65,7 +64,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <input type="password" name="password" required placeholder="Your password">
       </label>
 
-      <!-- Hidden input for role -->
       <input type="hidden" name="role" id="roleInput" value="client">
 
       <div class="form-actions">
@@ -75,7 +73,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <a href="register.php" class="btn link">Create account</a>
       </div>
 
-      <!-- Role selector -->
       <div class="role-selector">
         <button type="button" class="role-btn active" id="clientBtn">Client</button>
         <button type="button" class="role-btn" id="adminBtn">Admin</button>

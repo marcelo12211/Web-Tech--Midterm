@@ -4,14 +4,12 @@ include __DIR__ . '/db_connect.php';
 
 $message = "";
 
-// Handle registration
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fullname = mysqli_real_escape_string($conn, $_POST['name']);
     $email = $_POST['email']; 
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $role = "client"; // default role
+    $role = "client"; 
 
-    // Check if email already exists
     $check = mysqli_prepare($conn, "SELECT id FROM users WHERE email = ?");
     mysqli_stmt_bind_param($check, "s", $email);
     mysqli_stmt_execute($check);

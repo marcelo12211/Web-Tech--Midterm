@@ -1,5 +1,4 @@
 <?php
-// Database connection 
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -9,7 +8,6 @@ mysqli_set_charset($conn, 'utf8mb4');
 
 if (!$conn) die("Connection failed: " . mysqli_connect_error());
 
-// Sanitize
 function clean($value) {
     return htmlspecialchars(trim($value));
 }
@@ -27,7 +25,6 @@ $household_members = clean($_POST['householdMembers']);
 
 $respondent_name = trim("$first $middle $last $suffix");
 
-// VALIDATION
 $errors = [];
 
 if ($first === "") $errors[] = "First name is required.";
@@ -48,7 +45,6 @@ if (count($errors) > 0) {
     exit;
 }
 
-// INSERT
 $sql = "INSERT INTO identification 
         (PROVINCE, MUNICIPALITY, BARANGAY, ADDRESS, RESPONDENT_NAME, HOUSEHOLD_HEAD, HOUSEHOLD_MEMBERS)
         VALUES (?,?,?,?,?,?,?)";

@@ -152,16 +152,6 @@ function formatDate($date) {
                             <?php endfor; ?>
                         </select>
                     </div>
-                    <div class="input-group">
-                        <label for="period-filter">Period of Residence</label>
-                        <select id="period-filter" name="period" disabled>
-                            <option value="">-- Select Period of Residence --</option>
-                            <option value="0-1">1-12 Months</option>
-                            <option value="1-5">1-5 Years</option>
-                            <option value="5-10">5-10 Years</option>
-                            <option value="10+">10+ Years</option>
-                        </select>
-                    </div>
                 </div>
             </form>
           </div>

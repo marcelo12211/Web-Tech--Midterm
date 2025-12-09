@@ -1,14 +1,12 @@
 <?php
 session_start();
 
-// LOGOUT
 if (isset($_POST['logout'])) {
     session_destroy();
     header("Location: login.php");
     exit;
 }
 
-// Check login
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
@@ -200,7 +198,6 @@ const cities = {
   "Davao del Sur":["Davao City","Digos"]
 };
 
-// Dropdown setup
 function setupDropdown(inputId, listId, data){
   const input = document.getElementById(inputId);
   const list = document.getElementById(listId);
@@ -236,7 +233,6 @@ document.getElementById("newProvince").addEventListener("change", ()=>{
   setupDropdown("newCity","cityList", cities[selected] || []);
 });
 
-// Page navigation
 const page1 = document.getElementById("page1");
 const page2 = document.getElementById("page2");
 const page3 = document.getElementById("page3");

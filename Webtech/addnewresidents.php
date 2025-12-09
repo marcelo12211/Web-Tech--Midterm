@@ -11,7 +11,6 @@ if ($residentId) {
     $resData = $conn->query("SELECT * FROM residents WHERE resident_id=$residentId")->fetch_assoc();
 }
 
-// Fetch existing households for dropdown
 $householdsResult = $conn->query("SELECT household_id, household_head FROM household ORDER BY household_id ASC");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -29,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $householdId = intval($_POST['existingHousehold']);
     } else {
         $newHouseholdHead = $fullName;
-        // Insert new household
         $conn->query("INSERT INTO household (household_head) VALUES ('$newHouseholdHead')");
         $householdId = $conn->insert_id;
     }
@@ -50,7 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $pwdFilePath = $resData['pwd_image'] ?? null;
 
-    // Handle PWD image upload
     if ($isPWD && isset($_FILES['pwdImage']) && $_FILES['pwdImage']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = "uploads/pwd_ids/";
         if (!file_exists($uploadDir)) mkdir($uploadDir, 0777, true);

@@ -1,28 +1,20 @@
 <?php
 include 'db_connect.php'; 
 
-// Function to generate next document number
 function getNextDocNumber($conn) {
-    // Check if the connection is valid
     if (!$conn) {
         return 'IMG-ERR';
     }
     
-    // FIX: Changed 'id' to 'person_id' in the SELECT statement
     $result = $conn->query("SELECT person_id FROM documents ORDER BY person_id DESC LIMIT 1");
     
-    // Check if the query succeeded and returned a result
     if ($result && $row = $result->fetch_assoc()) {
-        // FIX: The auto-incrementing column is now 'person_id'
-        // Increment the last ID found and format it
         return 'IMG-' . str_pad($row['person_id'] + 1, 3, '0', STR_PAD_LEFT);
     } else {
-        // If no records are found (first document), start at 001
         return 'IMG-001';
     }
 }
 
-// Handle success message after upload
 $success = isset($_GET['success']) ? true : false;
 ?>
 <!DOCTYPE html>
@@ -138,13 +130,10 @@ $success = isset($_GET['success']) ? true : false;
                   </thead>
                   <tbody id="documentStorageTable">
                   <?php
-                  // Retrieve documents for the table display
                   $result = $conn->query("SELECT * FROM documents ORDER BY created_at DESC");
                   
-                  // Check if the query was successful before fetching results
                   if ($result) {
                     while ($row = $result->fetch_assoc()) {
-                        // Display the row data
                         echo "<tr>
                             <td>{$row['doc_number']}</td>
                             <td>{$row['resident_name']}</td>
@@ -156,7 +145,6 @@ $success = isset($_GET['success']) ? true : false;
                         </tr>";
                     }
                   } else {
-                      // Optional: Display an error if the query fails 
                       echo "<tr><td colspan='5'>Error loading documents.</td></tr>";
                   }
                   ?>
