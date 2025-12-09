@@ -50,19 +50,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body class="auth-page">
   <main class="auth-card">
     <div class="brand">
-      <img src="assets/logo.png" alt="Logo" class="logo" style="width:50px;height:50px;border-radius:8px;">
       <h1>Record Management System</h1>
     </div>
 
-    <p>Welcome back! Please login to continue.</p>
+    <p>Welcome! Please login to continue.</p>
 
     <form method="POST" class="form-grid">
-      <label>Email
-        <input type="email" name="email" required placeholder="you@gmail.com">
-      </label>
-      <label>Password
-        <input type="password" name="password" required placeholder="Your password">
-      </label>
+
+  <div class="form-group">
+    <label>ID</label>
+    <input type="email" name="email" required placeholder="you@gmail.com">
+  </div>
+
+  <div class="form-group">
+    <label>Password</label>
+    <input type="password" name="password" required placeholder="Your password">
+  </div>
+
 
       <input type="hidden" name="role" id="roleInput" value="client">
 
@@ -72,12 +76,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <div class="form-actions">
         <a href="register.php" class="btn link">Create account</a>
       </div>
-
-      <div class="role-selector">
-        <button type="button" class="role-btn active" id="clientBtn">Client</button>
-        <button type="button" class="role-btn" id="adminBtn">Admin</button>
-      </div>
-
       <?php if (!empty($message)): ?>
         <p class="form-message"><?php echo $message; ?></p>
       <?php endif; ?>
