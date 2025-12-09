@@ -18,11 +18,11 @@ include 'db_connect.php';
             <ul>
         
                 <li><a href="index.php">Dashboard</a></li>
+                <li><a href="household.php">Households</a></li>
                 <li><a href="residents.php">Residents</a></li>
                 <li><a href="addnewresidents.php">Add Resident</a></li>
-                    <li><a href="deaths.php" class="active" >Deaths</a></li>
-            <li><a href="documents.php">Documents</a></li>
-                <li class="nav-divider"></li>
+                <li><a href="deaths.php" class="active" >Deaths</a></li>
+                <li><a href="documents.php">Documents</a></li>
             </ul>
         </nav>
     </aside>

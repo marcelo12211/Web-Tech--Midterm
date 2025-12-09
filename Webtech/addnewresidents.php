@@ -115,6 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <nav class="main-nav">
         <ul>
             <li><a href="index.php">Dashboard</a></li>
+            <li><a href="household.php">Households</a></li>
             <li><a href="residents.php">Residents</a></li>
             <li><a href="addnewresidents.php" class="active"><?php echo $editMode ? "Edit" : "Add"; ?> Resident</a></li>
             <li><a href="deaths.php">Deaths</a></li>

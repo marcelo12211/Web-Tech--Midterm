@@ -87,7 +87,6 @@ function formatDate($date) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Residents Directory</title>
     <link rel="stylesheet" href="css/style.css" />
-    <link rel="stylesheet" href="css/residents-details.css" />
 </head>
 <body>
 <div class="app-container">
@@ -96,11 +95,11 @@ function formatDate($date) {
         <nav class="main-nav">
           <ul>
             <li><a href="index.php">Dashboard</a></li>
+            <li><a href="household.php">Households</a></li>
             <li><a href="residents.php" class="active">Residents</a></li>
             <li><a href="addnewresidents.php">Add Resident</a></li>
             <li><a href="deaths.php">Deaths</a></li>
             <li><a href="documents.php">Documents</a></li>
-            <li class="nav-divider"></li>
           </ul>
         </nav>
       </aside>

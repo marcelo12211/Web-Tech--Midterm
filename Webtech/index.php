@@ -41,11 +41,11 @@ $conn->close();
         <nav class="main-nav">
             <ul>
                 <li><a href="index.php" class="active">Dashboard</a></li>
+                <li><a href="household.php">Households</a></li>
                 <li><a href="residents.php">Residents</a></li>
                 <li><a href="addnewresidents.php">Add Resident</a></li>
                 <li><a href="deaths.php">Deaths</a></li>
                 <li><a href="documents.php">Documents</a></li>
-                <li class="nav-divider"></li>
             </ul>
         </nav>
     </aside>
