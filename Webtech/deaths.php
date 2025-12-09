@@ -69,13 +69,11 @@ include 'db_connect.php';
 
             <div class="filter-dropdowns">
               <div class="input-group">
-                <label for="filterCause">Cause of Death</label>
-                <select id="filterCause">
-                  <option value="">All Causes</option>
-                  <option value="kidney">Kidney Failure</option>
-                  <option value="oldage">Old Age (Natural)</option>
-                  <option value="accident">Accident</option>
-                </select>
+                <label for="filterCause">Name</label>
+                <input
+                  type="name"
+                  placeholder="Search by Name"
+                />
               </div>
               <div class="input-group">
                 <label for="filterYear">Year of Death</label>
