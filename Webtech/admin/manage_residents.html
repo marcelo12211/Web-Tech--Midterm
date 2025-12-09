@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resident Directory</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="logo">Happy Hallow<br />Barangay System</div>
+        <nav class="main-nav">
+          <ul>
+            <li>
+              <a href="admin_menu.html"> Dashboard</a>
+            </li>
+            <li>
+              <a href="manage_residents.html" class="active">
+                Manage Residents</a
+              >
+            </li>
+            <li>
+              <a href="manage_users.html"> Manage Users</a>
+            </li>
+            <li class="nav-divider"></li>
+            <li>
+              <a href="documents.html"> Documents</a>
+            </li>
+            <li>
+              <a href="#"> Logout</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="main-content">
+        <div class="topbar">
+          <div class="topbar-right">
+            <span class="user-info">Welcome, Admin</span>
+          </div>
+        </div>
+
+        <div class="page-content">
+          <h2>Resident Directory</h2>
+
+          <div class="card data-control-panel">
+            <div class="search-and-filter-wrapper">
+              <input
+                type="text"
+                placeholder="Search by name or ID..."
+                class="search-input"
+              />
+              <div class="filter-group">
+                <select class="filter-select category-filter">
+                  <option value="">-- Select Category --</option>
+                  <option value="senior">Senior Citizen</option>
+                  <option value="pwd">PWD</option>
+                  <option value="pregnant">Pregnant</option>
+                </select>
+                <select class="filter-select purok-filter">
+                  <option value="">-- Select Purok --</option>
+                  <option value="purok1">Purok 1</option>
+                  <option value="purok2">Purok 2</option>
+                  <option value="purok3">Purok 3</option>
+                </select>
+              </div>
+            </div>
+            <a href="#" class="btn primary-btn add-btn">
+              <i class="fas fa-plus"></i> Add New
+            </a>
+          </div>
+
+          <div class="data-table-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Full Name</th>
+                  <th>Sex</th>
+                  <th>Birthdate</th>
+                  <th>Civil Status</th>
+                  <th>Nationality</th>
+                  <th>Purok</th>
+                  <th>Address</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="resident-row" data-resident-id="1">
+                  <td>Juan Carlos Dela Cruz</td>
+                  <td>M</td>
+                  <td>Mar 15, 1985</td>
+                  <td>Single</td>
+                  <td>Filipino</td>
+                  <td>Purok 01</td>
+                  <td>123 Main St.</td>
+                  <td>
+                    <a href="#" class="action-btn edit-btn" title="Edit Record"
+                      ><i class="fas fa-edit"></i
+                    ></a>
+                    <a
+                      href="#"
+                      class="action-btn delete-btn"
+                      title="Delete Record"
+                      ><i class="fas fa-trash"></i
+                    ></a>
+                  </td>
+                </tr>
+                <tr class="detail-row collapsed-details" data-detail-id="1">
+                  <td colspan="8">
+                    <div class="detail-container">
+                      <div class="special-status-bar">No Special Status</div>
+                      <div class="detail-tabs">
+                        <span class="detail-tab active" data-tab="personal"
+                          >Personal Info</span
+                        >
+                        <span class="detail-tab" data-tab="health"
+                          >Health & Status</span
+                        >
+                        <span class="detail-tab" data-tab="education"
+                          >Education & Work</span
+                        >
+                        <span class="detail-tab" data-tab="family">Family</span>
+                      </div>
+                      <div class="tab-content active" id="personal">
+                        <div class="detail-grid">
+                          <div class="detail-box">
+                            <h4>IDENTIFICATION</h4>
+                            <p><strong>Person ID:</strong> RH-2023-0001</p>
+                            <p><strong>Status:</strong> Active</p>
+                          </div>
+                          <div class="detail-box">
+                            <h4>PERSONAL DETAILS</h4>
+                            <p>
+                              <strong>Full Name:</strong> Juan Carlos Dela Cruz
+                            </p>
+                            <p><strong>Contact:</strong> 0917-XXX-XXXX</p>
+                          </div>
+                          <div class="detail-box">
+                            <h4>LOCATION & BACKGROUND</h4>
+                            <p><strong>Purok:</strong> Purok 01</p>
+                            <p><strong>Voter:</strong> Yes</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="tab-content" id="health">
+                        <div class="detail-grid">
+                          <div class="detail-box">
+                            <h4>HEALTH STATUS</h4>
+                            <p><strong>Blood Type:</strong> O+</p>
+                            <p><strong>Disability:</strong> None</p>
+                          </div>
+                          <div class="detail-box">
+                            <h4>SPECIAL STATUS</h4>
+                            <p><strong>Senior Citizen:</strong> No</p>
+                            <p><strong>PWD Registered:</strong> No</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="tab-content" id="education">
+                        <div class="detail-box">
+                          <h4>EDUCATION & OCCUPATION</h4>
+                          <p>
+                            <strong>Highest Attainment:</strong> College
+                            Graduate
+                          </p>
+                          <p><strong>Occupation:</strong> Software Engineer</p>
+                        </div>
+                      </div>
+                      <div class="tab-content" id="family">
+                        <div class="detail-box">
+                          <h4>FAMILY MEMBERS</h4>
+                          <p><strong>Head of Family:</strong> Yes</p>
+                          <p><strong>Spouse:</strong> Maria Dela Cruz</p>
+                          <p><strong>No. of Children:</strong> 2</p>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr class="resident-row" data-resident-id="2">
+                  <td>Santos, Maria F.</td>
+                  <td>F</td>
+                  <td>Sept 1, 1957</td>
+                  <td>Widowed</td>
+                  <td>Filipino</td>
+                  <td>Purok 03</td>
+                  <td>456 Back Alley</td>
+                  <td>
+                    <a href="#" class="action-btn edit-btn" title="Edit Record"
+                      ><i class="fas fa-edit"></i
+                    ></a>
+                    <a
+                      href="#"
+                      class="action-btn delete-btn"
+                      title="Delete Record"
+                      ><i class="fas fa-trash"></i
+                    ></a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".resident-row").forEach((row) => {
+          row.addEventListener("click", (e) => {
+            if (e.target.closest(".action-btn")) return;
+
+            const residentId = row.dataset.residentId;
+            const detailRow = document.querySelector(
+              `.detail-row[data-detail-id="${residentId}"]`
+            );
+            if (detailRow) {
+              detailRow.classList.toggle("collapsed-details");
+              row.classList.toggle("expanded");
+              if (!detailRow.classList.contains("collapsed-details")) {
+                const firstTab = detailRow.querySelector(".detail-tab");
+                const allTabs = detailRow.querySelectorAll(".detail-tab");
+                const allContents = detailRow.querySelectorAll(".tab-content");
+
+                allTabs.forEach((tab) => tab.classList.remove("active"));
+                allContents.forEach((content) =>
+                  content.classList.remove("active")
+                );
+
+                if (firstTab) {
+                  firstTab.classList.add("active");
+                  const firstContentId = firstTab.dataset.tab;
+                  document
+                    .getElementById(firstContentId)
+                    .classList.add("active");
+                }
+              }
+            }
+          });
+        });
+        document.querySelectorAll(".detail-tab").forEach((tab) => {
+          tab.addEventListener("click", (e) => {
+            const parent = e.target.closest(".detail-row");
+            const tabName = e.target.dataset.tab;
+            parent
+              .querySelectorAll(".detail-tab")
+              .forEach((t) => t.classList.remove("active"));
+            parent
+              .querySelectorAll(".tab-content")
+              .forEach((c) => c.classList.remove("active"));
+            e.target.classList.add("active");
+            parent.querySelector(`#${tabName}`).classList.add("active");
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

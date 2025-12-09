@@ -1,344 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | Record Management System</title>
-   
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <style>
-        :root {
-            --bg: #f6f8fb;
-            --card: #ffffff;
-            --text-primary: #0f172a;
-            --text-muted: #6b7280;
-            --border-color: #e6e9ef;
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
-            --danger: #dc2626;
-            --spacing-sm: 8px;
-            --spacing-md: 12px;
-            --spacing-lg: 20px;
-            --header-height: 64px;
-            --radius: 8px;
-            --shadow: 0 4px 18px rgba(11, 15, 30, 0.08);
-            --transition-fast: 0.2s ease-out;
-            --sidebar-width: 240px; /* Slightly wider sidebar */
-            --card-icon-bg: #e0e7ff; /* Light background for card icons */
-        }
-        
-        * {
-            box-sizing: border-box;
-            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto,
-                "Helvetica Neue", Arial, sans-serif;
-        }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="logo">Happy Hallow<br />Barangay System</div>
+        <nav class="main-nav">
+          <ul>
+            <li>
+              <a href="admin_menu.html" class="active"> Dashboard</a>
+            </li>
+            <li>
+              <a href="manage_residents.html"> Manage Residents</a>
+            </li>
+            <li>
+              <a href="manage_users.html"> Manage Users</a>
+            </li>
+            <li class="nav-divider"></li>
+            <li>
+              <a href="documents.html"> Documents</a>
+            </li>
+            <li>
+              <a href="#"> Logout</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
 
-        body {
-            margin: 0;
-            background: var(--bg);
-            color: var(--text-primary);
-            line-height: 1.5;
-            display: flex;
-            min-height: 100vh;
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-            transition: color var(--transition-fast);
-        }
-
-        /* --- Global Header --- */
-        .header {
-            position: fixed;
-            top: 0;
-            right: 0;
-            padding: 0 var(--spacing-lg);
-            color: var(--text-muted);
-            font-size: 14px;
-            background: var(--card);
-            width: calc(100% - var(--sidebar-width));
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Lighter shadow */
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            height: var(--header-height);
-            z-index: 50;
-        }
-        .header a {
-            color: var(--accent);
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-radius: var(--radius);
-            font-weight: 500;
-        }
-        .header a:hover {
-            background: #f1f5f9; /* Subtle hover effect */
-        }
-        .header span {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        /* --- Sidebar Navigation --- */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: #1d1d1d; 
-            color: white;
-            height: 100vh;
-            padding: var(--spacing-lg) 0;
-            box-sizing: border-box;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 100;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-        }
-        .sidebar h2 {
-            font-size: 20px; /* Slightly larger title */
-            font-weight: 700;
-            line-height: 1.3;
-            margin: 0 var(--spacing-lg) 40px var(--spacing-lg);
-            padding-bottom: var(--spacing-md);
-            color: var(--card);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-        }
-        .sidebar a {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md); /* Space between icon and text */
-            color: #e0e0e0;
-            padding: var(--spacing-md) var(--spacing-lg);
-            border-left: 4px solid transparent;
-            transition: all var(--transition-fast);
-            font-size: 16px; /* Slightly larger font */
-            font-weight: 500;
-        }
-        .sidebar a:hover:not(.active) {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: var(--card);
-        }
-        .sidebar a.active {
-            background-color: var(--accent);
-            border-left-color: var(--accent);
-            color: var(--card);
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
-        }
-        .sidebar a svg {
-            width: 20px;
-            height: 20px;
-        }
-        
-        /* --- Main Content Area --- */
-        .main {
-            flex-grow: 1;
-            padding: var(--spacing-lg);
-            padding-top: calc(var(--header-height) + var(--spacing-lg));
-            margin-left: var(--sidebar-width);
-            width: calc(100% - var(--sidebar-width));
-            box-sizing: border-box;
-        }
-
-        /* --- Dashboard Title --- */
-        .dashboard-title {
-            font-size: 32px; /* Larger title */
-            font-weight: 800; /* Bolder title */
-            color: var(--text-primary);
-            margin-top: 0;
-            margin-bottom: var(--spacing-sm);
-        }
-        
-        /* Subtitle */
-        .dashboard-subtitle {
-            font-size: 16px;
-            color: var(--text-muted);
-            margin-bottom: var(--spacing-lg);
-            padding-bottom: var(--spacing-sm);
-        }
-
-
-        /* --- Card Container --- */
-        .card-container {
-            display: flex;
-            flex-wrap: wrap; /* Allows wrapping on smaller desktops/tablets */
-            gap: var(--spacing-lg);
-            margin-bottom: 30px;
-        }
-        .card {
-            background: var(--card);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: var(--spacing-lg);
-            text-align: left; /* Align text to left inside cards */
-            flex: 1;
-            min-width: 220px; /* Ensure cards don't get too small */
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            border: 1px solid var(--border-color);
-            transition: all var(--transition-fast);
-        }
-        .card:hover {
-            transform: translateY(-4px); /* More noticeable lift */
-            box-shadow: 0 8px 25px rgba(11, 15, 30, 0.15);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-icon {
-            background: var(--card-icon-bg);
-            padding: var(--spacing-sm);
-            border-radius: var(--radius);
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .card-icon svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .card h3 {
-            font-size: 42px; /* Large number */
-            margin: var(--spacing-sm) 0 var(--spacing-sm) 0;
-            color: var(--text-primary); 
-            font-weight: 800;
-            line-height: 1.2;
-        }
-        .card p {
-            margin: 0;
-            color: var(--text-muted);
-            font-size: 15px;
-            text-transform: capitalize;
-            font-weight: 600;
-        }
-
-    
-        #userCount, #recordCount, #staffCount, #logCount {
-            color: var(--accent); 
-        }
-
-        /* --- Responsiveness --- */
-        @media (max-width: 900px) {
-            .card-container {
-                gap: var(--spacing-md);
-            }
-            .card {
-                min-width: 45%; /* Two cards per row */
-            }
-        }
-
-        @media (max-width: 600px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-                padding: var(--spacing-md) 0;
-            }
-            .header {
-                display: none; 
-            }
-            .main {
-                margin-left: 0;
-                padding-top: var(--spacing-lg);
-                width: 100%;
-            }
-            .card-container {
-                flex-direction: column;
-            }
-        }
-    </style>
-</head>
-
-<body onload="lucide.createIcons()">
-    <!-- Top Right Header -->
-    <div class="header">
-        <span>Welcome, Admin</span>
-        <a href="../login.php" id="logoutBtn">Logout</a>
-    </div>
-
-    <!-- Sidebar Navigation -->
-    <div class="sidebar">
-        <h2>Admin Panel</h2>
-        <!-- Dashboard is the active link -->
-        <a href="index.php" class="active">
-            <i data-lucide="layout-dashboard"></i>
-            Dashboard
-        </a> 
-        <a href="users.php">
-            <i data-lucide="users"></i>
-            Manage Users
-        </a>
-        <a href="reports_admin.html">
-            <i data-lucide="bar-chart-2"></i>
-            Reports
-        </a>
-        <a href="../login.php" id="logoutBtn">
-            <i data-lucide="log-out"></i>
-            Logout
-        </a>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main">
-        <h1 class="dashboard-title">Welcome, Admin</h1>
-        <p class="dashboard-subtitle">Overview of the Record Management System</p>
-
-        <!-- Card Container to show counts -->
-        <div class="card-container">
-            <!-- Card 1: Registered Users -->
-            <div class="card">
-                <div class="card-header">
-                    <p>Registered Users</p>
-                    <div class="card-icon">
-                        <i data-lucide="user-plus"></i>
-                    </div>
-                </div>
-                <h3 id="userCount">34</h3> 
-            </div>
-            
-            <!-- Card 2: Total Records -->
-            <div class="card"> 
-                <div class="card-header">
-                    <p>Total Records</p>
-                    <div class="card-icon">
-                        <i data-lucide="database"></i>
-                    </div>
-                </div>
-                <h3 id="recordCount">210</h3>
-            </div>
-            
-            <!-- Card 3: Active Staff -->
-            <div class="card"> 
-                <div class="card-header">
-                    <p>Active Staff</p>
-                    <div class="card-icon">
-                        <i data-lucide="user-check"></i>
-                    </div>
-                </div>
-                <h3 id="staffCount">5</h3>
-            </div>
-            
-            <!-- Card 4: Activity Logs -->
-            <div class="card"> 
-                <div class="card-header">
-                    <p>Activity Logs</p>
-                    <div class="card-icon">
-                        <i data-lucide="list-checks"></i>
-                    </div>
-                </div>
-                <h3 id="logCount">142</h3>
-            </div>
+      <div class="main-content">
+        <div class="topbar">
+          <div class="topbar-right">
+            <span class="user-info">Welcome, Admin</span>
+          </div>
         </div>
-    </div>
 
-    <script src="js_admin/main.js"></script>
-</body>
+        <div class="page-content">
+          <h2>Dashboard Overview</h2>
+
+          <div class="dashboard-grid">
+            <div class="card stat-card" style="border-left-color: #007bff">
+              <div class="stat-label">Registered Residents</div>
+              <div class="stat-value">
+                <span>1,250</span>
+              </div>
+            </div>
+
+            <div class="card stat-card" style="border-left-color: #28a745">
+              <div class="stat-label">Total Records (Certificates/Etc)</div>
+              <div class="stat-value">
+                <span>480</span>
+              </div>
+            </div>
+
+            <div class="card stat-card" style="border-left-color: #ffc107">
+              <div class="stat-label">Active Barangay Staff</div>
+              <div class="stat-value">
+                <span>12</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card activity-log-card">
+            <h3>Activity Logs</h3>
+
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>2025-12-09 10:00 PM</td>
+                    <td>Admin</td>
+                    <td><span class="category-tag badge-info">Login</span></td>
+                    <td>Successful login to the system.</td>
+                  </tr>
+                  <tr>
+                    <td>2025-12-09 09:30 PM</td>
+                    <td>Staff User 1</td>
+                    <td><span class="category-tag badge-yes">Create</span></td>
+                    <td>Added new resident: **Dela Cruz, Juan** (Purok 1)</td>
+                  </tr>
+                  <tr>
+                    <td>2025-12-09 09:15 PM</td>
+                    <td>Admin</td>
+                    <td><span class="category-tag badge-no">Delete</span></td>
+                    <td>Removed temporary user account: **TempUser01**</td>
+                  </tr>
+                  <tr>
+                    <td>2025-12-09 08:00 PM</td>
+                    <td>Staff User 2</td>
+                    <td><span class="category-tag badge-info">Update</span></td>
+                    <td>Updated contact number for **Santos, Maria**.</td>
+                  </tr>
+                  <tr>
+                    <td>2025-12-09 07:45 PM</td>
+                    <td>Staff User 1</td>
+                    <td><span class="category-tag badge-yes">Create</span></td>
+                    <td>Issued Barangay Clearance to **Reyes, Jose**.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documents</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="sidebar">
+        <div class="logo">Happy Hallow<br />Barangay System</div>
+        <nav class="main-nav">
+          <ul>
+            <li><a href="admin_menu.html">Dashboard</a></li>
+            <li><a href="manage_residents.html">Manage Residents</a></li>
+            <li><a href="manage_users.html">Manage Users</a></li>
+            <li class="nav-divider"></li>
+            <li><a href="documents.html" class="active">Documents</a></li>
+            <li><a href="#">Logout</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="main-content">
+        <div class="topbar">
+          <div class="topbar-right">
+            <span class="user-info">Welcome, Admin</span>
+          </div>
+        </div>
+
+        <div class="page-content">
+          <div class="page-header-title">
+            <h2>Barangay Documents & Certificates</h2>
+            <a
+              href="#"
+              class="btn primary-btn add-new-floating-btn"
+              style="
+                background-color: var(--success-color);
+                border-color: #1e7e34;
+              "
+            >
+              Export Report
+            </a>
+          </div>
+
+          <div class="card data-table-card" style="margin-bottom: 30px">
+            <h3>Document Templates</h3>
+            <p style="margin-bottom: 20px; color: var(--secondary-color)">
+              Select a template below to generate a new document for a resident.
+            </p>
+
+            <div class="document-grid-container">
+              <div class="template-card">
+                <h4>Barangay Clearance</h4>
+                <p>Certificate for local residency and clearance purposes.</p>
+                <a href="#" class="btn primary-btn full-width-btn">Generate</a>
+              </div>
+
+              <div class="template-card">
+                <h4>Certificate of Residency</h4>
+                <p>Proof of residency within Barangay Happy Hallow.</p>
+                <a
+                  href="#"
+                  class="btn primary-btn full-width-btn"
+                  style="
+                    background-color: var(--info-color);
+                    border-color: #0d6efd;
+                  "
+                  >Generate</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <br />
+
+          <div class="card data-table-card">
+            <h3>Generated Document History</h3>
+
+            <div
+              class="data-control-panel-mini"
+              style="margin-bottom: 20px; padding: 0; box-shadow: none"
+            >
+              <div
+                class="filter-group-horizontal"
+                style="align-items: center; justify-content: space-between"
+              >
+                <input
+                  type="text"
+                  placeholder="Search by Requester or ID..."
+                  class="search-input-full"
+                  style="width: 300px"
+                />
+                <div class="filter-wrapper" style="flex-basis: 200px">
+                  <select class="filter-select">
+                    <option value="">-- Document Type --</option>
+                    <option value="clearance">Clearance</option>
+                    <option value="residency">Residency</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Doc ID</th>
+                  <th>Type</th>
+                  <th>Issued To</th>
+                  <th>Date Issued</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>BC-25-00123</td>
+                  <td>
+                    <span class="category-tag badge-info">Clearance</span>
+                  </td>
+                  <td>Dela Cruz, Juan C.</td>
+                  <td>2025-12-09</td>
+                  <td><span class="category-tag badge-yes">Released</span></td>
+                  <td>
+                    <a href="#" class="action-btn edit-btn" title="View PDF"
+                      >View</a
+                    >
+                    <a href="#" class="action-btn delete-btn" title="Archive"
+                      >Archive</a
+                    >
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>CR-25-00045</td>
+                  <td>
+                    <span
+                      class="category-tag badge-info"
+                      style="background-color: #cce5ff; color: #004085"
+                      >Residency</span
+                    >
+                  </td>
+                  <td>Santos, Maria F.</td>
+                  <td>2025-12-05</td>
+                  <td><span class="category-tag badge-yes">Released</span></td>
+                  <td>
+                    <a href="#" class="action-btn edit-btn" title="View PDF"
+                      >View</a
+                    >
+                    <a href="#" class="action-btn delete-btn" title="Archive"
+                      >Archive</a
+                    >
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>CR-25-00088</td>
+                  <td>
+                    <span
+                      class="category-tag badge-info"
+                      style="background-color: #cce5ff; color: #004085"
+                      >Residency</span
+                    >
+                  </td>
+                  <td>Ramos, Lita S.</td>
+                  <td>2025-11-20</td>
+                  <td>
+                    <span class="category-tag badge-no">Pending Pickup</span>
+                  </td>
+                  <td>
+                    <a href="#" class="action-btn edit-btn" title="View PDF"
+                      >View</a
+                    >
+                    <a
+                      href="#"
+                      class="action-btn primary-btn"
+                      style="
+                        background-color: var(--success-color);
+                        border-color: #1e7e34;
+                      "
+                      title="Mark as Released"
+                      >Release</a
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
