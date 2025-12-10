@@ -1,4 +1,13 @@
 <?php
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Pragma: no-cache');   
+header('Expires: 0');         
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
 include __DIR__ . '/db_connect.php';
 
 $sql = "SELECT
@@ -21,7 +30,6 @@ if ($result === false) {
 }
 
 $stats = $result->fetch_assoc();
-
 $stats['total_residents'] = $stats['primary_residents_count'] + $stats['total_children'];
 
 $conn->close();
@@ -31,7 +39,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard - Facilities Database</title>
+    <title>Dashboard - Happy Hallow Barangay System</title>
     <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -114,7 +122,7 @@ function setupLogout() {
     const logoutBtn = document.getElementById("logoutBtn");
     logoutBtn.addEventListener("click", () => {
         localStorage.removeItem("rms_user");
-        window.location.href = "login.html";
+        window.location.href = "logout.php"; 
     });
 }
 function showUser() {
