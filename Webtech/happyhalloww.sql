@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Dec 08, 2025 at 04:56 PM
+-- Generation Time: Dec 10, 2025 at 03:55 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -24,6 +24,31 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `deaths`
+--
+
+DROP TABLE IF EXISTS `deaths`;
+CREATE TABLE IF NOT EXISTS `deaths` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `record_number` varchar(10) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `age` int NOT NULL,
+  `date_of_death` date NOT NULL,
+  `cause_of_death` varchar(255) NOT NULL,
+  `is_pwd` enum('yes','no') DEFAULT 'no',
+  `is_senior` enum('yes','no') DEFAULT 'no',
+  `pwd_id` varchar(50) DEFAULT NULL,
+  `osca_id` varchar(50) DEFAULT NULL,
+  `ncsc_rrn` varchar(50) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `resident_id` int UNSIGNED DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `record_number` (`record_number`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `disabled_persons`
 --
 
@@ -38,6 +63,26 @@ CREATE TABLE IF NOT EXISTS `disabled_persons` (
   `date_registered` date DEFAULT (curdate()),
   PRIMARY KEY (`pwd_id`),
   KEY `fk_pwd_resident` (`resident_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `documents`
+--
+
+DROP TABLE IF EXISTS `documents`;
+CREATE TABLE IF NOT EXISTS `documents` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `resident_id` int NOT NULL,
+  `resident_name` varchar(255) NOT NULL,
+  `doc_number` varchar(50) NOT NULL,
+  `purpose` text,
+  `file_path` varchar(255) NOT NULL,
+  `file_type` varchar(10) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `doc_number` (`doc_number`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -140,7 +185,7 @@ CREATE TABLE IF NOT EXISTS `residents` (
   `children_count` int DEFAULT NULL,
   PRIMARY KEY (`person_id`),
   KEY `household_id` (`household_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2016 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2017 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `residents`
@@ -151,7 +196,8 @@ INSERT INTO `residents` (`person_id`, `household_id`, `first_name`, `middle_name
 (2012, 1001, 'Maria', 'Lourdes', 'Santos', '', 'F', '1990-07-22', 'Married', 'Filipino', 'Catholic', 0, '124 Main St', 'High School', 'Nurse', 0, 0, 'PhilHealth', 0, 1, 2),
 (2013, 1002, 'Pedro', 'Antonio', 'Reyes', '', 'M', '1975-11-05', 'Married', 'Filipino', 'Catholic', 0, '125 Main St', 'College', 'Farmer', 1, 0, 'None', 0, 0, 3),
 (2014, 1003, 'Lucia', 'Fernandez', 'Gomez', '', 'F', '1968-02-18', 'Widowed', 'Filipino', 'Catholic', 0, '126 Main St', 'Elementary', 'Retired', 1, 1, 'PhilHealth', 0, 0, 0),
-(2015, 1004, 'Carlos', 'Miguel', 'Torres', 'Jr.', 'M', '2000-09-12', 'Single', 'Filipino', 'Catholic', 0, '127 Main St', 'College', 'Student', 0, 0, 'PhilHealth', 0, 0, 0);
+(2015, 1004, 'Carlos', 'Miguel', 'Torres', 'Jr.', 'M', '2000-09-12', 'Single', 'Filipino', 'Catholic', 0, '127 Main St', 'College', 'Student', 0, 0, 'PhilHealth', 0, 0, 0),
+(2016, 1001, 'jerald', 'jaucian', 'fajardo', '', 'Male', '2003-07-26', 'Single', 'Filipino', '', 1, 'blk 8 lot 20', 'College', 'student', 0, 0, NULL, 0, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -185,16 +231,18 @@ CREATE TABLE IF NOT EXISTS `users` (
   `password` varchar(255) NOT NULL,
   `role` varchar(10) NOT NULL,
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5004 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9004 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`user_id`, `email`, `password`, `role`) VALUES
-(5001, 'admin1@example.com', 'password123', 'admin'),
-(5002, 'staff1@example.com', 'password123', 'staff'),
-(5003, 'staff2@example.com', 'password123', 'staff');
+(5004, 'staff4@example.com', 'password123', 'staff'),
+(5005, 'staff5@example.com', 'password123', 'staff'),
+(9001, 'admin101@example.com', 'password123', 'admin'),
+(9002, 'admin102@example.com', 'password123', 'admin'),
+(9003, 'admin103@example.com', 'password123', 'admin');
 
 -- --------------------------------------------------------
 

@@ -1,4 +1,14 @@
 <?php
+header('Cache-Control: no-cache, no-store, must-revalidate'); 
+header('Pragma: no-cache');   
+header('Expires: 0');         
+session_start();
+if (!isset($_SESSION['user_id'])) { 
+    header("Location: login.php");
+    exit();
+}
+$logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User';
+
 include __DIR__ . '/db_connect.php'; 
 
 $searchTerm = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
@@ -9,7 +19,7 @@ $whereClauses = [];
 if (!empty($searchTerm)) {
     $whereClauses[] = "
         (h.household_id LIKE '%$searchTerm%' OR
-         h.household_head LIKE '%$searchTerm%')
+        h.household_head LIKE '%$searchTerm%')
     ";
 }
 
@@ -73,7 +83,7 @@ $result = $conn->query($sql);
     <div class="main-content">
       <header class="topbar">
         <div class="topbar-right">
-          <span id="userName" class="user-info">Welcome, User</span>
+          <span id="userName" class="user-info">Welcome, <?php echo htmlspecialchars($logged_in_username); ?></span>
           <button id="logoutBtn" class="btn logout-btn">Logout</button>
         </div>
       </header>
@@ -101,7 +111,7 @@ $result = $conn->query($sql);
                 <div class="filter-dropdowns">
                     <div class="input-group">
                         <label for="ownership-filter">Ownership</label>
-                        <select id="ownership-filter" name="ownership">
+                        <select id="ownership-filter" name="ownership" onchange="document.getElementById('filterForm').submit()">
                             <option value="">-- Select Ownership --</option>
                             <option value="Owned" <?php echo ($selectedOwnership == 'Owned') ? 'selected' : ''; ?>>Owned</option>
                             <option value="Rented" <?php echo ($selectedOwnership == 'Rented') ? 'selected' : ''; ?>>Rented</option>
@@ -252,37 +262,20 @@ function setupLiveSearch() {
         }, 500);
     });
 }
-
-function setupFilterSubmit() {
-    const ownershipFilter = document.getElementById("ownership-filter");
-    ownershipFilter.addEventListener("change", function() {
-        filterForm.submit();
-    });
-}
-
 function setupLogout() {
     const logoutBtn = document.getElementById("logoutBtn");
     logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("rms_user");
-      window.location.href = "login.html";
+        window.location.href = "logout.php"; 
     });
 }
 
 function showUser() {
-    const user = JSON.parse(localStorage.getItem("rms_user"));
-    const userNameSpan = document.getElementById("userName");
-    if (user && user.name) {
-      userNameSpan.textContent = `Welcome, ${user.name}`;
-    } else {
-      userNameSpan.textContent = `Welcome, Guest`;
-    }
+    return;
 }
 
 window.onload = function () {
-    showUser();
     setupLogout();
     setupLiveSearch();
-    setupFilterSubmit();
 };
 </script>
 </body>

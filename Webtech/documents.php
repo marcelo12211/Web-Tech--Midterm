@@ -1,15 +1,25 @@
 <?php
+header('Cache-Control: no-cache, no-store, must-revalidate'); 
+header('Pragma: no-cache');   
+header('Expires: 0');         
+session_start();
+if (!isset($_SESSION['user_id'])) { 
+    header("Location: login.php");
+    exit();
+}
+
+$logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User';
+
 include 'db_connect.php'; 
 
 function getNextDocNumber($conn) {
     if (!$conn) {
         return 'IMG-ERR';
     }
-    
-    $result = $conn->query("SELECT person_id FROM documents ORDER BY person_id DESC LIMIT 1");
+    $result = $conn->query("SELECT id FROM documents ORDER BY id DESC LIMIT 1");
     
     if ($result && $row = $result->fetch_assoc()) {
-        return 'IMG-' . str_pad($row['person_id'] + 1, 3, '0', STR_PAD_LEFT);
+        return 'IMG-' . str_pad($row['id'] + 1, 3, '0', STR_PAD_LEFT);
     } else {
         return 'IMG-001';
     }
@@ -45,7 +55,7 @@ $success = isset($_GET['success']) ? true : false;
       <div class="main-content">
         <header class="topbar">
           <div class="topbar-right">
-            <span id="userName" class="user-info">Welcome, User</span>
+            <span id="userName" class="user-info">Welcome, <?php echo htmlspecialchars($logged_in_username); ?></span>
             <button id="logoutBtn" class="btn logout-btn">Logout</button>
           </div>
         </header>
@@ -80,13 +90,13 @@ $success = isset($_GET['success']) ? true : false;
                     <input
                       type="text"
                       id="docNumberDisplay"
-                      value="<?php echo $next_doc_number; ?>"
+                      value="<?php echo htmlspecialchars($next_doc_number); ?>"
                       readonly 
                     />
                     <input
                       type="hidden"
                       name="docNumber"
-                      value="<?php echo $next_doc_number; ?>"
+                      value="<?php echo htmlspecialchars($next_doc_number); ?>"
                     />
                   </div>
 
@@ -130,22 +140,22 @@ $success = isset($_GET['success']) ? true : false;
                   </thead>
                   <tbody id="documentStorageTable">
                   <?php
-                  $result = $conn->query("SELECT * FROM documents ORDER BY created_at DESC");
+                  $result = $conn->query("SELECT id, doc_number, resident_name, file_path, created_at FROM documents ORDER BY created_at DESC");
                   
                   if ($result) {
                     while ($row = $result->fetch_assoc()) {
                         echo "<tr>
-                            <td>{$row['doc_number']}</td>
-                            <td>{$row['resident_name']}</td>
-                            <td>Image</td>
-                            <td>{$row['created_at']}</td>
-                            <td class='actions-cell'>
-                                <a href='{$row['file_path']}' class='action-link view' target='_blank'>View</a>
-                            </td>
-                        </tr>";
+                                <td>" . htmlspecialchars($row['doc_number']) . "</td>
+                                <td>" . htmlspecialchars($row['resident_name']) . "</td>
+                                <td>Image</td>
+                                <td>" . htmlspecialchars(date('Y-m-d', strtotime($row['created_at']))) . "</td>
+                                <td class='actions-cell'>
+                                    <a href='" . htmlspecialchars($row['file_path']) . "' class='action-link view' target='_blank'>View</a>
+                                </td>
+                            </tr>";
                     }
                   } else {
-                      echo "<tr><td colspan='5'>Error loading documents.</td></tr>";
+                      echo "<tr><td colspan='5'>Error loading documents: " . $conn->error . "</td></tr>";
                   }
                   ?>
                   </tbody>
@@ -161,23 +171,10 @@ $success = isset($_GET['success']) ? true : false;
       function setupLogout() {
         const logoutBtn = document.getElementById("logoutBtn");
         logoutBtn.addEventListener("click", () => {
-          localStorage.removeItem("rms_user");
-          window.location.href = "login.html";
+          window.location.href = "logout.php";
         });
       }
-
-      function showUser() {
-        const user = JSON.parse(localStorage.getItem("rms_user"));
-        const userNameSpan = document.getElementById("userName");
-        if (user && user.name) {
-          userNameSpan.textContent = `Welcome, ${user.name}`;
-        } else {
-          userNameSpan.textContent = "Welcome, Guest";
-        }
-      }
-
       window.onload = function () {
-        showUser();
         setupLogout();
       };
     </script>

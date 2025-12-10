@@ -1,38 +1,54 @@
 <?php
+header('Cache-Control: no-cache, no-store, must-revalidate'); 
+header('Pragma: no-cache');   
+header('Expires: 0');         
+session_start();
+if (!isset($_SESSION['user_id'])) { 
+    header("Location: login.php");
+    exit();
+}
+$logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User';
+
 include 'db_connect.php';
 
 $editMode = false;
-$residentId = $_GET['id'] ?? null;
+$residentId = isset($_GET['id']) ? intval($_GET['id']) : null;
 $resData = [];
 
 if ($residentId) {
     $editMode = true;
-    $residentId = intval($residentId);
-    $resData = $conn->query("SELECT * FROM residents WHERE person_id=$residentId")->fetch_assoc();
+    $stmt = $conn->prepare("SELECT * FROM residents WHERE person_id = ?");
+    $stmt->bind_param("i", $residentId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $resData = $result->fetch_assoc();
+    $stmt->close();
+    if (!$resData) {
+        header("Location: residents.php");
+        exit();
+    }
 }
-
-// Get households for dropdown
 $householdResult = $conn->query("SELECT household_id, household_head FROM household ORDER BY household_id ASC");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $household_id   = intval($_POST['household_id']);
-    $first_name     = $conn->real_escape_string($_POST['first_name']);
-    $middle_name    = $conn->real_escape_string($_POST['middle_name'] ?? '');
-    $surname        = $conn->real_escape_string($_POST['surname']);
-    $suffix         = $conn->real_escape_string($_POST['suffix'] ?? '');
-    $sex            = $_POST['sex'];
-    $birthdate      = $_POST['birthdate'];
-    $civil_status   = $_POST['civil_status'];
-    $nationality    = $_POST['nationality'];
-    $purok          = intval($_POST['purok']);
-    $address        = $conn->real_escape_string($_POST['address']);
-    $education_level= $_POST['education_level'];
-    $occupation     = $conn->real_escape_string($_POST['occupation']);
-    $vaccination    = $conn->real_escape_string($_POST['vaccination']);
+    $household_id     = intval($_POST['household_id']);
+    $first_name       = $conn->real_escape_string($_POST['first_name']);
+    $middle_name      = $conn->real_escape_string($_POST['middle_name'] ?? '');
+    $surname          = $conn->real_escape_string($_POST['surname']);
+    $suffix           = $conn->real_escape_string($_POST['suffix'] ?? '');
+    $sex              = $conn->real_escape_string($_POST['sex']);
+    $birthdate        = $conn->real_escape_string($_POST['birthdate']);
+    $civil_status     = $conn->real_escape_string($_POST['civil_status']);
+    $nationality      = $conn->real_escape_string($_POST['nationality']);
+    $purok            = intval($_POST['purok']);
+    $address          = $conn->real_escape_string($_POST['address']);
+    $education_level  = $conn->real_escape_string($_POST['education_level']);
+    $occupation       = $conn->real_escape_string($_POST['occupation']);
+    $vaccination      = $conn->real_escape_string($_POST['vaccination']);
 
-    $is_senior      = isset($_POST['is_senior']) ? 1 : 0;
-    $is_disabled    = isset($_POST['is_disabled']) ? 1 : 0;
-    $is_pregnant    = isset($_POST['is_pregnant']) ? 1 : 0;
+    $is_senior        = isset($_POST['is_senior']) ? 1 : 0;
+    $is_disabled      = isset($_POST['is_disabled']) ? 1 : 0;
+    $is_pregnant      = isset($_POST['is_pregnant']) ? 1 : 0;
 
     if ($editMode) {
         $sql = "UPDATE residents SET 
@@ -64,7 +80,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($conn->query($sql)) {
-        $success = "Resident $actionMsg successfully!";
+        $_SESSION['status_success'] = "Resident $actionMsg successfully!";
+        header("Location: residents.php"); 
+        exit();
     } else {
         $error = "Error: " . $conn->error;
     }
@@ -86,8 +104,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <nav class="main-nav">
         <ul>
             <li><a href="index.php">Dashboard</a></li>
+            <li><a href="household.php">Households</a></li>
             <li><a href="residents.php">Residents</a></li>
-            <li><a href="addnewresidents.php" class="active"><?php echo $editMode ? "Edit" : "Add"; ?> Resident</a></li>
+            <li><a href="<?php echo $editMode ? "edit_resident.php?id=$residentId" : "addnewresidents.php"; ?>" class="active"><?php echo $editMode ? "Edit Resident" : "Add Resident"; ?></a></li>
             <li><a href="deaths.php">Deaths</a></li>
             <li><a href="documents.php">Documents</a></li>
         </ul>
@@ -97,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="main-content">
 <header class="topbar">
   <div class="topbar-right">
-    <span id="userName" class="user-info">Welcome, User</span>
+    <span id="userName" class="user-info">Welcome, <?php echo htmlspecialchars($logged_in_username); ?></span>
     <button id="logoutBtn" class="btn logout-btn">Logout</button>
   </div>
 </header>
@@ -108,12 +127,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <a href="residents.php" class="close-btn">&times;</a>
 
 <?php
-if(isset($success)) echo "<p style='color:green;'>$success</p>";
 if(isset($error)) echo "<p style='color:red;'>$error</p>";
 ?>
 
 <form id="addResidentForm" method="POST">
-<h2 class="form-title"><?php echo $editMode ? "Edit" : "Add New"; ?> Resident</h2>
+<h2 class="form-title"><?php echo $editMode ? "Edit Resident (ID: " . htmlspecialchars($residentId) . ")" : "Add New Resident"; ?></h2>
 
 <div class="form-grid">
 
@@ -123,7 +141,7 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
         <option value="">Select Household</option>
         <?php while($row = $householdResult->fetch_assoc()): ?>
             <option value="<?= $row['household_id'] ?>" <?php if(($resData['household_id'] ?? '') == $row['household_id']) echo 'selected'; ?>>
-                <?= $row['household_id'] ?> - <?= $row['household_head'] ?? 'No Head' ?>
+                <?= htmlspecialchars($row['household_id']) ?> - <?= htmlspecialchars($row['household_head'] ?? 'No Head') ?>
             </option>
         <?php endwhile; ?>
     </select>
@@ -131,22 +149,22 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
 
 <div class="input-group">
   <label>First Name</label>
-  <input type="text" name="first_name" required value="<?php echo $resData['first_name'] ?? ''; ?>">
+  <input type="text" name="first_name" required value="<?php echo htmlspecialchars($resData['first_name'] ?? ''); ?>">
 </div>
 
 <div class="input-group">
   <label>Middle Name</label>
-  <input type="text" name="middle_name" value="<?php echo $resData['middle_name'] ?? ''; ?>">
+  <input type="text" name="middle_name" value="<?php echo htmlspecialchars($resData['middle_name'] ?? ''); ?>">
 </div>
 
 <div class="input-group">
   <label>Surname</label>
-  <input type="text" name="surname" required value="<?php echo $resData['surname'] ?? ''; ?>">
+  <input type="text" name="surname" required value="<?php echo htmlspecialchars($resData['surname'] ?? ''); ?>">
 </div>
 
 <div class="input-group">
   <label>Suffix</label>
-  <input type="text" name="suffix" value="<?php echo $resData['suffix'] ?? ''; ?>">
+  <input type="text" name="suffix" value="<?php echo htmlspecialchars($resData['suffix'] ?? ''); ?>">
 </div>
 
 <div class="input-group">
@@ -160,7 +178,7 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
 
 <div class="input-group">
   <label>Birth Date</label>
-  <input type="date" name="birthdate" required value="<?php echo $resData['birthdate'] ?? ''; ?>">
+  <input type="date" name="birthdate" required value="<?php echo htmlspecialchars($resData['birthdate'] ?? ''); ?>">
 </div>
 
 <div class="input-group">
@@ -175,7 +193,7 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
 
 <div class="input-group">
   <label>Nationality</label>
-  <input type="text" name="nationality" required value="<?php echo $resData['nationality'] ?? 'Filipino'; ?>">
+  <input type="text" name="nationality" required value="<?php echo htmlspecialchars($resData['nationality'] ?? 'Filipino'); ?>">
 </div>
 
 <div class="input-group">
@@ -190,7 +208,7 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
 
 <div class="input-group">
   <label>Address</label>
-  <input type="text" name="address" required value="<?php echo $resData['address'] ?? ''; ?>">
+  <input type="text" name="address" required value="<?php echo htmlspecialchars($resData['address'] ?? ''); ?>">
 </div>
 
 <div class="input-group">
@@ -207,22 +225,31 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
 
 <div class="input-group">
   <label>Occupation</label>
-  <input type="text" name="occupation" value="<?php echo $resData['occupation'] ?? ''; ?>">
+  <input type="text" name="occupation" value="<?php echo htmlspecialchars($resData['occupation'] ?? ''); ?>">
 </div>
 
 <div class="input-group">
   <label>Vaccinations</label>
-  <input type="text" name="vaccination" value="<?php echo $resData['vaccination'] ?? ''; ?>">
+  <input type="text" name="vaccination" value="<?php echo htmlspecialchars($resData['vaccination'] ?? ''); ?>">
 </div>
 
-<div class="input-group" style="display:flex; gap:15px;">
-    <label><input type="checkbox" name="is_senior" <?php if(!empty($resData['is_senior'])) echo 'checked'; ?>> Senior</label>
-    <label><input type="checkbox" name="is_disabled" <?php if(!empty($resData['is_disabled'])) echo 'checked'; ?>> Disabled</label>
-    <label><input type="checkbox" name="is_pregnant" <?php if(!empty($resData['is_pregnant'])) echo 'checked'; ?>> Pregnant</label>
+<div class="input-group checkbox-group" style="grid-column: 1 / -1; display:flex; gap:30px;">
+    <label>
+        <input type="checkbox" name="is_senior" <?php if(!empty($resData['is_senior'])) echo 'checked'; ?>> 
+        Senior Citizen
+    </label>
+    <label>
+        <input type="checkbox" name="is_disabled" <?php if(!empty($resData['is_disabled'])) echo 'checked'; ?>> 
+        Person with Disability (PWD)
+    </label>
+    <label>
+        <input type="checkbox" name="is_pregnant" <?php if(!empty($resData['is_pregnant'])) echo 'checked'; ?>> 
+        Pregnant
+    </label>
 </div>
 
-<div class="button-group">
-  <button type="submit" class="btn"><?php echo $editMode ? "Update" : "Submit"; ?></button>
+<div class="button-group" style="grid-column: 1 / -1; text-align: center;">
+  <button type="submit" class="btn primary-btn"><?php echo $editMode ? "Update Resident" : "Submit Resident"; ?></button>
 </div>
 
 </div>
@@ -232,5 +259,17 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
 </main>
 </div>
 </div>
+
+<script>
+function setupLogout() {
+    const logoutBtn = document.getElementById("logoutBtn");
+    logoutBtn.addEventListener("click", () => {
+        window.location.href = "logout.php"; 
+    });
+}
+window.onload = function () {
+    setupLogout();
+};
+</script>
 </body>
 </html>

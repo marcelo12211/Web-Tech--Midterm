@@ -1,4 +1,14 @@
 <?php
+header('Cache-Control: no-cache, no-store, must-revalidate'); 
+header('Pragma: no-cache');   
+header('Expires: 0');         
+session_start();
+if (!isset($_SESSION['user_id'])) { 
+    header("Location: login.php");
+    exit();
+}
+$logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User';
+
 include __DIR__ . '/db_connect.php'; 
 
 $searchTerm = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
@@ -10,7 +20,7 @@ $whereClauses = [];
 if (!empty($searchTerm)) {
     $whereClauses[] = "
         (T1.person_id LIKE '%$searchTerm%' OR
-         CONCAT(T1.first_name, ' ', T1.middle_name, ' ', T1.surname, ' ', IFNULL(T1.suffix,'')) LIKE '%$searchTerm%')
+        CONCAT(T1.first_name, ' ', T1.middle_name, ' ', T1.surname, ' ', IFNULL(T1.suffix,'')) LIKE '%$searchTerm%')
     ";
 }
 
@@ -87,6 +97,7 @@ function formatDate($date) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Residents Directory</title>
     <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/residents-details.css" /> 
 </head>
 <body>
 <div class="app-container">
@@ -107,7 +118,7 @@ function formatDate($date) {
     <div class="main-content">
       <header class="topbar">
         <div class="topbar-right">
-          <span id="userName" class="user-info">Welcome, User</span>
+          <span id="userName" class="user-info">Welcome, <?php echo htmlspecialchars($logged_in_username); ?></span>
           <button id="logoutBtn" class="btn logout-btn">Logout</button>
         </div>
       </header>
@@ -135,7 +146,7 @@ function formatDate($date) {
                 <div class="filter-dropdowns">
                     <div class="input-group">
                         <label for="category-filter">Category</label>
-                        <select id="category-filter" name="category">
+                        <select id="category-filter" name="category" onchange="document.getElementById('filterForm').submit()">
                             <option value="">-- Select Category --</option>
                             <option value="senior" <?php echo ($selectedCategory == 'senior') ? 'selected' : ''; ?>>Senior Citizen</option>
                             <option value="pwd" <?php echo ($selectedCategory == 'pwd') ? 'selected' : ''; ?>>PWD</option>
@@ -144,7 +155,7 @@ function formatDate($date) {
                     </div>
                     <div class="input-group">
                         <label for="purok-filter">Purok</label>
-                        <select id="purok-filter" name="purok">
+                        <select id="purok-filter" name="purok" onchange="document.getElementById('filterForm').submit()">
                             <option value="">-- Select Purok --</option>
                             <?php for ($i = 1; $i <= 5; $i++): ?>
                                 <option value="<?php echo $i; ?>" <?php echo ($selectedPurok == $i) ? 'selected' : ''; ?>>Purok <?php echo $i; ?></option>
@@ -362,39 +373,23 @@ function setupLiveSearch() {
 }
 
 function setupFilterSubmit() {
-    const categoryFilter = document.getElementById("category-filter");
-    const purokFilter = document.getElementById("purok-filter");
-    categoryFilter.addEventListener("change", function() {
-        filterForm.submit();
-    });
-    purokFilter.addEventListener("change", function() {
-        filterForm.submit();
-    });
+    return; 
 }
 
 function setupLogout() {
     const logoutBtn = document.getElementById("logoutBtn");
     logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("rms_user");
-      window.location.href = "login.html";
+        window.location.href = "logout.php"; 
     });
 }
 
 function showUser() {
-    const user = JSON.parse(localStorage.getItem("rms_user"));
-    const userNameSpan = document.getElementById("userName");
-    if (user && user.name) {
-      userNameSpan.textContent = `Welcome, ${user.name}`;
-    } else {
-      userNameSpan.textContent = `Welcome, Guest`;
-    }
+    return;
 }
 
 window.onload = function () {
-    showUser();
     setupLogout();
     setupLiveSearch();
-    setupFilterSubmit();
 };
 </script>
 </body>
