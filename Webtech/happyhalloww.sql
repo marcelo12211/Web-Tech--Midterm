@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Dec 11, 2025 at 06:20 PM
+-- Generation Time: Dec 11, 2025 at 06:59 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -102,10 +102,11 @@ CREATE TABLE IF NOT EXISTS `documents` (
   `purpose` text,
   `file_path` varchar(255) NOT NULL,
   `file_type` varchar(10) NOT NULL,
+  `doc_type` varchar(100) NOT NULL DEFAULT 'Other Upload',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `doc_number` (`doc_number`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -194,7 +195,7 @@ CREATE TABLE IF NOT EXISTS `residents` (
   `birthdate` date NOT NULL,
   `civil_status` varchar(20) NOT NULL,
   `nationality` varchar(20) NOT NULL,
-  `religion` varchar(20) NOT NULL,
+  `religion` varchar(100) DEFAULT NULL,
   `purok` int NOT NULL,
   `address` varchar(150) NOT NULL,
   `residency_start_date` date DEFAULT NULL,
@@ -208,7 +209,7 @@ CREATE TABLE IF NOT EXISTS `residents` (
   `children_count` int DEFAULT NULL,
   PRIMARY KEY (`person_id`),
   KEY `household_id` (`household_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2029 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2037 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `residents`
@@ -219,8 +220,7 @@ INSERT INTO `residents` (`person_id`, `household_id`, `first_name`, `middle_name
 (2012, 1001, 'Maria', 'Lourdes', 'Santos', '', 'F', '1990-07-22', 'Married', 'Filipino', 'Catholic', 0, '124 Main St', '2020-05-01', 'High School', 'Nurse', 0, 0, 'PhilHealth', 0, 1, 2),
 (2013, 1002, 'Pedro', 'Antonio', 'Reyes', '', 'M', '1975-11-05', 'Married', 'Filipino', 'Catholic', 0, '125 Main St', '1998-01-15', 'College', 'Farmer', 1, 0, 'None', 0, 0, 3),
 (2014, 1003, 'Lucia', 'Fernandez', 'Gomez', '', 'F', '1968-02-18', 'Widowed', 'Filipino', 'Catholic', 0, '126 Main St', '1970-06-20', 'Elementary', 'Retired', 1, 1, 'PhilHealth', 0, 0, 0),
-(2015, 1004, 'Carlos', 'Miguel', 'Torres', 'Jr.', 'M', '2000-09-12', 'Single', 'Filipino', 'Catholic', 0, '127 Main St', '2023-03-01', 'College', 'Student', 0, 0, 'PhilHealth', 0, 0, 0),
-(2016, 1001, 'jerald', 'jaucian', 'fajardo', '', 'Male', '2003-07-26', 'Single', 'Filipino', '', 1, 'blk 8 lot 20', '2003-07-26', 'College', 'student', 0, 0, NULL, 0, 0, 0);
+(2015, 1004, 'Carlos', 'Miguel', 'Torres', 'Jr.', 'M', '2000-09-12', 'Single', 'Filipino', 'Catholic', 0, '127 Main St', '2023-03-01', 'College', 'Student', 0, 0, 'PhilHealth', 0, 0, 0);
 
 -- --------------------------------------------------------
 
