@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $_SESSION['user_id'] = $user_id;
                     $_SESSION['role'] = $user_role;
                     if ($first_digit == '9') {
-                        header("Location: admin/admin_menu.html"); 
+                        header("Location: admin/admin_dashboard.php"); 
                     } elseif ($first_digit == '5') {
                         header("Location: index.php"); 
                     } else {

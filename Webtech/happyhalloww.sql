@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Dec 11, 2025 at 06:59 PM
+-- Generation Time: Dec 11, 2025 at 07:47 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -263,7 +263,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 INSERT INTO `users` (`user_id`, `email`, `password`, `role`) VALUES
 (5004, 'staff4@example.com', 'password123', 'staff'),
 (5005, 'staff5@example.com', 'password123', 'staff'),
-(9001, 'admin101@example.com', 'password123', 'admin'),
+(9001, 'admin101@example.com', 'password123', 'staff'),
 (9002, 'admin102@example.com', 'password123', 'admin'),
 (9003, 'admin103@example.com', 'password123', 'admin');
 
@@ -280,6 +280,7 @@ CREATE TABLE IF NOT EXISTS `user_log` (
   `date_encoded` datetime NOT NULL,
   `encoded_by` varchar(100) NOT NULL,
   `remarks` varchar(50) NOT NULL,
+  `log_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`log_id`),
   KEY `person_id` (`person_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

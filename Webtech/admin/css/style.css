@@ -105,7 +105,6 @@ a {
   background-color: rgba(255, 255, 255, 0.1);
   margin: 20px 30px;
 }
-
 .main-content {
   margin-left: var(--sidebar-width);
   flex-grow: 1;
@@ -181,7 +180,6 @@ h2 {
 .add-new-floating-btn:hover {
   background-color: var(--primary-dark);
 }
-
 .card {
   background-color: var(--card-background);
   padding: 30px;
@@ -209,7 +207,6 @@ h2 {
   position: relative;
   overflow: hidden;
 }
-
 .stat-card::before {
   content: "";
   position: absolute;
@@ -304,6 +301,9 @@ h2 {
   padding-bottom: 10px;
   border-bottom: 2px solid var(--border-color);
 }
+.table-responsive {
+  overflow-x: auto;
+}
 
 table {
   width: 100%;
@@ -345,7 +345,6 @@ tr:hover {
   cursor: default;
   box-shadow: inset 4px 0 0 0 var(--primary-color);
 }
-
 .category-tag {
   padding: 6px 12px;
   border-radius: 20px;
@@ -369,7 +368,6 @@ tr:hover {
   background-color: #f8d7da;
   color: #842029;
 }
-
 .chart-card h3 {
   font-size: 1.6rem;
   color: var(--primary-dark);
@@ -425,7 +423,6 @@ tr:hover {
   font-weight: 600;
   z-index: 2;
 }
-
 .data-control-panel {
   display: flex;
   flex-direction: column;
@@ -487,7 +484,6 @@ tr:hover {
 .data-table-card {
   padding: 0;
 }
-
 .resident-row {
   cursor: pointer;
   transition: background-color 0.2s;
@@ -622,7 +618,6 @@ td .action-btn {
 .detail-box strong {
   color: var(--text-color);
 }
-
 .document-grid-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -677,7 +672,6 @@ td .action-btn {
   box-shadow: none;
   margin-bottom: 0;
 }
-
 @media (min-width: 1200px) {
   .dashboard-grid {
     grid-template-columns: repeat(5, 1fr);
