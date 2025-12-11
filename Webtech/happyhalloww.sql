@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Dec 10, 2025 at 03:55 PM
+-- Generation Time: Dec 11, 2025 at 06:20 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -42,9 +42,31 @@ CREATE TABLE IF NOT EXISTS `deaths` (
   `ncsc_rrn` varchar(50) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `resident_id` int UNSIGNED DEFAULT NULL,
+  `place_of_death` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `record_number` (`record_number`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `deaths`
+--
+
+INSERT INTO `deaths` (`id`, `record_number`, `name`, `age`, `date_of_death`, `cause_of_death`, `is_pwd`, `is_senior`, `pwd_id`, `osca_id`, `ncsc_rrn`, `created_at`, `resident_id`, `place_of_death`) VALUES
+(13, 'D-008', 'Pedro Reyes', 45, '2024-03-05', 'Accident', 'no', 'no', NULL, NULL, NULL, '2025-12-11 18:17:35', 8, NULL),
+(12, 'D-007', 'Maria Santos', 62, '2024-02-15', 'Heart Attack', 'no', 'no', NULL, NULL, NULL, '2025-12-11 18:17:35', 7, NULL),
+(11, 'D-006', 'Juan Dela Cruz', 78, '2024-01-20', 'Old Age (Natural)', 'no', 'yes', NULL, 'OSCA-1001', 'NCSC-9801', '2025-12-11 18:17:35', 6, NULL),
+(6, 'D-001', 'Elena Dela Cruz', 75, '2023-01-15', 'Old Age (Natural)', 'no', 'yes', NULL, 'OSCA-1234', 'NCSC-5432', '2025-12-11 18:06:29', 1, NULL),
+(7, 'D-002', 'Robert Sanchez', 52, '2023-03-20', 'Kidney Failure', 'no', 'no', NULL, NULL, NULL, '2025-12-11 18:06:29', 2, NULL),
+(8, 'D-003', 'Luzviminda Garcia', 88, '2023-05-01', 'Old Age (Natural)', 'yes', 'yes', 'PWD-9876', 'OSCA-6789', 'NCSC-9876', '2025-12-11 18:06:29', 3, NULL),
+(9, 'D-004', 'Marlon Ramos', 28, '2023-08-10', 'Accident', 'no', 'no', NULL, NULL, NULL, '2025-12-11 18:06:29', 4, NULL),
+(10, 'D-005', 'Estella Lim', 65, '2024-02-28', 'Other', 'no', 'yes', NULL, 'OSCA-0101', 'NCSC-2020', '2025-12-11 18:06:29', 5, NULL),
+(14, 'D-009', 'Liza Fernandez', 85, '2024-03-28', 'Old Age (Natural)', 'no', 'yes', NULL, 'OSCA-1002', 'NCSC-9802', '2025-12-11 18:17:35', 9, NULL),
+(15, 'D-010', 'Jose Pineda', 55, '2024-04-10', 'Kidney Failure', 'yes', 'no', 'PWD-5001', NULL, NULL, '2025-12-11 18:17:35', 10, NULL),
+(16, 'D-011', 'Anna Lopez', 70, '2024-05-01', 'Heart Attack', 'no', 'yes', NULL, 'OSCA-1003', 'NCSC-9803', '2025-12-11 18:17:35', 11, NULL),
+(17, 'D-012', 'Michael Tan', 30, '2024-05-18', 'Other', 'no', 'no', NULL, NULL, NULL, '2025-12-11 18:17:35', 12, NULL),
+(18, 'D-013', 'Sophia Cruz', 90, '2024-06-03', 'Old Age (Natural)', 'yes', 'yes', 'PWD-5002', 'OSCA-1004', 'NCSC-9804', '2025-12-11 18:17:35', 13, NULL),
+(19, 'D-014', 'Ramon Garcia', 68, '2024-06-25', 'Kidney Failure', 'no', 'yes', NULL, 'OSCA-1005', 'NCSC-9805', '2025-12-11 18:17:35', 14, NULL),
+(20, 'D-015', 'Nena Lim', 50, '2024-07-12', 'Heart Attack', 'no', 'no', NULL, NULL, NULL, '2025-12-11 18:17:35', 15, NULL);
 
 -- --------------------------------------------------------
 
@@ -175,6 +197,7 @@ CREATE TABLE IF NOT EXISTS `residents` (
   `religion` varchar(20) NOT NULL,
   `purok` int NOT NULL,
   `address` varchar(150) NOT NULL,
+  `residency_start_date` date DEFAULT NULL,
   `education_level` varchar(20) NOT NULL,
   `occupation` varchar(50) NOT NULL,
   `is_senior` tinyint(1) NOT NULL,
@@ -185,19 +208,19 @@ CREATE TABLE IF NOT EXISTS `residents` (
   `children_count` int DEFAULT NULL,
   PRIMARY KEY (`person_id`),
   KEY `household_id` (`household_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2017 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2029 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `residents`
 --
 
-INSERT INTO `residents` (`person_id`, `household_id`, `first_name`, `middle_name`, `surname`, `suffix`, `sex`, `birthdate`, `civil_status`, `nationality`, `religion`, `purok`, `address`, `education_level`, `occupation`, `is_senior`, `is_disabled`, `health_insurance`, `vaccination`, `is_pregnant`, `children_count`) VALUES
-(2011, 1001, 'Juan', 'Carlos', 'Dela Cruz', '', 'M', '1985-03-15', 'Single', 'Filipino', 'Catholic', 0, '123 Main St', 'College', 'Teacher', 0, 0, 'PhilHealth', 0, 0, 0),
-(2012, 1001, 'Maria', 'Lourdes', 'Santos', '', 'F', '1990-07-22', 'Married', 'Filipino', 'Catholic', 0, '124 Main St', 'High School', 'Nurse', 0, 0, 'PhilHealth', 0, 1, 2),
-(2013, 1002, 'Pedro', 'Antonio', 'Reyes', '', 'M', '1975-11-05', 'Married', 'Filipino', 'Catholic', 0, '125 Main St', 'College', 'Farmer', 1, 0, 'None', 0, 0, 3),
-(2014, 1003, 'Lucia', 'Fernandez', 'Gomez', '', 'F', '1968-02-18', 'Widowed', 'Filipino', 'Catholic', 0, '126 Main St', 'Elementary', 'Retired', 1, 1, 'PhilHealth', 0, 0, 0),
-(2015, 1004, 'Carlos', 'Miguel', 'Torres', 'Jr.', 'M', '2000-09-12', 'Single', 'Filipino', 'Catholic', 0, '127 Main St', 'College', 'Student', 0, 0, 'PhilHealth', 0, 0, 0),
-(2016, 1001, 'jerald', 'jaucian', 'fajardo', '', 'Male', '2003-07-26', 'Single', 'Filipino', '', 1, 'blk 8 lot 20', 'College', 'student', 0, 0, NULL, 0, 0, NULL);
+INSERT INTO `residents` (`person_id`, `household_id`, `first_name`, `middle_name`, `surname`, `suffix`, `sex`, `birthdate`, `civil_status`, `nationality`, `religion`, `purok`, `address`, `residency_start_date`, `education_level`, `occupation`, `is_senior`, `is_disabled`, `health_insurance`, `vaccination`, `is_pregnant`, `children_count`) VALUES
+(2011, 1001, 'Juan', 'Carlos', 'Dela Cruz', '', 'M', '1985-03-15', 'Single', 'Filipino', 'Catholic', 0, '123 Main St', '2015-08-10', 'College', 'Teacher', 0, 0, 'PhilHealth', 0, 0, 0),
+(2012, 1001, 'Maria', 'Lourdes', 'Santos', '', 'F', '1990-07-22', 'Married', 'Filipino', 'Catholic', 0, '124 Main St', '2020-05-01', 'High School', 'Nurse', 0, 0, 'PhilHealth', 0, 1, 2),
+(2013, 1002, 'Pedro', 'Antonio', 'Reyes', '', 'M', '1975-11-05', 'Married', 'Filipino', 'Catholic', 0, '125 Main St', '1998-01-15', 'College', 'Farmer', 1, 0, 'None', 0, 0, 3),
+(2014, 1003, 'Lucia', 'Fernandez', 'Gomez', '', 'F', '1968-02-18', 'Widowed', 'Filipino', 'Catholic', 0, '126 Main St', '1970-06-20', 'Elementary', 'Retired', 1, 1, 'PhilHealth', 0, 0, 0),
+(2015, 1004, 'Carlos', 'Miguel', 'Torres', 'Jr.', 'M', '2000-09-12', 'Single', 'Filipino', 'Catholic', 0, '127 Main St', '2023-03-01', 'College', 'Student', 0, 0, 'PhilHealth', 0, 0, 0),
+(2016, 1001, 'jerald', 'jaucian', 'fajardo', '', 'Male', '2003-07-26', 'Single', 'Filipino', '', 1, 'blk 8 lot 20', '2003-07-26', 'College', 'student', 0, 0, NULL, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -276,12 +299,6 @@ ALTER TABLE `health_records`
 --
 ALTER TABLE `migration`
   ADD CONSTRAINT `migration-resident` FOREIGN KEY (`person_id`) REFERENCES `residents` (`person_id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
-
---
--- Constraints for table `residents`
---
-ALTER TABLE `residents`
-  ADD CONSTRAINT `household_id` FOREIGN KEY (`household_id`) REFERENCES `household` (`household_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `user_log`
