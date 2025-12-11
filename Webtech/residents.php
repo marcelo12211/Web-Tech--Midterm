@@ -7,6 +7,7 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
+
 $logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User';
 
 include __DIR__ . '/db_connect.php'; 
@@ -14,6 +15,7 @@ include __DIR__ . '/db_connect.php';
 $searchTerm = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
 $selectedCategory = isset($_GET['category']) ? $conn->real_escape_string($_GET['category']) : '';
 $selectedPurok = isset($_GET['purok']) ? $conn->real_escape_string($_GET['purok']) : '';
+$selectedResidenceYears = isset($_GET['residence_years']) ? (int)$_GET['residence_years'] : 0; 
 
 $whereClauses = [];
 
@@ -42,11 +44,19 @@ if (!empty($selectedCategory)) {
     }
 }
 
+// *** NA-UPDATE NA RESIDENCE FILTER LOGIC (Gamit ang residency_start_date) ***
+if ($selectedResidenceYears > 0) {
+    // Tiyakin na ang residency_start_date ay hindi NULL bago mag-compute
+    $whereClauses[] = "T1.residency_start_date IS NOT NULL AND FLOOR(DATEDIFF(CURDATE(), T1.residency_start_date) / 365.25) >= $selectedResidenceYears";
+}
+// *************************************************************************
+
 $whereClause = '';
 if (!empty($whereClauses)) {
     $whereClause = " WHERE " . implode(" AND ", $whereClauses);
 }
 
+// *** NA-UPDATE NA SELECT QUERY (Idinagdag ang residency_start_date) ***
 $sql = "
     SELECT 
         T1.person_id AS ID, 
@@ -62,6 +72,7 @@ $sql = "
         T1.religion,
         T1.purok,
         T1.address,
+        T1.residency_start_date,  -- KASAMA NA ITO SA SELECTION
         T1.education_level,
         T1.occupation,
         T1.is_senior,
@@ -74,6 +85,7 @@ $sql = "
     $whereClause
     ORDER BY T1.person_id ASC
 ";
+// *************************************************************************
 
 $result = $conn->query($sql);
 
@@ -153,6 +165,19 @@ function formatDate($date) {
                             <option value="pregnant" <?php echo ($selectedCategory == 'pregnant') ? 'selected' : ''; ?>>Pregnant</option>
                         </select>
                     </div>
+                    
+                    <div class="input-group">
+                      <label for="residence-filter">Period of Residence</label>
+                      <select id="residence-filter" name="residence_years" onchange="document.getElementById('filterForm').submit()">
+                        <option value="0" <?php echo ($selectedResidenceYears == 0) ? 'selected' : ''; ?>>-- All Periods --</option>
+                        <option value="1" <?php echo ($selectedResidenceYears == 1) ? 'selected' : ''; ?>>1+ Year</option>
+                        <option value="3" <?php echo ($selectedResidenceYears == 3) ? 'selected' : ''; ?>>3+ Years</option>
+                        <option value="5" <?php echo ($selectedResidenceYears == 5) ? 'selected' : ''; ?>>5+ Years</option>
+                        <option value="10" <?php echo ($selectedResidenceYears == 10) ? 'selected' : ''; ?>>10+ Years</option>
+                        <option value="20" <?php echo ($selectedResidenceYears == 20) ? 'selected' : ''; ?>>20+ Years</option>
+                      </select>
+                    </div>
+                    
                     <div class="input-group">
                         <label for="purok-filter">Purok</label>
                         <select id="purok-filter" name="purok" onchange="document.getElementById('filterForm').submit()">
@@ -205,6 +230,7 @@ function formatDate($date) {
                               </td>";
                         echo "</tr>";
                         
+                        // Start of the hidden details row
                         echo "<tr class='details-row' id='$detailsId'>";
                         echo "<td colspan='8' class='details-cell'>";
                         echo "<div class='details-content'>";
@@ -214,7 +240,17 @@ function formatDate($date) {
                         $isPregnant = $row['is_pregnant'] == 1;
                         $isVaccinated = $row['vaccination'] == 1;
                         
+                        // Calculate Years of Residence for display
+                        $residencyStartDate = $row['residency_start_date'];
+                        $yearsOfResidency = 'N/A';
+                        if (!empty($residencyStartDate) && $residencyStartDate != '0000-00-00') {
+                            $residencyDateObj = new DateTime($residencyStartDate);
+                            $today = new DateTime();
+                            $yearsOfResidency = $residencyDateObj->diff($today)->y . ' years';
+                        }
+                        
                         echo "<div class='status-summary'>";
+                        echo "<div class='status-item'><span class='detail-label'>Residency:</span> " . htmlspecialchars($yearsOfResidency) . "</div>";
                         if ($isSenior) echo "<div class='status-item'><span class='status-icon'></span> Senior Citizen</div>";
                         if ($isPWD) echo "<div class='status-item'><span class='status-icon'></span> PWD</div>";
                         if ($isPregnant) echo "<div class='status-item'><span class='status-icon'></span> Pregnant</div>";
@@ -251,6 +287,7 @@ function formatDate($date) {
                         echo "<h4>Location & Background</h4>";
                         echo "<div class='detail-item'><span class='detail-label'>Purok:</span><span class='detail-value'>" . htmlspecialchars($row['purok'] ?? 'N/A') . "</span></div>";
                         echo "<div class='detail-item'><span class='detail-label'>Address:</span><span class='detail-value'>" . htmlspecialchars($row['address'] ?? 'N/A') . "</span></div>";
+                        echo "<div class='detail-item'><span class='detail-label'>Residency Start Date:</span><span class='detail-value'>" . formatDate($residencyStartDate) . "</span></div>";
                         echo "<div class='detail-item'><span class='detail-label'>Nationality:</span><span class='detail-value'>" . htmlspecialchars($row['nationality'] ?? 'N/A') . "</span></div>";
                         echo "<div class='detail-item'><span class='detail-label'>Religion:</span><span class='detail-value'>" . htmlspecialchars($row['religion'] ?? 'N/A') . "</span></div>";
                         echo "</div>";
@@ -331,8 +368,23 @@ function toggleDetails(detailsId, rowId) {
         detailsRow.classList.remove('show');
         icon.classList.remove('expanded');
     } else {
+        document.querySelectorAll('.details-row.show').forEach(row => row.classList.remove('show'));
+        document.querySelectorAll('.expand-icon.expanded').forEach(icon => icon.classList.remove('expanded'));
+        
         detailsRow.classList.add('show');
         icon.classList.add('expanded');
+
+        const detailsContent = detailsRow.querySelector('.details-content');
+        if (detailsContent) {
+          const firstButton = detailsContent.querySelector('.tab-button:first-child');
+          const firstContent = detailsContent.querySelector('.tab-content:first-child');
+          
+          detailsContent.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+          detailsContent.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+          if(firstButton) firstButton.classList.add('active');
+          if(firstContent) firstContent.classList.add('active');
+        }
     }
 }
 
@@ -372,19 +424,11 @@ function setupLiveSearch() {
     });
 }
 
-function setupFilterSubmit() {
-    return; 
-}
-
 function setupLogout() {
     const logoutBtn = document.getElementById("logoutBtn");
     logoutBtn.addEventListener("click", () => {
         window.location.href = "logout.php"; 
     });
-}
-
-function showUser() {
-    return;
 }
 
 window.onload = function () {

@@ -1,8 +1,11 @@
 <?php
+// PHP Configuration: Prevent caching and start session
 header('Cache-Control: no-cache, no-store, must-revalidate'); 
 header('Pragma: no-cache');   
-header('Expires: 0');         
+header('Expires: 0');       
 session_start();
+
+// Check for user authentication
 if (!isset($_SESSION['user_id'])) { 
     header("Location: login.php");
     exit();
@@ -10,7 +13,37 @@ if (!isset($_SESSION['user_id'])) {
 
 $logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User';
 
+// Include database connection
 include 'db_connect.php';
+
+// --- FILTERING LOGIC ---
+$filter_name = $_GET['filterName'] ?? '';
+$filter_year = $_GET['filterYear'] ?? '';
+
+$current_filter_name = htmlspecialchars($filter_name);
+$current_filter_year = htmlspecialchars($filter_year);
+
+$where_clauses = [];
+$bind_params = [];
+$bind_types = '';
+
+if (!empty($filter_name)) {
+    $where_clauses[] = "name LIKE ?";
+    $bind_types .= 's';
+    $bind_params[] = '%' . $filter_name . '%';
+}
+
+if (!empty($filter_year) && is_numeric($filter_year)) {
+    $where_clauses[] = "YEAR(date_of_death) = ?";
+    $bind_types .= 'i';
+    $bind_params[] = (int)$filter_year;
+}
+
+$where_sql = count($where_clauses) > 0 ? " WHERE " . implode(" AND ", $where_clauses) : "";
+
+
+// --- FUNCTIONS ---
+
 function getNextDeathRecordNumber($conn) {
     if (!$conn || $conn->connect_error) {
         return 'D-ERR';
@@ -24,22 +57,80 @@ function getNextDeathRecordNumber($conn) {
         return 'D-001';
     }
 }
+
+function refValues($arr){
+    if (strnatcmp(phpversion(),'5.3') >= 0) // PHP >= 5.3
+    {
+        $refs = array();
+        foreach($arr as $key => $value)
+            $refs[$key] = &$arr[$key];
+        return $refs;
+    }
+    return $arr;
+}
+
+// --- DATABASE QUERIES FOR DASHBOARD STATISTICS (UPDATED) ---
+
+// 1. Get Total Death Records (No Change)
 $total_deaths = 0;
 $result_total = $conn->query("SELECT COUNT(*) AS total FROM deaths");
 if ($result_total && $row_total = $result_total->fetch_assoc()) {
     $total_deaths = $row_total['total'];
 }
 
-$next_record_number = getNextDeathRecordNumber($conn);
-$death_records = [];
-$sql_records = "SELECT id, name, age, cause_of_death, date_of_death, record_number FROM deaths ORDER BY date_of_death DESC";
-$result_records = $conn->query($sql_records);
+// 2. Get Top 2 Causes of Death
+$top_causes = [];
+$sql_top_causes = "
+    SELECT 
+        cause_of_death, 
+        COUNT(id) AS count
+    FROM 
+        deaths
+    GROUP BY 
+        cause_of_death
+    ORDER BY 
+        count DESC, cause_of_death ASC
+    LIMIT 2
+";
+$result_top_causes = $conn->query($sql_top_causes);
 
-if ($result_records) {
-    while ($row = $result_records->fetch_assoc()) {
-        $death_records[] = $row;
+if ($result_top_causes) {
+    while ($row = $result_top_causes->fetch_assoc()) {
+        $top_causes[] = $row;
     }
 }
+
+// Fill remaining slots if less than 2 causes found
+while (count($top_causes) < 2) {
+    $top_causes[] = ['cause_of_death' => 'N/A', 'count' => 0];
+}
+
+
+// --- DATABASE QUERY FOR DISPLAYING RECORDS IN TABLE (No Change) ---
+$death_records = [];
+$sql_records = "SELECT id, name, age, cause_of_death, date_of_death, record_number FROM deaths" . $where_sql . " ORDER BY date_of_death DESC";
+
+$stmt = $conn->prepare($sql_records);
+
+if ($stmt) {
+    if (count($bind_params) > 0) {
+        $stmt_params = array_merge([$bind_types], $bind_params);
+        call_user_func_array([$stmt, 'bind_param'], refValues($stmt_params));
+    }
+    
+    $stmt->execute();
+    $result_records = $stmt->get_result();
+    
+    if ($result_records) {
+        while ($row = $result_records->fetch_assoc()) {
+            $death_records[] = $row;
+        }
+    }
+    $stmt->close();
+}
+
+
+// --- STATUS MESSAGES (No Change) ---
 $status_success = $_SESSION['status_success'] ?? null;
 unset($_SESSION['status_success']);
 
@@ -105,51 +196,67 @@ unset($_SESSION['status_error']);
                 class="stat-card report-stat"
                 style="border-left-color: #dc3545"
               >
-                <p class="stat-label">Cause: Kidney Failure</p>
-                <p class="stat-value"><span>[Dynamic Count]</span></p>
+                <p class="stat-label">Cause: <?php echo htmlspecialchars($top_causes[0]['cause_of_death']); ?></p>
+                <p class="stat-value"><span><?php echo htmlspecialchars($top_causes[0]['count']); ?></span></p>
               </div>
 
               <div
                 class="stat-card report-stat"
                 style="border-left-color: #ffc107"
               >
-                <p class="stat-label">Cause: Old Age</p>
-                <p class="stat-value"><span>[Dynamic Count]</span></p>
+                <p class="stat-label">Cause: <?php echo htmlspecialchars($top_causes[1]['cause_of_death']); ?></p>
+                <p class="stat-value"><span><?php echo htmlspecialchars($top_causes[1]['count']); ?></span></p>
               </div>
             </div>
 
-            <div class="filter-dropdowns">
-              <div class="input-group">
-                <label for="filterName">Name</label>
-                <input
-                  type="text"
-                  id="filterName"
-                  placeholder="Search by Name"
-                />
-              </div>
-              <div class="input-group">
-                <label for="filterYear">Year of Death</label>
-                <input
-                  type="number"
-                  id="filterYear"
-                  min="1900"
-                  max="2100"
-                  placeholder="e.g., 2024"
-                />
-              </div>
-              <div class="input-group">
-                <label>&nbsp;</label>
-                <button class="btn primary-btn" style="width: 100%">
-                  Filter
-                </button>
-              </div>
-            </div>
+            <form method="GET" action="deaths.php">
+                <div class="filter-dropdowns">
+                  <div class="input-group">
+                    <label for="filterName">Name</label>
+                    <input
+                      type="text"
+                      id="filterName"
+                      name="filterName"
+                      placeholder="Search by Name"
+                      value="<?php echo $current_filter_name; ?>"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label for="filterYear">Year of Death</label>
+                    <input
+                      type="number"
+                      id="filterYear"
+                      name="filterYear"
+                      min="1900"
+                      max="2100"
+                      placeholder="e.g., 2024"
+                      value="<?php echo $current_filter_year; ?>"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label>&nbsp;</label>
+                    <button type="submit" class="btn primary-btn" style="width: 100%">
+                      Filter
+                    </button>
+                  </div>
+                  <?php if (!empty($filter_name) || !empty($filter_year)): ?>
+                  <div class="input-group">
+                    <label>&nbsp;</label>
+                    <a href="deaths.php" class="btn secondary" style="width: 100%; text-align: center;">Clear Filters</a>
+                  </div>
+                  <?php endif; ?>
+                </div>
+            </form>
           </div>
 
           <div class="card data-table-card">
             <h3>Death Record Details</h3>
             <div class="search-results-info">
-              Displaying 1-<?php echo min(count($death_records), 10); ?> of <?php echo count($death_records); ?> records.
+              Displaying 1-<?php echo min(count($death_records), 10); ?> of <?php echo count($death_records); ?> records 
+              <?php if (!empty($filter_name) || !empty($filter_year)): ?>
+                  (Filtered Result)
+              <?php endif; ?>
+              of <?php echo count($death_records); ?> total records shown.
             </div>
             <div class="table-responsive">
               <table>
@@ -178,10 +285,10 @@ unset($_SESSION['status_error']);
                             <td><?php echo htmlspecialchars($record['date_of_death']); ?></td>
                             <td class="actions-cell">
                                 <a
-                                  href="#"
-                                  class="action-link view"
-                                  onclick="viewDetails(<?php echo $record['id']; ?>)"
-                                  >View Details</a
+                                    href="#"
+                                    class="action-link view"
+                                    onclick="viewDetails(<?php echo $record['id']; ?>)"
+                                    >View Details</a
                                 >
                             </td>
                         </tr>
