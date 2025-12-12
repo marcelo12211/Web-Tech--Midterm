@@ -1,11 +1,9 @@
 <?php
-// PHP Configuration: Prevent caching and start session
 header('Cache-Control: no-cache, no-store, must-revalidate'); 
 header('Pragma: no-cache');   
 header('Expires: 0');       
 session_start();
 
-// Check for user authentication
 if (!isset($_SESSION['user_id'])) { 
     header("Location: login.php");
     exit();
@@ -13,10 +11,8 @@ if (!isset($_SESSION['user_id'])) {
 
 $logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User';
 
-// Include database connection
 include 'db_connect.php';
 
-// --- FILTERING LOGIC ---
 $filter_name = $_GET['filterName'] ?? '';
 $filter_year = $_GET['filterYear'] ?? '';
 
@@ -41,8 +37,6 @@ if (!empty($filter_year) && is_numeric($filter_year)) {
 
 $where_sql = count($where_clauses) > 0 ? " WHERE " . implode(" AND ", $where_clauses) : "";
 
-
-// --- FUNCTIONS ---
 
 function getNextDeathRecordNumber($conn) {
     if (!$conn || $conn->connect_error) {
@@ -69,16 +63,12 @@ function refValues($arr){
     return $arr;
 }
 
-// --- DATABASE QUERIES FOR DASHBOARD STATISTICS (UPDATED) ---
-
-// 1. Get Total Death Records (No Change)
 $total_deaths = 0;
 $result_total = $conn->query("SELECT COUNT(*) AS total FROM deaths");
 if ($result_total && $row_total = $result_total->fetch_assoc()) {
     $total_deaths = $row_total['total'];
 }
 
-// 2. Get Top 2 Causes of Death
 $top_causes = [];
 $sql_top_causes = "
     SELECT 
@@ -100,13 +90,10 @@ if ($result_top_causes) {
     }
 }
 
-// Fill remaining slots if less than 2 causes found
 while (count($top_causes) < 2) {
     $top_causes[] = ['cause_of_death' => 'N/A', 'count' => 0];
 }
 
-
-// --- DATABASE QUERY FOR DISPLAYING RECORDS IN TABLE (No Change) ---
 $death_records = [];
 $sql_records = "SELECT id, name, age, cause_of_death, date_of_death, record_number FROM deaths" . $where_sql . " ORDER BY date_of_death DESC";
 
@@ -129,8 +116,6 @@ if ($stmt) {
     $stmt->close();
 }
 
-
-// --- STATUS MESSAGES (No Change) ---
 $status_success = $_SESSION['status_success'] ?? null;
 unset($_SESSION['status_success']);
 

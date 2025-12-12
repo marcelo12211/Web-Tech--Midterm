@@ -6,14 +6,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $purpose = htmlspecialchars($_POST['purpose']);
     $doc_number = htmlspecialchars($_POST['docNumber']);
 
-    //   'docFile' to match the form
     if (isset($_FILES['docFile']) && $_FILES['docFile']['error'] === 0) {
         $fileTmpPath = $_FILES['docFile']['tmp_name'];
         $fileName = $_FILES['docFile']['name'];
         $fileSize = $_FILES['docFile']['size'];
         $fileType = $_FILES['docFile']['type'];
 
-        // Allow PDFs and other document types
         $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx'];
         $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 
@@ -22,7 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
 
-        // Check file size (10MB max)
         if ($fileSize > 10485760) {
             header("Location: documents.php?error=" . urlencode("File size must be less than 10MB."));
             exit();
@@ -37,7 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $destPath = $uploadDir . $newFileName;
 
         if (move_uploaded_file($fileTmpPath, $destPath)) {
-            //  Insert with doc_number and file_type
             $stmt = $conn->prepare("INSERT INTO documents (resident_name, doc_number, file_path, file_type, purpose, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
             $stmt->bind_param("sssss", $resident, $doc_number, $destPath, $fileExtension, $purpose);
 
@@ -54,7 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
     } else {
-        // error handling
         $error_code = isset($_FILES['docFile']['error']) ? $_FILES['docFile']['error'] : 'No file uploaded';
         $error_messages = [
             UPLOAD_ERR_INI_SIZE => 'File exceeds upload_max_filesize directive in php.ini',

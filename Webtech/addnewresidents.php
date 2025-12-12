@@ -1,6 +1,4 @@
 <?php
-// addnewresidents.php (Ginagamit din ng edit_resident.php)
-
 header('Cache-Control: no-cache, no-store, must-revalidate'); 
 header('Pragma: no-cache');   
 header('Expires: 0');         
@@ -33,7 +31,6 @@ if ($residentId) {
 $householdResult = $conn->query("SELECT household_id, household_head FROM household ORDER BY household_id ASC");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // --- 1. Pag-extract at Cleaning ng Data ---
     $household_id     = intval($_POST['household_id']);
     $first_name       = $conn->real_escape_string($_POST['first_name']);
     $middle_name      = $conn->real_escape_string($_POST['middle_name'] ?? '');
@@ -51,10 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $vaccination      = $conn->real_escape_string($_POST['vaccination'] ?? '');
     $children_count   = intval($_POST['children_count'] ?? 0); 
 
-    // --- 2. Special Status/Insurance Field Handling (New Dropdown) ---
     $special_status   = $conn->real_escape_string($_POST['special_status'] ?? 'None');
 
-    // Set all flags to 0 by default
     $is_senior        = 0;
     $is_disabled      = 0;
     $is_pregnant      = 0;
@@ -84,7 +79,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $current_date = date('Y-m-d');
     $religion_value = empty($religion) ? "''" : "'$religion'";
 
-    // --- 3. SQL Execution ---
     if ($editMode) {
         $residency_update = "";
         if (empty($resData['residency_start_date']) || $resData['residency_start_date'] == '0000-00-00') {
@@ -124,7 +118,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Error: " . $conn->error;
         }
     } else {
-        // INSERT new resident
         $sql = "INSERT INTO residents 
             (household_id, first_name, middle_name, surname, suffix, sex, birthdate, civil_status, nationality, religion, purok, address, education_level, occupation, vaccination, is_senior, is_disabled, is_pregnant, residency_start_date, health_insurance, children_count)
             VALUES 
@@ -133,14 +126,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($conn->query($sql)) {
             $new_resident_id = $conn->insert_id;
             
-            // If PWD was selected, handle PWD-specific data
             if ($special_status === 'PWD') {
                 $pwd_gov_id = $conn->real_escape_string($_POST['pwd_gov_id'] ?? '');
                 $disability_type = $conn->real_escape_string($_POST['disability_type'] ?? '');
                 
                 $pwd_image_path = null;
                 
-                // Handle pag PWD ID image upload
                 if (isset($_FILES['pwd_id_image']) && $_FILES['pwd_id_image']['error'] === 0) {
                     $fileTmpPath = $_FILES['pwd_id_image']['tmp_name'];
                     $fileName = $_FILES['pwd_id_image']['name'];
@@ -164,7 +155,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
                 
-                // Insert into disabled_persons table
                 $stmt = $conn->prepare("INSERT INTO disabled_persons (resident_id, pwd_gov_id, disability_type, id_picture_path, date_registered) VALUES (?, ?, ?, ?, ?)");
                 $stmt->bind_param("issss", $new_resident_id, $pwd_gov_id, $disability_type, $pwd_image_path, $current_date);
                 $stmt->execute();
@@ -381,7 +371,6 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
 </div>
 
 <?php if (!$editMode): ?>
-<!-- PWD Section - papakita lang pag adding of new residents -->
 <div class="pwd-section" id="pwdSection">
     <h4>📋 PWD Information & Document Upload</h4>
     <div class="pwd-fields">
@@ -438,13 +427,11 @@ function togglePWDSection() {
     if (pwdSection) {
         if (specialStatus === 'PWD') {
             pwdSection.classList.add('show');
-            // PWD fields required to be filled if nagpakkita yung PWD
             document.getElementById('pwdGovId').required = true;
             document.getElementById('disabilityType').required = true;
             document.getElementById('pwdIdImage').required = true;
         } else {
             pwdSection.classList.remove('show');
-            // Remove required attribute
             document.getElementById('pwdGovId').required = false;
             document.getElementById('disabilityType').required = false;
             document.getElementById('pwdIdImage').required = false;

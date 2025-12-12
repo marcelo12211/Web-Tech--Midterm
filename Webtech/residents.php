@@ -44,19 +44,15 @@ if (!empty($selectedCategory)) {
     }
 }
 
-// *** NA-UPDATE NA RESIDENCE FILTER LOGIC (Gamit ang residency_start_date) ***
 if ($selectedResidenceYears > 0) {
-    // Tiyakin na ang residency_start_date ay hindi NULL bago mag-compute
     $whereClauses[] = "T1.residency_start_date IS NOT NULL AND FLOOR(DATEDIFF(CURDATE(), T1.residency_start_date) / 365.25) >= $selectedResidenceYears";
 }
-// *************************************************************************
 
 $whereClause = '';
 if (!empty($whereClauses)) {
     $whereClause = " WHERE " . implode(" AND ", $whereClauses);
 }
 
-// *** NA-UPDATE NA SELECT QUERY (Idinagdag ang residency_start_date) ***
 $sql = "
     SELECT 
         T1.person_id AS ID, 
@@ -85,7 +81,6 @@ $sql = "
     $whereClause
     ORDER BY T1.person_id ASC
 ";
-// *************************************************************************
 
 $result = $conn->query($sql);
 
@@ -230,7 +225,6 @@ function formatDate($date) {
                               </td>";
                         echo "</tr>";
                         
-                        // Start of the hidden details row
                         echo "<tr class='details-row' id='$detailsId'>";
                         echo "<td colspan='8' class='details-cell'>";
                         echo "<div class='details-content'>";
@@ -240,7 +234,6 @@ function formatDate($date) {
                         $isPregnant = $row['is_pregnant'] == 1;
                         $isVaccinated = $row['vaccination'] == 1;
                         
-                        // Calculate Years of Residence for display
                         $residencyStartDate = $row['residency_start_date'];
                         $yearsOfResidency = 'N/A';
                         if (!empty($residencyStartDate) && $residencyStartDate != '0000-00-00') {
