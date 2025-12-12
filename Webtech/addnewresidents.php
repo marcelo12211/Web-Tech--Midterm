@@ -82,7 +82,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $current_date = date('Y-m-d');
-
     $religion_value = empty($religion) ? "''" : "'$religion'";
 
     // --- 3. SQL Execution ---
@@ -116,21 +115,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $residency_update 
             WHERE person_id=$residentId";
         $actionMsg = "updated";
+        
+        if ($conn->query($sql)) {
+            $_SESSION['status_success'] = "Resident $actionMsg successfully!";
+            header("Location: residents.php"); 
+            exit();
+        } else {
+            $error = "Error: " . $conn->error;
+        }
     } else {
-
+        // INSERT new resident
         $sql = "INSERT INTO residents 
             (household_id, first_name, middle_name, surname, suffix, sex, birthdate, civil_status, nationality, religion, purok, address, education_level, occupation, vaccination, is_senior, is_disabled, is_pregnant, residency_start_date, health_insurance, children_count)
             VALUES 
             ($household_id, '$first_name', '$middle_name', '$surname', '$suffix', '$sex', '$birthdate', '$civil_status', '$nationality', $religion_value, $purok, '$address', '$education_level', '$occupation', '$vaccination', $is_senior, $is_disabled, $is_pregnant, '$current_date', '$health_insurance', $children_count)"; 
-        $actionMsg = "added";
-    }
-
-    if ($conn->query($sql)) {
-        $_SESSION['status_success'] = "Resident $actionMsg successfully!";
-        header("Location: residents.php"); 
-        exit();
-    } else {
-        $error = "Error: " . $conn->error;
+        
+        if ($conn->query($sql)) {
+            $new_resident_id = $conn->insert_id;
+            
+            // If PWD was selected, handle PWD-specific data
+            if ($special_status === 'PWD') {
+                $pwd_gov_id = $conn->real_escape_string($_POST['pwd_gov_id'] ?? '');
+                $disability_type = $conn->real_escape_string($_POST['disability_type'] ?? '');
+                
+                $pwd_image_path = null;
+                
+                // Handle pag PWD ID image upload
+                if (isset($_FILES['pwd_id_image']) && $_FILES['pwd_id_image']['error'] === 0) {
+                    $fileTmpPath = $_FILES['pwd_id_image']['tmp_name'];
+                    $fileName = $_FILES['pwd_id_image']['name'];
+                    $fileSize = $_FILES['pwd_id_image']['size'];
+                    $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                    
+                    $allowedExtensions = ['jpg', 'jpeg', 'png'];
+                    
+                    if (in_array($fileExtension, $allowedExtensions) && $fileSize <= 5242880) { // 5MB
+                        $uploadDir = 'uploads/pwd_documents/';
+                        if (!is_dir($uploadDir)) {
+                            mkdir($uploadDir, 0777, true);
+                        }
+                        
+                        $newFileName = 'pwd_' . $new_resident_id . '_' . uniqid() . '.' . $fileExtension;
+                        $destPath = $uploadDir . $newFileName;
+                        
+                        if (move_uploaded_file($fileTmpPath, $destPath)) {
+                            $pwd_image_path = $destPath;
+                        }
+                    }
+                }
+                
+                // Insert into disabled_persons table
+                $stmt = $conn->prepare("INSERT INTO disabled_persons (resident_id, pwd_gov_id, disability_type, id_picture_path, date_registered) VALUES (?, ?, ?, ?, ?)");
+                $stmt->bind_param("issss", $new_resident_id, $pwd_gov_id, $disability_type, $pwd_image_path, $current_date);
+                $stmt->execute();
+                $stmt->close();
+            }
+            
+            $actionMsg = "added";
+            $_SESSION['status_success'] = "Resident $actionMsg successfully!";
+            header("Location: residents.php"); 
+            exit();
+        } else {
+            $error = "Error: " . $conn->error;
+        }
     }
 }
 
@@ -152,6 +199,30 @@ $current_status = getSelectedStatus($resData);
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title><?php echo $editMode ? "Edit" : "Add"; ?> Resident</title>
 <link rel="stylesheet" href="css/style.css" />
+<style>
+.pwd-section {
+    display: none;
+    grid-column: 1 / -1;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px solid #ffc107;
+    margin-top: 10px;
+}
+.pwd-section.show {
+    display: block;
+}
+.pwd-section h4 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+.pwd-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+</style>
 </head>
 <body>
 <div class="app-container">
@@ -186,7 +257,7 @@ $current_status = getSelectedStatus($resData);
 if(isset($error)) echo "<p style='color:red;'>$error</p>";
 ?>
 
-<form id="addResidentForm" method="POST">
+<form id="addResidentForm" method="POST" enctype="multipart/form-data">
 <h2 class="form-title"><?php echo $editMode ? "Edit Resident (ID: " . htmlspecialchars($residentId) . ")" : "Add New Resident"; ?></h2>
 
 <div class="form-grid">
@@ -300,7 +371,7 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
 
 <div class="input-group" style="grid-column: 1 / -1;">
   <label>Special Status / Health Insurance</label>
-  <select name="special_status">
+  <select name="special_status" id="specialStatus" onchange="togglePWDSection()">
     <option value="None" <?php if($current_status == 'None') echo 'selected'; ?>>None</option>
     <option value="Senior Citizen" <?php if($current_status == 'Senior Citizen') echo 'selected'; ?>>Senior Citizen</option>
     <option value="PWD" <?php if($current_status == 'PWD') echo 'selected'; ?>>Person with Disability (PWD)</option>
@@ -308,6 +379,39 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
     <option value="Others" <?php if($current_status == 'Others') echo 'selected'; ?>>Others (Specify in notes if needed)</option>
   </select>
 </div>
+
+<?php if (!$editMode): ?>
+<!-- PWD Section - papakita lang pag adding of new residents -->
+<div class="pwd-section" id="pwdSection">
+    <h4>📋 PWD Information & Document Upload</h4>
+    <div class="pwd-fields">
+        <div class="input-group">
+            <label>PWD Government ID Number *</label>
+            <input type="text" name="pwd_gov_id" id="pwdGovId" placeholder="e.g., PWD-2024-12345">
+        </div>
+        
+        <div class="input-group">
+            <label>Disability Type *</label>
+            <select name="disability_type" id="disabilityType">
+                <option value="">Select Disability Type</option>
+                <option value="Visual Impairment">Visual Impairment</option>
+                <option value="Hearing Impairment">Hearing Impairment</option>
+                <option value="Physical Disability">Physical Disability</option>
+                <option value="Intellectual Disability">Intellectual Disability</option>
+                <option value="Mental Disability">Mental Disability</option>
+                <option value="Multiple Disabilities">Multiple Disabilities</option>
+                <option value="Others">Others</option>
+            </select>
+        </div>
+        
+        <div class="input-group" style="grid-column: 1 / -1;">
+            <label>Upload PWD ID Image (JPG, PNG only) *</label>
+            <input type="file" name="pwd_id_image" id="pwdIdImage" accept="image/jpeg,image/jpg,image/png">
+            <small style="color: #6c757d; margin-top: 5px; display: block;">Maximum file size: 5MB</small>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <div class="input-group">
   <label>Number of Children (Optional)</label>
@@ -327,15 +431,38 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
 </div>
 
 <script>
+function togglePWDSection() {
+    const specialStatus = document.getElementById('specialStatus').value;
+    const pwdSection = document.getElementById('pwdSection');
+    
+    if (pwdSection) {
+        if (specialStatus === 'PWD') {
+            pwdSection.classList.add('show');
+            // PWD fields required to be filled if nagpakkita yung PWD
+            document.getElementById('pwdGovId').required = true;
+            document.getElementById('disabilityType').required = true;
+            document.getElementById('pwdIdImage').required = true;
+        } else {
+            pwdSection.classList.remove('show');
+            // Remove required attribute
+            document.getElementById('pwdGovId').required = false;
+            document.getElementById('disabilityType').required = false;
+            document.getElementById('pwdIdImage').required = false;
+        }
+    }
+}
+
+window.onload = function() {
+    togglePWDSection();
+    setupLogout();
+};
+
 function setupLogout() {
     const logoutBtn = document.getElementById("logoutBtn");
     logoutBtn.addEventListener("click", () => {
         window.location.href = "logout.php"; 
     });
 }
-window.onload = function () {
-    setupLogout();
-};
 </script>
 </body>
 </html>
