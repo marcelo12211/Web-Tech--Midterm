@@ -41,6 +41,30 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - Happy Hallow Barangay System</title>
     <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .chart-card h3 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 18px;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+    </style>
 </head>
 <body>
 <div class="app-container">
@@ -92,24 +116,13 @@ $conn->close();
                     <p class="stat-label">Total Children (Listed)</p>
                     <p class="stat-value"><span><?php echo $stats['total_children']; ?></span></p>
                 </div>
-                
-                <div class="card chart-card">
-                    <h3>Primary Residents by Purok</h3>
-                    <div class="purok-chart">
-                        <?php
-                        $primary_residents_count = $stats['primary_residents_count'] ?? 1; 
+            </div>
 
-                        for ($i = 1; $i <= 5; $i++) {
-                            $count = $stats["purok{$i}_count"] ?? 0;
-                            $width = $primary_residents_count > 0 ? ($count / $primary_residents_count) * 100 : 0;
-                            echo '<div class="purok-item">';
-                            echo "<span class='purok-label'>Purok $i</span>";
-                            echo "<div class='purok-bar-container'>";
-                            echo "<div class='purok-bar' style='width: {$width}%;'></div>";
-                            echo "<span class='purok-count'>{$count}</span>";
-                            echo "</div></div>";
-                        }
-                        ?>
+            <div class="charts-container">
+                <div class="chart-card">
+                    <h3>🎯 Special Categories Distribution</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="categoriesChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -118,6 +131,56 @@ $conn->close();
 </div>
 
 <script>
+const categoryData = {
+    senior: <?php echo $stats['senior_count']; ?>,
+    pwd: <?php echo $stats['pwd_count']; ?>,
+    pregnant: <?php echo $stats['pregnant_count']; ?>,
+    regular: <?php echo $stats['primary_residents_count'] - $stats['senior_count'] - $stats['pwd_count'] - $stats['pregnant_count']; ?>
+};
+
+const colors = {
+    blue: 'rgba(54, 162, 235, 0.8)',
+    green: 'rgba(75, 192, 192, 0.8)',
+    yellow: 'rgba(255, 206, 86, 0.8)',
+    red: 'rgba(255, 99, 132, 0.8)'
+};
+
+// Create the doughnut chart
+const doughnutCtx = document.getElementById('categoriesChart').getContext('2d');
+new Chart(doughnutCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Senior Citizens', 'PWD', 'Pregnant', 'Regular Residents'],
+        datasets: [{
+            data: [
+                categoryData.senior,
+                categoryData.pwd,
+                categoryData.pregnant,
+                categoryData.regular
+            ],
+            backgroundColor: [
+                colors.green,
+                colors.yellow,
+                colors.red,
+                colors.blue
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true, // Chart adapts to screen size
+        maintainAspectRatio: false, // Allows custom height
+        // Animation happens automatically when chart loads, chart.js draws the doughnut pieces in a rotating motion
+        // Hover effect is built-in, show tooltips when you hover over them
+        plugins: {
+            legend: {
+                position: 'bottom' // Places legend below the chart
+            }
+        }
+    }
+});
+
 function setupLogout() {
     const logoutBtn = document.getElementById("logoutBtn");
     logoutBtn.addEventListener("click", () => {
