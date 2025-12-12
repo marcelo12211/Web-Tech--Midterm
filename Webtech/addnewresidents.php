@@ -161,6 +161,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->close();
             }
             
+         
+            if ($special_status === 'Senior Citizen') {
+                $senior_gov_id = $conn->real_escape_string($_POST['senior_gov_id'] ?? '');
+                
+                $senior_image_path = null;
+                
+                if (isset($_FILES['senior_id_image']) && $_FILES['senior_id_image']['error'] === 0) {
+                    $fileTmpPath = $_FILES['senior_id_image']['tmp_name'];
+                    $fileName = $_FILES['senior_id_image']['name'];
+                    $fileSize = $_FILES['senior_id_image']['size'];
+                    $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                    
+                    $allowedExtensions = ['jpg', 'jpeg', 'png'];
+                    
+                    if (in_array($fileExtension, $allowedExtensions) && $fileSize <= 5242880) {
+                        $uploadDir = 'uploads/senior_documents/';
+                        if (!is_dir($uploadDir)) {
+                            mkdir($uploadDir, 0777, true);
+                        }
+                        
+                        $newFileName = 'senior_' . $new_resident_id . '_' . uniqid() . '.' . $fileExtension;
+                        $destPath = $uploadDir . $newFileName;
+                        
+                        if (move_uploaded_file($fileTmpPath, $destPath)) {
+                            $senior_image_path = $destPath;
+                        }
+                    }
+                }
+                
+                $stmt = $conn->prepare("INSERT INTO senior_citizens (resident_id, senior_gov_id, id_picture_path, date_registered, status) VALUES (?, ?, ?, ?, 'Active')");
+                $stmt->bind_param("isss", $new_resident_id, $senior_gov_id, $senior_image_path, $current_date);
+                $stmt->execute();
+                $stmt->close();
+            }
+            
             $actionMsg = "added";
             $_SESSION['status_success'] = "Resident $actionMsg successfully!";
             header("Location: residents.php"); 
@@ -190,24 +225,29 @@ $current_status = getSelectedStatus($resData);
 <title><?php echo $editMode ? "Edit" : "Add"; ?> Resident</title>
 <link rel="stylesheet" href="css/style.css" />
 <style>
-.pwd-section {
+.pwd-section, .senior-section {
     display: none;
     grid-column: 1 / -1;
     padding: 20px;
     background: #f8f9fa;
     border-radius: 8px;
-    border: 2px solid #ffc107;
     margin-top: 10px;
 }
-.pwd-section.show {
+.pwd-section {
+    border: 2px solid #ffc107;
+}
+.senior-section {
+    border: 2px solid #28a745;
+}
+.pwd-section.show, .senior-section.show {
     display: block;
 }
-.pwd-section h4 {
+.pwd-section h4, .senior-section h4 {
     color: #333;
     margin-bottom: 15px;
     font-size: 1.1rem;
 }
-.pwd-fields {
+.pwd-fields, .senior-fields {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
@@ -361,7 +401,7 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
 
 <div class="input-group" style="grid-column: 1 / -1;">
   <label>Special Status / Health Insurance</label>
-  <select name="special_status" id="specialStatus" onchange="togglePWDSection()">
+  <select name="special_status" id="specialStatus" onchange="toggleSpecialSections()">
     <option value="None" <?php if($current_status == 'None') echo 'selected'; ?>>None</option>
     <option value="Senior Citizen" <?php if($current_status == 'Senior Citizen') echo 'selected'; ?>>Senior Citizen</option>
     <option value="PWD" <?php if($current_status == 'PWD') echo 'selected'; ?>>Person with Disability (PWD)</option>
@@ -371,8 +411,9 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
 </div>
 
 <?php if (!$editMode): ?>
+
 <div class="pwd-section" id="pwdSection">
-    <h4>📋 PWD Information & Document Upload</h4>
+    <h4>PWD Information & Document Upload</h4>
     <div class="pwd-fields">
         <div class="input-group">
             <label>PWD Government ID Number *</label>
@@ -400,6 +441,22 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
         </div>
     </div>
 </div>
+
+<div class="senior-section" id="seniorSection">
+    <h4>Senior Citizen Information & Document Upload</h4>
+    <div class="senior-fields">
+        <div class="input-group" style="grid-column: 1 / -1;">
+            <label>Senior Citizen Government ID Number *</label>
+            <input type="text" name="senior_gov_id" id="seniorGovId" placeholder="e.g., OSCA-2024-12345">
+        </div>
+        
+        <div class="input-group" style="grid-column: 1 / -1;">
+            <label>Upload Senior Citizen ID Image (JPG, PNG only) *</label>
+            <input type="file" name="senior_id_image" id="seniorIdImage" accept="image/jpeg,image/jpg,image/png">
+            <small style="color: #6c757d; margin-top: 5px; display: block;">Maximum file size: 5MB</small>
+        </div>
+    </div>
+</div>
 <?php endif; ?>
 
 <div class="input-group">
@@ -420,27 +477,38 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
 </div>
 
 <script>
-function togglePWDSection() {
+function toggleSpecialSections() {
     const specialStatus = document.getElementById('specialStatus').value;
     const pwdSection = document.getElementById('pwdSection');
+    const seniorSection = document.getElementById('seniorSection');
     
     if (pwdSection) {
-        if (specialStatus === 'PWD') {
-            pwdSection.classList.add('show');
-            document.getElementById('pwdGovId').required = true;
-            document.getElementById('disabilityType').required = true;
-            document.getElementById('pwdIdImage').required = true;
-        } else {
-            pwdSection.classList.remove('show');
-            document.getElementById('pwdGovId').required = false;
-            document.getElementById('disabilityType').required = false;
-            document.getElementById('pwdIdImage').required = false;
-        }
+        pwdSection.classList.remove('show');
+        document.getElementById('pwdGovId').required = false;
+        document.getElementById('disabilityType').required = false;
+        document.getElementById('pwdIdImage').required = false;
+    }
+    
+    if (seniorSection) {
+        seniorSection.classList.remove('show');
+        document.getElementById('seniorGovId').required = false;
+        document.getElementById('seniorIdImage').required = false;
+    }
+    
+    if (specialStatus === 'PWD' && pwdSection) {
+        pwdSection.classList.add('show');
+        document.getElementById('pwdGovId').required = true;
+        document.getElementById('disabilityType').required = true;
+        document.getElementById('pwdIdImage').required = true;
+    } else if (specialStatus === 'Senior Citizen' && seniorSection) {
+        seniorSection.classList.add('show');
+        document.getElementById('seniorGovId').required = true;
+        document.getElementById('seniorIdImage').required = true;
     }
 }
 
 window.onload = function() {
-    togglePWDSection();
+    toggleSpecialSections();
     setupLogout();
 };
 
