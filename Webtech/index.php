@@ -113,14 +113,14 @@ $conn->close();
                 </div>
 
                 <div class="stat-card">
-                    <p class="stat-label">Total Children (Listed)</p>
+                    <p class="stat-label">Total Children</p>
                     <p class="stat-value"><span><?php echo $stats['total_children']; ?></span></p>
                 </div>
             </div>
 
             <div class="charts-container">
                 <div class="chart-card">
-                    <h3>🎯 Special Categories Distribution</h3>
+                    <h3>Residents Distribution</h3>
                     <div class="chart-wrapper">
                         <canvas id="categoriesChart"></canvas>
                     </div>
@@ -145,7 +145,6 @@ const colors = {
     red: 'rgba(255, 99, 132, 0.8)'
 };
 
-// Create the doughnut chart
 const doughnutCtx = document.getElementById('categoriesChart').getContext('2d');
 new Chart(doughnutCtx, {
     type: 'doughnut',
@@ -169,13 +168,11 @@ new Chart(doughnutCtx, {
         }]
     },
     options: {
-        responsive: true, // Chart adapts to screen size
-        maintainAspectRatio: false, // Allows custom height
-        // Animation happens automatically when chart loads, chart.js draws the doughnut pieces in a rotating motion
-        // Hover effect is built-in, show tooltips when you hover over them
+        responsive: true, 
+        maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: 'bottom' // Places legend below the chart
+                position: 'bottom'
             }
         }
     }
