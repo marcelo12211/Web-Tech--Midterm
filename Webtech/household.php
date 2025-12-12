@@ -9,6 +9,23 @@ if (!isset($_SESSION['user_id'])) {
 }
 $logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User';
 
+// Check for success/error messages from session
+$update_success = false;
+$update_error = false;
+$error_msg = '';
+
+if (isset($_SESSION['update_success']) && $_SESSION['update_success']) {
+    $update_success = true;
+    unset($_SESSION['update_success']);
+}
+
+if (isset($_SESSION['update_error']) && $_SESSION['update_error']) {
+    $update_error = true;
+    $error_msg = $_SESSION['error_msg'] ?? 'Unknown error';
+    unset($_SESSION['update_error']);
+    unset($_SESSION['error_msg']);
+}
+
 include __DIR__ . '/db_connect.php'; 
 
 $searchTerm = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
@@ -63,6 +80,32 @@ $result = $conn->query($sql);
     <title>Household Directory</title>
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/residents-details.css" />
+    <style>
+        .alert {
+            padding: 12px 20px;
+            margin: 15px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .alert.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
 <div class="app-container">
@@ -88,11 +131,20 @@ $result = $conn->query($sql);
         </div>
       </header>
 
+      <!-- Success/Error Messages -->
+      <?php if ($update_success): ?>
+          <div class="alert success">✓ Household updated successfully!</div>
+      <?php endif; ?>
+
+      <?php if ($update_error): ?>
+          <div class="alert error">✗ Error updating household: <?php echo htmlspecialchars($error_msg); ?></div>
+      <?php endif; ?>
+
       <main class="page-content">
         <div class="residents-directory card">
           <div class="directory-header">
             <h2>Household Directory</h2>
-            <a href="add_household.php" class="btn primary-btn">+ Add New Household</a>
+            <a href="add_household.php" class="btn primary-btn">+ Add New</a>
           </div>
 
           <div class="filter-section">
@@ -276,6 +328,15 @@ function showUser() {
 window.onload = function () {
     setupLogout();
     setupLiveSearch();
+    
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.opacity = '0';
+            alert.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 5000);
 };
 </script>
 </body>
