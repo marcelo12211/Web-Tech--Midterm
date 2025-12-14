@@ -66,7 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <div class="form-group">
                 <label>User ID</label> 
-                <input type="number" name="login_id" required> 
+                <input type="text" name="login_id" inputmode="numeric" pattern="[0-9]+" required>
             </div>
 
             <div class="form-group">
