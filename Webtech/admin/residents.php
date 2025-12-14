@@ -276,7 +276,7 @@ function getStatusBar($res) {
                             <a href="residents.php" class="btn">Reset</a>
                         </div>
                     </div>
-                    <a href="add_new_resident.php" class="btn primary-btn add-btn">
+                    <a href="addnewresidents.php" class="btn primary-btn add-btn">
                         <i class="fas fa-plus"></i> Add New
                     </a>
                 </form>
