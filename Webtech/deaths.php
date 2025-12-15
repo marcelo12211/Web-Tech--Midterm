@@ -269,7 +269,7 @@ function formatDate($date) {
                         $counter++;
                     }
                 } else {
-                    echo "<tr><td colspan='5'>No death records found matching the filters.</td></tr>";
+                    echo "<tr><td colspan='5'>No death records found.</td></tr>";
                 }
                 ?>
                 </tbody>

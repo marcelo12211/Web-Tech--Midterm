@@ -36,14 +36,4 @@ $sql = "
         osca_id = '$osca_id'
     WHERE id = '$death_id'
 ";
-
-if ($conn->query($sql) === TRUE) {
-    $_SESSION['status_success'] = 'Death record updated successfully.';
-    header('Location: deaths.php');
-    exit();
-} else {
-    $_SESSION['status_error'] = 'Error updating death record: ' . $conn->error;
-    header('Location: deaths.php');
-    exit();
-}
 ?>
