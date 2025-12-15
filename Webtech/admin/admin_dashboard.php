@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <ul>
                 <li><a href="admin_dashboard.php" class="active">Dashboard</a></li>
                 <li><a href="residents.php">Manage Residents</a></li>
-                <li><a href="residents.php">Manage Users</a></li>
+                <li><a href="manage_users.php">Manage Users</a></li>
                 <li><a href="documents.php">Documents</a></li>
                 <li><a href="logout.php">Logout</a></li>
             </ul>

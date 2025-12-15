@@ -105,7 +105,7 @@ if ($conn && $conn->ping()) {
                 <ul>
                     <li><a href="admin_dashboard.php">Dashboard</a></li>
                     <li><a href="residents.php">Manage Residents</a></li>
-                    <li><a href="manage_users.php" class="active">Users</a></li>
+                    <li><a href="manage_users.php" class="active">Manage Users</a></li>
                     <li><a href="documents.php">Documents</a></li>
                     <li class="nav-divider"></li>
                     <li><a href="logout.php">Logout</a></li>

@@ -260,13 +260,12 @@ $current_status = getSelectedStatus($resData);
     <div class="logo">Happy Hallow Barangay System</div>
     <nav class="main-nav">
         <ul>
-            <li><a href="index.php">Dashboard</a></li>
-            <li><a href="household.php">Households</a></li>
-            <li><a href="residents.php">Residents</a></li>
-            <li><a href="<?php echo $editMode ? "edit_resident.php?id=$residentId" : "addnewresidents.php"; ?>" class="active"><?php echo $editMode ? "Edit Resident" : "Add Resident"; ?></a></li>
-            <li><a href="deaths.php">Deaths</a></li>
+            <li><a href="admin_dashboard.php">Dashboard</a></li>
+            <li><a href="residents.php" class="active">Manage Residents</a></li>
+            <li><a href="manage_users.php">Manage Users</a></li>
             <li><a href="documents.php">Documents</a></li>
-        </ul>
+            <li><a href="logout.php">Logout</a></li>
+          </ul>
     </nav>
 </aside>
 
