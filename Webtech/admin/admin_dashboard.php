@@ -40,6 +40,7 @@ if ($log_result && $log_result->num_rows > 0) {
         $activity_logs[] = $row;
     }
 } else {
+    // HARDCODED ITO ISSUE
     $activity_logs = [
         ['log_time' => 'N/A', 'user_name' => 'System', 'action' => 'No Data', 'details' => 'Please implement logging in login.php, residents.php, etc.'],
         ['log_time' => '2025-12-11 10:00 PM', 'user_name' => 'Admin', 'action' => 'Login', 'details' => 'Successful login to the system.'], 
