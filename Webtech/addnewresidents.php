@@ -330,11 +330,11 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
 
 <div class="input-group">
   <label>Sex</label>
-  <select name="sex" required>
-    <option value="">Select</option>
-    <option value="Male" <?php if(($resData['sex'] ?? '')=='Male') echo 'selected'; ?>>Male</option>
-    <option value="Female" <?php if(($resData['sex'] ?? '')=='Female') echo 'selected'; ?>>Female</option>
-  </select>
+<select name="sex" required>
+  <option value="">Select</option>
+  <option value="M" <?php if(($resData['sex'] ?? '')=='M') echo 'selected'; ?>>Male</option>
+  <option value="F" <?php if(($resData['sex'] ?? '')=='F') echo 'selected'; ?>>Female</option>
+</select>
 </div>
 
 <div class="input-group">
