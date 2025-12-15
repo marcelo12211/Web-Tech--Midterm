@@ -48,14 +48,9 @@ function safeHtml($value) {
     return htmlspecialchars($value ?? '');
 }
 
-<<<<<<< HEAD
 function isSelected($current, $target) {
     return ((string)$current === (string)$target) ? 'selected' : '';
 }
-=======
-$householdResult = $conn->query("SELECT household_id, household_head FROM household ORDER BY household_id ASC");
-
->>>>>>> 5056538b16a6be869744c375a4bc4096a7aeeaa1
 
 $sexValue = strtoupper(substr($residentData['sex'] ?? '', 0, 1));
 
@@ -180,25 +175,6 @@ $householdsResult = $conn->query($householdsSql);
 
                     <h3 class="section-title">Address & Location</h3>
                     <div class="form-grid">
-<<<<<<< HEAD
-=======
-                        <div class="input-group">
-                            <label>Household</label>
-                            <select name="household_id" required>
-                            <option value="">Select Household</option>
-                            <?php 
-                            if ($householdResult->num_rows > 0) {
-                            $householdResult->data_seek(0);
-                            }
-                            while($row = $householdResult->fetch_assoc()): ?>
-                            <option value="<?= $row['household_id'] ?>" <?php if(($resData['household_id'] ?? '') == $row['household_id']) echo 'selected'; ?>>
-                            <?= htmlspecialchars($row['household_id']) ?> - <?= htmlspecialchars($row['household_head'] ?? 'No Head') ?>
-                            </option>
-                            <?php endwhile; ?>
-                            </select>
-                    </div>
-                        
->>>>>>> 5056538b16a6be869744c375a4bc4096a7aeeaa1
                         <div class="input-group">
                             <label>Household Head</label>
                             <select name="household_id">
