@@ -53,10 +53,8 @@ function safeHtml($value) {
     return htmlspecialchars($value ?? '');
 }
 
-$householdsSql = " SELECT household_id, household_head 
-FROM household WHERE household_head 
-IS NOT NULL ORDER BY household_head ASC ";
-$householdsResult = $conn->query($householdsSql);
+$householdResult = $conn->query("SELECT household_id, household_head FROM household ORDER BY household_id ASC");
+
 
 ?>
 <!DOCTYPE html>
@@ -203,21 +201,21 @@ $householdsResult = $conn->query($householdsSql);
 
                     <h3 class="section-title">Address & Location</h3>
                     <div class="form-grid">
-                        <div class="input-group"> 
-                            <label for="household_id">Household Head *</label> 
-                            <select id="household_id" name="household_id" required> 
-                                <option value="">Select household head</option> 
-                                <?php while ($row = $householdsResult->fetch_assoc()) {
-                                     $selected = ($row['household_id'] == $residentData['household_id']) ? 'selected' : '';
-                                      echo '<option value="' 
-                                      . safeHtml($row['household_id']) 
-                                      . '" ' . $selected 
-                                      . '>' 
-                                      . safeHtml($row['household_head']) 
-                                      . ' (ID ' . safeHtml($row['household_id']) 
-                                      . ')' 
-                                      . '</option>';
-                                       } ?> </select> </div>
+                        <div class="input-group">
+                            <label>Household</label>
+                            <select name="household_id" required>
+                            <option value="">Select Household</option>
+                            <?php 
+                            if ($householdResult->num_rows > 0) {
+                            $householdResult->data_seek(0);
+                            }
+                            while($row = $householdResult->fetch_assoc()): ?>
+                            <option value="<?= $row['household_id'] ?>" <?php if(($resData['household_id'] ?? '') == $row['household_id']) echo 'selected'; ?>>
+                            <?= htmlspecialchars($row['household_id']) ?> - <?= htmlspecialchars($row['household_head'] ?? 'No Head') ?>
+                            </option>
+                            <?php endwhile; ?>
+                            </select>
+                    </div>
                         
                         <div class="input-group">
                             <label for="purok">Purok *</label>
