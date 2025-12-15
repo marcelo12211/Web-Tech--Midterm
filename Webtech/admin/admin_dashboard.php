@@ -1,11 +1,6 @@
 <?php
-// admin_dashboard.php
 session_start();
-
-// 🚨 Tiyakin na TAMA ang path. Kung ang db_connect.php ay nasa labas ng admin folder, ito ay tama:
 include '../db_connect.php'; 
-
-// 1. Authentication Check
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -13,10 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $logged_in_username = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Admin';
 $error = '';
-
-// --- FUNCTION TO GET DYNAMIC COUNTS ---
 function getCount($conn, $table) {
-    // Escape table name to prevent SQL injection if the table name came from external input (though here it's static)
     $safe_table = mysqli_real_escape_string($conn, $table); 
     $sql = "SELECT COUNT(*) AS count FROM $safe_table";
     $result = $conn->query($sql);
@@ -26,17 +18,12 @@ function getCount($conn, $table) {
     }
     return 0;
 }
-
-// 2. Fetch Dashboard Counts
 $total_residents = getCount($conn, 'residents');
 $total_documents = getCount($conn, 'documents');
 $total_users = getCount($conn, 'users'); 
 $total_deaths = getCount($conn, 'deaths');
 $activity_logs = [];
-
-// 3. Fetch Activity Logs (Latest 5 entries)
 $activity_logs = [];
-// Order by log_id DESC dahil nag-error ang log_time noon
 $log_result = $conn->query("SELECT * FROM user_log ORDER BY log_id DESC LIMIT 5");
 
 if ($log_result && $log_result->num_rows > 0) {
@@ -44,7 +31,6 @@ if ($log_result && $log_result->num_rows > 0) {
         $activity_logs[] = $row;
     }
 } else {
-    // Sample data (fallback if user_log is empty)
     $activity_logs = [
         ['log_time' => 'N/A', 'user_name' => 'System', 'action' => 'No Data', 'details' => 'Please implement logging in login.php, residents.php, etc.'],
         ['log_time' => '2025-12-11 10:00 PM', 'user_name' => 'Admin', 'action' => 'Login', 'details' => 'Successful login to the system.'], 
@@ -53,18 +39,16 @@ if ($log_result && $log_result->num_rows > 0) {
         ['log_time' => '2025-12-11 08:00 PM', 'user_name' => 'Staff User 2', 'action' => 'Update', 'details' => 'Updated contact number for **Santos, Maria**.'],
     ];
 }
-
-// 4. Function for Action Tag Styling
 function getActionTag($action) {
     switch (strtolower($action)) {
         case 'create':
         case 'add':
-            return 'badge-yes'; // Green
+            return 'badge-yes';
         case 'delete':
         case 'remove':
-            return 'badge-no'; // Red
+            return 'badge-no';
         default:
-            return 'badge-info'; // Blue/Default
+            return 'badge-info';
     }
 }
 ?>
@@ -75,12 +59,9 @@ function getActionTag($action) {
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Admin Dashboard</title>
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
 <link rel="stylesheet" href="css/style.css" />
-
 <script>
-// Prevent back button functionality after logout/forwarding
 window.onload = function () {
     if (window.history.length > 0) {
         window.history.forward();
@@ -105,7 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <ul>
                 <li><a href="admin_dashboard.php" class="active">Dashboard</a></li>
                 <li><a href="residents.php">Manage Residents</a></li>
-                <li><a href="manage_users.php">Manage Users</a></li>
+                <li><a href="users.php">Manage Users</a></li>
                 <li><a href="documents.php">Documents</a></li>
                 <li><a href="logout.php">Logout</a></li>
             </ul>
