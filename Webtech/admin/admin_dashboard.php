@@ -1,5 +1,9 @@
 <?php
 session_start();
+<<<<<<< HEAD
+=======
+
+>>>>>>> dd66c9c5fc46184fee249e123582cff0b091cade
 include '../db_connect.php'; 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -8,6 +12,10 @@ if (!isset($_SESSION['user_id'])) {
 
 $logged_in_username = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Admin';
 $error = '';
+<<<<<<< HEAD
+=======
+
+>>>>>>> dd66c9c5fc46184fee249e123582cff0b091cade
 function getCount($conn, $table) {
     $safe_table = mysqli_real_escape_string($conn, $table); 
     $sql = "SELECT COUNT(*) AS count FROM $safe_table";
@@ -18,19 +26,33 @@ function getCount($conn, $table) {
     }
     return 0;
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> dd66c9c5fc46184fee249e123582cff0b091cade
 $total_residents = getCount($conn, 'residents');
 $total_documents = getCount($conn, 'documents');
 $total_users = getCount($conn, 'users'); 
 $total_deaths = getCount($conn, 'deaths');
 $activity_logs = [];
+<<<<<<< HEAD
+=======
+
+>>>>>>> dd66c9c5fc46184fee249e123582cff0b091cade
 $activity_logs = [];
 $log_result = $conn->query("SELECT * FROM user_log ORDER BY log_id DESC LIMIT 5");
 
+
+// HARDCODED ITO ISSUE
 if ($log_result && $log_result->num_rows > 0) {
     while($row = $log_result->fetch_assoc()) {
         $activity_logs[] = $row;
     }
 } else {
+<<<<<<< HEAD
+=======
+    // HARDCODED ITO ISSUE
+>>>>>>> dd66c9c5fc46184fee249e123582cff0b091cade
     $activity_logs = [
         ['log_time' => 'N/A', 'user_name' => 'System', 'action' => 'No Data', 'details' => 'Please implement logging in login.php, residents.php, etc.'],
         ['log_time' => '2025-12-11 10:00 PM', 'user_name' => 'Admin', 'action' => 'Login', 'details' => 'Successful login to the system.'], 
@@ -39,16 +61,29 @@ if ($log_result && $log_result->num_rows > 0) {
         ['log_time' => '2025-12-11 08:00 PM', 'user_name' => 'Staff User 2', 'action' => 'Update', 'details' => 'Updated contact number for **Santos, Maria**.'],
     ];
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> dd66c9c5fc46184fee249e123582cff0b091cade
 function getActionTag($action) {
     switch (strtolower($action)) {
         case 'create':
         case 'add':
+<<<<<<< HEAD
             return 'badge-yes';
         case 'delete':
         case 'remove':
             return 'badge-no';
         default:
             return 'badge-info';
+=======
+            return 'badge-yes'; 
+        case 'delete':
+        case 'remove':
+            return 'badge-no'; 
+        default:
+            return 'badge-info'; 
+>>>>>>> dd66c9c5fc46184fee249e123582cff0b091cade
     }
 }
 ?>

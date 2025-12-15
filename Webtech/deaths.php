@@ -37,7 +37,6 @@ if (!empty($filter_year) && is_numeric($filter_year)) {
 
 $where_sql = count($where_clauses) > 0 ? " WHERE " . implode(" AND ", $where_clauses) : "";
 
-
 function getNextDeathRecordNumber($conn) {
     if (!$conn || $conn->connect_error) {
         return 'D-ERR';
@@ -52,9 +51,10 @@ function getNextDeathRecordNumber($conn) {
     }
 }
 
+$next_record_number = getNextDeathRecordNumber($conn);
+
 function refValues($arr){
-    if (strnatcmp(phpversion(),'5.3') >= 0) // PHP >= 5.3
-    {
+    if (strnatcmp(phpversion(),'5.3') >= 0) {
         $refs = array();
         foreach($arr as $key => $value)
             $refs[$key] = &$arr[$key];
@@ -95,7 +95,7 @@ while (count($top_causes) < 2) {
 }
 
 $death_records = [];
-$sql_records = "SELECT id, name, age, cause_of_death, date_of_death, record_number FROM deaths" . $where_sql . " ORDER BY date_of_death DESC";
+$sql_records = "SELECT * FROM deaths" . $where_sql . " ORDER BY date_of_death DESC";
 
 $stmt = $conn->prepare($sql_records);
 
@@ -121,6 +121,11 @@ unset($_SESSION['status_success']);
 
 $status_error = $_SESSION['status_error'] ?? null;
 unset($_SESSION['status_error']);
+
+function formatDate($date) {
+    if (empty($date) || $date == '0000-00-00') return 'N/A';
+    return date('M d, Y', strtotime($date));
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -129,6 +134,7 @@ unset($_SESSION['status_error']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Deaths and Records - Happy Hallow Barangay System</title>
     <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/residents-details.css" />
   </head>
 
   <body>
@@ -155,99 +161,84 @@ unset($_SESSION['status_error']);
         </header>
 
         <main class="page-content">
-          <div class="directory-header">
-            <h2>Death Records</h2>
-            <button class="btn primary-btn" onclick="openDeathRecordModal()">
-              + Add New Record
-            </button>
-          </div>
-          
-          <?php if (isset($status_success)): ?>
-            <div class="alert success"><?php echo htmlspecialchars($status_success); ?></div>
-          <?php endif; ?>
-          <?php if (isset($status_error)): ?>
-            <div class="alert error"><?php echo htmlspecialchars($status_error); ?></div>
-          <?php endif; ?>
-
-          <div class="card filter-section">
-            <h3>Death Statistics and Filter</h3>
-            <div class="dashboard-grid">
-              <div class="stat-card report-stat">
-                <p class="stat-label">Total Death Records</p>
-                <p class="stat-value"><span><?php echo htmlspecialchars($total_deaths); ?></span></p> 
-              </div>
-
-              <div
-                class="stat-card report-stat"
-                style="border-left-color: #dc3545"
-              >
-                <p class="stat-label">Cause: <?php echo htmlspecialchars($top_causes[0]['cause_of_death']); ?></p>
-                <p class="stat-value"><span><?php echo htmlspecialchars($top_causes[0]['count']); ?></span></p>
-              </div>
-
-              <div
-                class="stat-card report-stat"
-                style="border-left-color: #ffc107"
-              >
-                <p class="stat-label">Cause: <?php echo htmlspecialchars($top_causes[1]['cause_of_death']); ?></p>
-                <p class="stat-value"><span><?php echo htmlspecialchars($top_causes[1]['count']); ?></span></p>
-              </div>
+          <div class="residents-directory card">
+            <div class="directory-header">
+              <h2>Death Records</h2>
+              <button class="btn primary-btn" onclick="openDeathRecordModal()">
+                + Add New Record
+              </button>
             </div>
+            
+            <?php if (isset($status_success)): ?>
+              <div class="alert success"><?php echo htmlspecialchars($status_success); ?></div>
+            <?php endif; ?>
+            <?php if (isset($status_error)): ?>
+              <div class="alert error"><?php echo htmlspecialchars($status_error); ?></div>
+            <?php endif; ?>
 
-            <form method="GET" action="deaths.php">
-                <div class="filter-dropdowns">
-                  <div class="input-group">
-                    <label for="filterName">Name</label>
-                    <input
-                      type="text"
-                      id="filterName"
-                      name="filterName"
-                      placeholder="Search by Name"
-                      value="<?php echo $current_filter_name; ?>"
-                    />
-                  </div>
-                  <div class="input-group">
-                    <label for="filterYear">Year of Death</label>
-                    <input
-                      type="number"
-                      id="filterYear"
-                      name="filterYear"
-                      min="1900"
-                      max="2100"
-                      placeholder="e.g., 2024"
-                      value="<?php echo $current_filter_year; ?>"
-                    />
-                  </div>
-                  <div class="input-group">
-                    <label>&nbsp;</label>
-                    <button type="submit" class="btn primary-btn" style="width: 100%">
-                      Filter
-                    </button>
-                  </div>
-                  <?php if (!empty($filter_name) || !empty($filter_year)): ?>
-                  <div class="input-group">
-                    <label>&nbsp;</label>
-                    <a href="deaths.php" class="btn secondary" style="width: 100%; text-align: center;">Clear Filters</a>
-                  </div>
-                  <?php endif; ?>
+            <div class="filter-section">
+              <h3>Death Statistics</h3>
+              <div class="dashboard-grid">
+                <div class="stat-card report-stat">
+                  <p class="stat-label">Total Death Records</p>
+                  <p class="stat-value"><span><?php echo htmlspecialchars($total_deaths); ?></span></p> 
                 </div>
-            </form>
-          </div>
 
-          <div class="card data-table-card">
-            <h3>Death Record Details</h3>
-            <div class="search-results-info">
-              Displaying 1-<?php echo min(count($death_records), 10); ?> of <?php echo count($death_records); ?> records 
-              <?php if (!empty($filter_name) || !empty($filter_year)): ?>
-                  (Filtered Result)
-              <?php endif; ?>
-              of <?php echo count($death_records); ?> total records shown.
+                <div class="stat-card report-stat" style="border-left-color: #dc3545">
+                  <p class="stat-label">Cause: <?php echo htmlspecialchars($top_causes[0]['cause_of_death']); ?></p>
+                  <p class="stat-value"><span><?php echo htmlspecialchars($top_causes[0]['count']); ?></span></p>
+                </div>
+
+                <div class="stat-card report-stat" style="border-left-color: #ffc107">
+                  <p class="stat-label">Cause: <?php echo htmlspecialchars($top_causes[1]['cause_of_death']); ?></p>
+                  <p class="stat-value"><span><?php echo htmlspecialchars($top_causes[1]['count']); ?></span></p>
+                </div>
+              </div>
+
+              <form method="GET" action="deaths.php" id="filterForm">
+                  <div class="filter-dropdowns">
+                    <div class="input-group">
+                      <label for="filterName">Name</label>
+                      <input
+                        type="text"
+                        id="filterName"
+                        name="filterName"
+                        placeholder="Search by Name"
+                        value="<?php echo $current_filter_name; ?>"
+                      />
+                    </div>
+                    <div class="input-group">
+                      <label for="filterYear">Year of Death</label>
+                      <input
+                        type="number"
+                        id="filterYear"
+                        name="filterYear"
+                        min="1900"
+                        max="2100"
+                        placeholder="e.g., 2024"
+                        value="<?php echo $current_filter_year; ?>"
+                      />
+                    </div>
+                    <div class="input-group">
+                      <label>&nbsp;</label>
+                      <button type="submit" class="btn primary-btn" style="width: 100%">
+                        Filter
+                      </button>
+                    </div>
+                    <?php if (!empty($filter_name) || !empty($filter_year)): ?>
+                    <div class="input-group">
+                      <label>&nbsp;</label>
+                      <a href="deaths.php" class="btn secondary" style="width: 100%; text-align: center;">Clear Filters</a>
+                    </div>
+                    <?php endif; ?>
+                  </div>
+              </form>
             </div>
-            <div class="table-responsive">
+
+            <div class="data-table-card">
               <table>
                 <thead>
                   <tr>
-                    <th>Rec. No.</th>
                     <th>Name</th>
                     <th>Age</th>
                     <th>Cause of Death</th>
@@ -256,29 +247,31 @@ unset($_SESSION['status_error']);
                   </tr>
                 </thead>
                 <tbody id="deathRecordTable">
-                <?php if (empty($death_records)): ?>
-                    <tr>
-                        <td colspan="6">No death records found.</td>
-                    </tr>
-                <?php else: ?>
-                    <?php foreach ($death_records as $record): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($record['record_number'] ?? 'N/A'); ?></td>
-                            <td><?php echo htmlspecialchars($record['name']); ?></td>
-                            <td><?php echo htmlspecialchars($record['age']); ?></td>
-                            <td><?php echo htmlspecialchars($record['cause_of_death']); ?></td>
-                            <td><?php echo htmlspecialchars($record['date_of_death']); ?></td>
-                            <td class="actions-cell">
-                                <a
-                                    href="#"
-                                    class="action-link view"
-                                    onclick="viewDetails(<?php echo $record['id']; ?>)"
-                                    >View Details</a
-                                >
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                <?php
+                if (!empty($death_records)) {
+                    $counter = 0;
+                    foreach ($death_records as $record) {
+                        $deathId = htmlspecialchars($record['id']); 
+                        $rowId = "row-" . $counter;
+                        $detailsId = "details-" . $counter;
+
+                        echo "<tr>";
+                        echo "<td>" . htmlspecialchars($record['name']) . "</td>";
+                        echo "<td>" . htmlspecialchars($record['age']) . "</td>";
+                        echo "<td>" . htmlspecialchars($record['cause_of_death']) . "</td>";
+                        echo "<td>" . formatDate($record['date_of_death']) . "</td>";
+                        echo "<td>
+                                <button class='btn small-btn edit-btn' onclick='editDeath(\"{$deathId}\")'>Edit</button>
+                                <button class='btn small-btn delete-btn' onclick='deleteDeath(\"{$deathId}\")'>Delete</button>
+                              </td>";
+                        echo "</tr>";
+                        
+                        $counter++;
+                    }
+                } else {
+                    echo "<tr><td colspan='5'>No death records found.</td></tr>";
+                }
+                ?>
                 </tbody>
               </table>
             </div>
@@ -300,9 +293,7 @@ unset($_SESSION['status_error']);
               <h3>Basic Information</h3>
               <div class="form-grid">
                 <div class="input-group">
-                  <label for="recordNumber"
-                    >Record Number (Auto-Generated)</label
-                  >
+                  <label for="recordNumber">Record Number (Auto-Generated)</label>
                   <input
                     type="text"
                     id="recordNumberDisplay"
@@ -396,15 +387,21 @@ unset($_SESSION['status_error']);
     </div>
 
     <script>
+      function editDeath(id) {
+          window.location.href = `edit_deaths.php?id=${id}`;
+      }
+
+      function deleteDeath(id) {
+          if (confirm(`Are you sure you want to delete this death record? This action cannot be undone.`)) {
+              window.location.href = `delete_deaths.php?id=${id}`;
+          }
+      }
+
       function toggleIdFields() {
         const isPwd = document.getElementById("isPwd").value === "yes";
-        const isSeniorCitizen =
-          document.getElementById("isSeniorCitizen").value === "yes";
-        document.getElementById("pwdIdField").style.display = isPwd
-          ? "flex"
-          : "none";
-        document.getElementById("seniorCitizenIdFields").style.display =
-          isSeniorCitizen ? "grid" : "none";
+        const isSeniorCitizen = document.getElementById("isSeniorCitizen").value === "yes";
+        document.getElementById("pwdIdField").style.display = isPwd ? "flex" : "none";
+        document.getElementById("seniorCitizenIdFields").style.display = isSeniorCitizen ? "grid" : "none";
       }
 
       function openDeathRecordModal() {
