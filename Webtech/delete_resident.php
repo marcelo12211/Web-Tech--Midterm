@@ -1,25 +1,47 @@
 <?php
-include 'db_connect.php'; 
+include 'db_connect.php';
 
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     header('Location: residents.php');
     exit();
 }
 
-$residentId = $conn->real_escape_string($_GET['id']);
+$residentId = intval($_GET['id']);
 
-$sql_demo_delete = "DELETE FROM demographics WHERE MEMBER_ID = '$residentId'";
+$conn->begin_transaction();
 
-if (!$conn->query($sql_demo_delete)) {
-    die("Error deleting demographic data: " . $conn->error);
+try {
+
+    $stmt = $conn->prepare("DELETE FROM disabled_persons WHERE resident_id = ?");
+    $stmt->bind_param("i", $residentId);
+    $stmt->execute();
+    $stmt->close();
+
+    $stmt = $conn->prepare("DELETE FROM senior_citizens WHERE resident_id = ?");
+    $stmt->bind_param("i", $residentId);
+    $stmt->execute();
+    $stmt->close();
+
+    if ($conn->query("SHOW TABLES LIKE 'death_records'")->num_rows > 0) {
+        $stmt = $conn->prepare("DELETE FROM death_records WHERE resident_id = ?");
+        $stmt->bind_param("i", $residentId);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    $stmt = $conn->prepare("DELETE FROM residents WHERE person_id = ?");
+    $stmt->bind_param("i", $residentId);
+    $stmt->execute();
+    $stmt->close();
+
+    $conn->commit();
+
+    header("Location: residents.php?status=deleted&id=" . urlencode($residentId));
+    exit();
+
+} catch (Exception $e) {
+
+    $conn->rollback();
+    die("Error deleting resident: " . $e->getMessage());
 }
-
-$sql_id_delete = "DELETE FROM identification WHERE ID = '$residentId'";
-
-if (!$conn->query($sql_id_delete)) {
-    die("Error deleting resident identification data: " . $conn->error);
-}
-
-header('Location: residents.php?status=deleted&id=' . urlencode($residentId));
-exit();
 ?>
