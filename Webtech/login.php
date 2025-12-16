@@ -18,81 +18,46 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $first_digit = substr($login_id, 0, 1);
 
         /* ===============================
-           ADMIN LOGIN → NODE VALIDATION
+           UNIFIED LOGIN (ADMIN / CLIENT / STAFF)
+           -------------------------------
+           This block replaces the previous separate 'if ($first_digit === '9')'
+           and 'else' logic to handle all logins using PHP/MySQL for validation.
+           We select user_id, password, role, AND email (for completeness).
            =============================== */
-        if ($first_digit === '9') {
+        $stmt = mysqli_prepare($conn, "SELECT user_id, password, role, email FROM users WHERE user_id = ?");
+        mysqli_stmt_bind_param($stmt, "i", $login_id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_bind_result($stmt, $user_id, $db_password, $user_role, $email);
 
-            // Get admin email from DB
-            $stmt = mysqli_prepare($conn, "SELECT email FROM users WHERE user_id = ?");
-            mysqli_stmt_bind_param($stmt, "i", $login_id);
-            mysqli_stmt_execute($stmt);
-            mysqli_stmt_bind_result($stmt, $email);
-            mysqli_stmt_fetch($stmt);
-            mysqli_stmt_close($stmt);
+        if (mysqli_stmt_fetch($stmt)) {
+            // NOTE: This uses plaintext comparison for passwords, matching your current DB schema.
+            // For production, use password_verify().
+            if ($password === $db_password) {
+                session_regenerate_id(true);
+                $_SESSION['user_id'] = $user_id;
+                $_SESSION['role'] = $user_role;
 
-            if (empty($email)) {
-                $message = "Account not found.";
-            } else {
-
-                $payload = json_encode([
-                    "email" => $email,
-                    "password" => $password
-                ]);
-
-                $ch = curl_init("http://127.0.0.1:5000/admin/login");
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-                $response = curl_exec($ch);
-                curl_close($ch);
-
-                $result = json_decode($response, true);
-
-                if (!empty($result['success']) && $result['role'] === 'admin') {
-                    session_regenerate_id(true);
-                    $_SESSION['user_id'] = $result['user_id'];
-                    $_SESSION['role'] = 'admin';
-
-                    header("Location: /webtechfinals/Web-Tech--Midterm/Webtech/admin/admin_dashboard.php");
+                // --- REDIRECTION LOGIC ---
+                if ($user_role === 'admin' && $first_digit === '9') {
+                    // Admin login successful (e.g., 9002)
+                    header("Location: admin/admin_dashboard.php");
+                    exit;
+                } elseif ($first_digit === '5') {
+                    // Staff/Client login successful (e.g., 5004)
+                    header("Location: index.php");
                     exit;
                 } else {
-                    $message = "Invalid admin credentials.";
-                }
-            }
-
-        } else {
-
-            /* ===============================
-               CLIENT / STAFF LOGIN (PHP)
-               =============================== */
-            $stmt = mysqli_prepare($conn, "SELECT user_id, password, role FROM users WHERE user_id = ?");
-            mysqli_stmt_bind_param($stmt, "i", $login_id);
-            mysqli_stmt_execute($stmt);
-            mysqli_stmt_bind_result($stmt, $user_id, $db_password, $user_role);
-
-            if (mysqli_stmt_fetch($stmt)) {
-                if ($password === $db_password) {
-                    session_regenerate_id(true);
-                    $_SESSION['user_id'] = $user_id;
-                    $_SESSION['role'] = $user_role;
-
-                    if ($first_digit === '5') {
-                        header("Location: index.php");
-                        exit;
-                    } else {
-                        $message = "Invalid ID format or role.";
-                    }
-                } else {
-                    $message = "Incorrect password.";
+                    // Account found, but ID/Role doesn't match expected redirection logic
+                    $message = "Account found, but invalid ID format or role for redirection.";
                 }
             } else {
-                $message = "Account not found.";
+                $message = "Incorrect password.";
             }
-
-            mysqli_stmt_close($stmt);
+        } else {
+            $message = "Account not found.";
         }
+
+        mysqli_stmt_close($stmt);
     }
 }
 ?>

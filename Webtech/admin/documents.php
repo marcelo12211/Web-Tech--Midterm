@@ -527,7 +527,7 @@ th, td {
                 </div>
             </div>
 
-            <h2>**Generated Documents** (<?php echo $document_count; ?> Found)</h2>
+            <h2>Generated Documents</h2>
             
             <?php if (!empty($error)): ?>
                 <div class="alert-error"><?php echo $error; ?></div>

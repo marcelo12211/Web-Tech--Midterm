@@ -87,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $bind_params = [&$fullname, &$email, &$role, &$status, &$user_id];
         }
 
-        $sql_update = "UPDATE users SET fullname = ?, email = ?, role = ?, status = ?" 
+        $sql_update = "UPDATE users SET fullname = ?, email = ?, role = ?, status = ?"
                     . $password_update 
                     . " WHERE user_id = ?";
         

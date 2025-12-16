@@ -6,29 +6,10 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
-
 $logged_in_username = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Admin';
 $search_term = $_GET['search'] ?? '';
 $purok_filter = $_GET['purok'] ?? '';
 $category_filter = $_GET['category'] ?? '';
-function getFullName($res) {
-    $name = htmlspecialchars($res['first_name']) . ' ';
-    if (!empty($res['middle_name'])) {
-        $name .= htmlspecialchars(substr($res['middle_name'], 0, 1)) . '. ';
-    }
-    $name .= htmlspecialchars($res['surname']);
-    if (!empty($res['suffix'])) {
-        $name .= ' ' . htmlspecialchars($res['suffix']);
-    }
-    return $name;
-}
-
-function getStatusBar($res) {
-    if ($res['is_senior'] == 1) return ['text' => 'Senior Citizen', 'class' => 'badge-senior'];
-    if ($res['is_disabled'] == 1) return ['text' => 'Person with Disability (PWD)', 'class' => 'badge-pwd'];
-    if ($res['is_pregnant'] == 1 && $res['sex'] == 'Female') return ['text' => 'Pregnant Resident', 'class' => 'badge-pregnant'];
-    return ['text' => 'General Resident', 'class' => 'badge-none'];
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -254,7 +235,6 @@ th, td {
     border-bottom: 2px solid var(--primary-color);
 }
 
-/* Detail Content */
 .tab-content {
     display: none;
 }
@@ -480,6 +460,7 @@ th, td {
             const purokSelect = document.getElementById("purok-select");
             const residentCountSpan = document.getElementById("resident-count");
             let searchTimeout;
+            
             function loadResidents() {
                 collapseAllDetails();
                 tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Filtering data...</td></tr>';
@@ -492,7 +473,7 @@ th, td {
                 fetch(url)
                     .then(response => {
                         if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
+                            return response.text().then(text => { throw new Error(text) });
                         }
                         return response.text();
                     })
@@ -505,7 +486,7 @@ th, td {
                     })
                     .catch(error => {
                         console.error('Fetch error:', error);
-                        tableBody.innerHTML = `<tr><td colspan="7" class="alert-error" style="text-align: center;">Failed to load data. Please check network and server logs.</td></tr>`;
+                        tableBody.innerHTML = `<tr><td colspan="7" class="alert-error" style="text-align: center;">${error.message || 'Failed to load data. Please check network and server logs.'}</td></tr>`;
                         residentCountSpan.textContent = '0';
                     });
             }
@@ -515,7 +496,6 @@ th, td {
             });
             categorySelect.addEventListener('change', loadResidents);
             purokSelect.addEventListener('change', loadResidents);
-
             function collapseAllDetails() {
                 document.querySelectorAll('.detail-row').forEach(otherDetail => {
                     otherDetail.classList.remove('expanded'); 
@@ -524,6 +504,7 @@ th, td {
                     otherRow.classList.remove('expanded');
                 });
             }
+            
             function handleRowClick(e) {
                 if (e.target.closest(".action-btn, a")) {
                     return;
@@ -543,13 +524,13 @@ th, td {
                     document.querySelectorAll('.detail-row.expanded').forEach(dr => {
                         if (dr !== detailRow) dr.classList.remove('expanded');
                     });
-                    
                     if (!isExpanded) {
                         row.classList.add("expanded");
                         detailRow.classList.add('expanded');
                         const allTabs = detailRow.querySelectorAll(".detail-tab");
                         const allContents = detailRow.querySelectorAll(".tab-content");
                         const firstTab = detailRow.querySelector(".detail-tab");
+                        
                         allTabs.forEach((tab) => tab.classList.remove("active"));
                         allContents.forEach((content) => content.classList.remove("active"));
                         
@@ -570,9 +551,11 @@ th, td {
 
             function attachRowClickListeners() {
                 document.querySelectorAll(".resident-row").forEach((row) => {
+                    row.removeEventListener("click", handleRowClick);
                     row.addEventListener("click", handleRowClick);
                 });
             }
+            
             function handleTabClick(e) {
                 const detailContainer = e.target.closest(".detail-container");
                 const tabName = e.target.dataset.tab;
@@ -587,8 +570,10 @@ th, td {
                     }
                 }
             }
+            
             function attachDetailTabListeners() {
                 document.querySelectorAll(".detail-tab").forEach((tab) => {
+                    tab.removeEventListener("click", handleTabClick);
                     tab.addEventListener("click", handleTabClick);
                 });
             }

@@ -1,39 +1,63 @@
 <?php
 session_start();
-include '../db_connect.php';
+// Tiyaking tama ang path papunta sa database connection file
+include '../db_connect.php'; 
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
+
 $logged_in_username = htmlspecialchars($_SESSION['user_name'] ?? 'Guest');
-/*NODE API version for counting from db instead of php queries*/
-$stats = [
-    "total_residents" => 0,
-    "senior" => 0,
-    "pwd" => 0,
-    "pregnant" => 0,
-    "regular" => 0,
-    "total_children" => 0
-];
 
-$ch = curl_init("http://127.0.0.1:5000/admin/dashboard/stats");
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$response = curl_exec($ch);
-curl_close($ch);
+// --- DATABASE STATS FETCHING (PHP/MySQLi) ---
+// Tiyakin na ang $conn ay galing sa db_connect.php
+if (!isset($conn) || $conn === null) {
+    // Kung hindi gumana ang connection, i-log ang error at mag-exit
+    error_log("Database connection failed in admin_dashboard.php");
+    $stats = [
+        "total_residents" => 0,
+        "senior" => 0,
+        "pwd" => 0,
+        "pregnant" => 0,
+        "regular" => 0,
+        "total_children" => 0
+    ];
+} else {
+    // 1. Total Residents
+    $sql_total = "SELECT COUNT(person_id) AS total FROM residents";
+    $result_total = mysqli_query($conn, $sql_total);
+    $total_residents = mysqli_fetch_assoc($result_total)['total'] ?? 0;
 
-if ($response) {
-    $decoded = json_decode($response, true);
-    if (is_array($decoded)) {
-        $stats = array_merge($stats, $decoded);
-    }
+    // 2. Senior Citizens (is_senior = 1)
+    $sql_senior = "SELECT COUNT(person_id) AS senior FROM residents WHERE is_senior = 1";
+    $result_senior = mysqli_query($conn, $sql_senior);
+    $senior = mysqli_fetch_assoc($result_senior)['senior'] ?? 0;
+
+    // 3. PWD (is_disabled = 1)
+    $sql_pwd = "SELECT COUNT(person_id) AS pwd FROM residents WHERE is_disabled = 1";
+    $result_pwd = mysqli_query($conn, $sql_pwd);
+    $pwd = mysqli_fetch_assoc($result_pwd)['pwd'] ?? 0;
+
+    // 4. Pregnant Residents (is_pregnant = 1 AND sex = 'Female')
+    $sql_pregnant = "SELECT COUNT(person_id) AS pregnant FROM residents WHERE is_pregnant = 1 AND sex = 'F'";
+    $result_pregnant = mysqli_query($conn, $sql_pregnant);
+    $pregnant = mysqli_fetch_assoc($result_pregnant)['pregnant'] ?? 0;
+
+    // 5. Total Children (is_senior=0 AND is_disabled=0 AND is_pregnant=0) (This is an assumption for 'Regular')
+    // NOTE: Ang 'regular' residents ay ang mga hindi pasok sa special categories.
+    $regular = $total_residents - $senior - $pwd - $pregnant;
+    // Tiyakin na hindi ito magiging negative
+    $regular = max(0, $regular); 
+    
+    // 6. Total Children Count (Sum of all children_count columns)
+    $sql_children = "SELECT SUM(children_count) AS total_children FROM residents";
+    $result_children = mysqli_query($conn, $sql_children);
+    $total_children = mysqli_fetch_assoc($result_children)['total_children'] ?? 0;
+
+    // Isara ang koneksyon pagkatapos mag-fetch
+    // mysqli_close($conn); // Maaari mong iwanan ito kung kailangan pa ang $conn sa ibang file
 }
-
-$total_residents = $stats['total_residents'];
-$senior = $stats['senior'];
-$pwd = $stats['pwd'];
-$pregnant = $stats['pregnant'];
-$regular = $stats['regular'];
-$total_children = $stats['total_children'];
 
 ?>
 <!DOCTYPE html>
@@ -44,6 +68,7 @@ $total_children = $stats['total_children'];
 <title>Happy Hallow Barangay System - Dashboard</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
+/* --- CSS CODE (NO CHANGE) --- */
 :root {
     --primary-color: #226b8dff;
     --primary-dark: #226b8dff;
@@ -60,83 +85,33 @@ $total_children = $stats['total_children'];
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-* {
-  box-sizing: border-box;
-}
-
+* { box-sizing: border-box; }
 body {
-  margin: 0;
-  font-family: "Roboto", Arial, sans-serif;
-  background: var(--background-color);
-  color: var(--text-color);
-}
-
-a {
-  text-decoration: none;
-}
-
-.app-container {
-  display: flex;
-  min-height: 100vh;
-}
-
-.sidebar {
-  width: 250px;
-  background: var(--sidebar-bg);
-  color: white;
-}
-
-.logo {
-  padding: 25px;
-  text-align: center;
-  font-weight: 700;
-  font-size: 1.15rem; 
-  line-height: 1.3;
-}
-
-.main-nav ul {
-    list-style: none;
-    padding: 0;
     margin: 0;
+    font-family: "Roboto", Arial, sans-serif;
+    background: var(--background-color);
+    color: var(--text-color);
 }
-.main-nav li {
-    margin: 0;
-}
-
-.main-nav a {
-  display: block;
-  padding: 14px 20px;
-  color: #bdc1c6;
-}
+a { text-decoration: none; }
+.app-container { display: flex; min-height: 100vh; }
+.sidebar { width: 250px; background: var(--sidebar-bg); color: white; }
+.logo { padding: 25px; text-align: center; font-weight: 700; font-size: 1.15rem; line-height: 1.3; }
+.main-nav ul { list-style: none; padding: 0; margin: 0; }
+.main-nav a { display: block; padding: 14px 20px; color: #bdc1c6; }
 .main-nav a:hover,
-.main-nav a.active {
-  background: var(--primary-dark); 
-  color: white;
-}
+.main-nav a.active { background: var(--primary-dark); color: white; }
 
-.main-content {
-  flex: 1;
-}
-
+.main-content { flex: 1; }
 .topbar {
-  background: white;
-  padding: 15px 30px;
-  border-bottom: 1px solid var(--border-color);
-  display: flex; 
-  justify-content: flex-end;
-  align-items: center;
-}
-
-.topbar-right {
-    display: flex;
+    background: white;
+    padding: 15px 30px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex; 
+    justify-content: flex-end;
     align-items: center;
 }
-
-.user-info {
-    margin-right: 15px;
-    color: var(--text-light);
-}
-
+.topbar-right { display: flex; align-items: center; }
+.user-info { margin-right: 15px; color: var(--text-light); }
 .logout-btn {
     padding: 8px 15px;
     border: 1px solid var(--border-color);
@@ -148,40 +123,30 @@ a {
     transition: background-color 0.2s;
     font-weight: 500;
 }
-
-.logout-btn:hover {
-    background: var(--background-color);
-}
-
-.page-content {
-  padding: 30px;
-}
-
-.page-content h2 {
-    margin-top: 0;
-    margin-bottom: 30px;
-    padding-bottom: 10px;
+.logout-btn:hover { background: var(--background-color); }
+.page-content { padding: 30px; }
+.page-content h2 { 
+    margin-top: 0; 
+    margin-bottom: 30px; 
+    padding-bottom: 10px; 
     border-bottom: 2px solid var(--primary-color); 
     width: fit-content; 
     font-size: 1.5rem;
     font-weight: 500;
 }
-
 .card {
-  background: white;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 25px;
-  margin-bottom: 30px;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 25px;
+    margin-bottom: 30px;
 }
-
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 20px;
     margin-bottom: 30px;
 }
-
 .stat-card {
     padding: 20px;
     display: flex;
@@ -208,78 +173,37 @@ a {
     color: var(--text-color);
     line-height: 1; 
 }
+/* Border Colors */
+.dashboard-grid .stat-card:nth-child(1) { border-left-color: var(--primary-color); }
+.dashboard-grid .stat-card:nth-child(2) { border-left-color: var(--warning-color); }
+.dashboard-grid .stat-card:nth-child(3) { border-left-color: var(--danger-color); }
+.dashboard-grid .stat-card:nth-child(4) { border-left-color: #64b5f6; } /* Light Blue */
+.dashboard-grid .stat-card:nth-child(5) { border-left-color: #26c6da; } /* Cyan */
 
-.dashboard-grid .stat-card:nth-child(1) {
-    border-left-color: var(--primary-color); 
-}
-.dashboard-grid .stat-card:nth-child(2) {
-    border-left-color: var(--warning-color); 
-}
-.dashboard-grid .stat-card:nth-child(3) {
-    border-left-color: var(--danger-color); 
-}
-.dashboard-grid .stat-card:nth-child(4) {
-    border-left-color: #64b5f6; 
-}
-.dashboard-grid .stat-card:nth-child(5) {
-    border-left-color: #26c6da;
-}
-
-.charts-container {
-    margin-top: 30px;
-}
-
-.chart-card {
-    padding: 25px;
-    margin-bottom: 0;
-}
-
-.chart-card h3 {
-    margin-top: 0;
-    font-weight: 500;
-    color: var(--text-color);
-}
-
-.chart-wrapper {
-    max-width: 450px;
-    margin: 0 auto;
-    padding-top: 20px;
-}
-.template-card .btn {
-  background-color: #1a73e8; 
-  border-color: #1a73e8;
-  color: #ffffff;
-}
-
-.template-card .btn:hover {
-  background-color: #1558c0;
-  border-color: #1558c0;
-  box-shadow: 0 4px 10px rgba(26, 115, 232, 0.4);
-}
+.charts-container { margin-top: 30px; }
+.chart-card { padding: 25px; margin-bottom: 0; }
+.chart-card h3 { margin-top: 0; font-weight: 500; color: var(--text-color); }
+.chart-wrapper { max-width: 450px; margin: 0 auto; padding-top: 20px; }
 @media (max-width: 768px) {
-  .sidebar {
-    display: none;
-  }
-  .page-content {
-    padding: 15px;
-  }
+    .sidebar { display: none; }
+    .page-content { padding: 15px; }
 }
 </style>
 </head>
 <body>
 <div class="app-container">
     <div class="sidebar">
-            <div class="logo">Happy Hallow<br />Barangay System</div>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="admin_dashboard.php">Dashboard</a></li>
-                    <li><a href="residents.php" class="active">Manage Residents</a></li>
-                    <li><a href="users.php">Manage Users</a></li>
-                    <li><a href="documents.php">Documents</a></li>
-                    <li><a href="logout.php">Logout</a></li>
-                </ul>
-            </nav>
-        </div>
+        <div class="logo">Happy Hallow<br />Barangay System</div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="admin_dashboard.php" class="active">Dashboard</a></li>
+                <li><a href="residents.php">Manage Residents</a></li>
+                <li><a href="users.php">Manage Users</a></li>
+                <li><a href="documents.php">Documents</a></li>
+                <li><a href="logout.php">Logout</a></li>
+            </ul>
+        </nav>
+    </div>
     <div class="main-content">
         <div class="topbar">
             <div class="topbar-right">
@@ -327,6 +251,12 @@ a {
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// I-inject ang PHP data sa JavaScript
+const seniorCount = <?php echo $senior; ?>;
+const pwdCount = <?php echo $pwd; ?>;
+const pregnantCount = <?php echo $pregnant; ?>;
+const regularCount = <?php echo $regular; ?>;
+
 const ctx = document.getElementById('categoriesChart').getContext('2d');
 new Chart(ctx, {
     type: 'doughnut',
@@ -339,10 +269,10 @@ new Chart(ctx, {
         ],
         datasets: [{
             data: [
-                <?php echo $senior; ?>,
-                <?php echo $pwd; ?>,
-                <?php echo $pregnant; ?>,
-                <?php echo $regular; ?>
+                seniorCount,
+                pwdCount,
+                pregnantCount,
+                regularCount
             ],
             backgroundColor: [
                 '#76d7d2', 
