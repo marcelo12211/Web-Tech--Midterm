@@ -401,7 +401,7 @@ th, td {
             </div>
             
             <div class="page-content">
-                <h2>**Resident Directory** (<span id="resident-count">Loading...</span> Found)</h2>
+                <h2>Resident Directory (<span id="resident-count">Loading...</span> Found)</h2>
 
                 <?php if (isset($_SESSION['success_message'])): ?>
                     <div class="alert-success">

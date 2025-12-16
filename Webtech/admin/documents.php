@@ -504,21 +504,21 @@ th, td {
             <div class="card template-card">
                 <div class="template-grid-container">
                     <div class="template-item">
-                        <h4><i class="fas fa-id-card"></i> Barangay Clearance</h4>
+                        <h4>Barangay Clearance</h4>
                         <p>Generate a general or specific clearance certificate.</p>
                         <a href="generate_clearance.php" class="btn primary-btn" style="padding: 8px 15px;">
                             <i class="fas fa-plus"></i> Generate
                         </a>
                     </div>
                     <div class="template-item">
-                        <h4><i class="fas fa-home"></i> Certificate of Residency</h4>
+                        <h4>Certificate of Residency</h4>
                         <p>Official proof of barangay residency.</p>
                         <a href="generate_residency.php" class="btn primary-btn" style="padding: 8px 15px;">
                             <i class="fas fa-plus"></i> Generate
                         </a>
                     </div>
                     <div class="template-item">
-                        <h4><i class="fas fa-hand-holding-usd"></i> Certificate of Indigency</h4>
+                        <h4>Certificate of Indigency</h4>
                         <p>Low-income status assistance certificate.</p>
                         <a href="generate_indigency.php" class="btn primary-btn" style="padding: 8px 15px;">
                             <i class="fas fa-plus"></i> Generate
