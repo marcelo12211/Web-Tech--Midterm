@@ -93,13 +93,13 @@ $conn->close();
             <div class="dashboard-grid">
                 
                 <div class="stat-card">
-                    <p class="stat-label">Total Residents</p>
+                    <p class="stat-label" >Total Residents</p>
                     <p class="stat-value"><span><?php echo $stats['total_residents']; ?></span></p>
                 </div>
                 
-                <div class="stat-card">
+                <div class="stat-card" >
                     <p class="stat-label">Senior Citizen</p>
-                    <p class="stat-value"><span><?php echo $stats['senior_count']; ?></span></p>
+                    <p class="stat-value" ><span><?php echo $stats['senior_count']; ?></span></p>
                 </div>
                 
                 <div class="stat-card">
