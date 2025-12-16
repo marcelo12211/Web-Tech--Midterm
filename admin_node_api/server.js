@@ -58,6 +58,42 @@ app.get("/admin/users", async (req, res) => {
   }
 });
 
+/*DASHBOARD STATSSS*/
+app.get("/admin/dashboard/stats", async (req, res) => {
+  try {
+    const [[total]] = await pool.query(
+      "SELECT COUNT(*) AS count FROM residents"
+    );
+
+    const [[senior]] = await pool.query(
+      "SELECT COUNT(*) AS count FROM residents WHERE is_senior = 1"
+    );
+
+    const [[pwd]] = await pool.query(
+      "SELECT COUNT(*) AS count FROM residents WHERE is_disabled = 1"
+    );
+
+    const [[pregnant]] = await pool.query(
+      "SELECT COUNT(*) AS count FROM residents WHERE is_pregnant = 1"
+    );
+
+    const regular =
+      total.count - (senior.count + pwd.count + pregnant.count);
+
+    res.json({
+      total_residents: total.count,
+      senior: senior.count,
+      pwd: pwd.count,
+      pregnant: pregnant.count,
+      regular: regular < 0 ? 0 : regular,
+      total_children: 5
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch dashboard stats" });
+  }
+});
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Admin API running on http://127.0.0.1:${PORT}`);
 });
