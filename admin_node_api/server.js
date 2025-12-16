@@ -8,8 +8,24 @@ const PORT = 5000;
 
 app.use(cors());
 app.use(express.json());
+const path = require("path");
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+const multer = require("multer");
 
 const pool = mysql.createPool(dbConfig);
+const fs = require("fs");
+
+const ensureDir = dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+};
+
+ensureDir("uploads");
+ensureDir("uploads/pwd_documents");
+ensureDir("uploads/senior_documents");
+
 
 /* Health check */
 app.get("/health", (req, res) => {

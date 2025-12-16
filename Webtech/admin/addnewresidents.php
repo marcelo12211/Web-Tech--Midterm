@@ -34,240 +34,15 @@ if ($residentId) {
 // Fetch household data for dropdown
 $householdResult = $conn->query("SELECT household_id, household_head FROM household ORDER BY household_id ASC");
 
-// --- POST Handling Logic ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Escape strings using prepared statements later or use real_escape_string carefully
-    $household_id     = intval($_POST['household_id']);
-    $first_name       = $conn->real_escape_string($_POST['first_name']);
-    $middle_name      = $conn->real_escape_string($_POST['middle_name'] ?? '');
-    $surname          = $conn->real_escape_string($_POST['surname']);
-    $suffix           = $conn->real_escape_string($_POST['suffix'] ?? '');
-    $sex              = $conn->real_escape_string($_POST['sex']);
-    $birthdate        = $conn->real_escape_string($_POST['birthdate']);
-    $civil_status     = $conn->real_escape_string($_POST['civil_status']);
-    $nationality      = $conn->real_escape_string($_POST['nationality']);
-    $religion         = $conn->real_escape_string($_POST['religion'] ?? '');
-    $purok            = intval($_POST['purok']);
-    $address          = $conn->real_escape_string($_POST['address']);
-    $education_level  = $conn->real_escape_string($_POST['education_level']);
-    $occupation       = $conn->real_escape_string($_POST['occupation']);
-    $vaccination      = $conn->real_escape_string($_POST['vaccination'] ?? '');
-    $children_count   = intval($_POST['children_count'] ?? 0); 
-    $special_status   = $conn->real_escape_string($_POST['special_status'] ?? 'None');
-
-    $is_senior = 0;
-    $is_disabled = 0;
-    $is_pregnant = 0;
-    $health_insurance = 'N/A';
-
-    // Set binary flags and health_insurance based on special_status
-    switch ($special_status) {
-        case 'Senior Citizen':
-            $is_senior = 1;
-            $health_insurance = 'Senior';
-            break;
-        case 'PWD':
-            $is_disabled = 1;
-            $health_insurance = 'PWD';
-            break;
-        case 'Pregnant':
-            $is_pregnant = 1;
-            $health_insurance = 'Pregnant';
-            break;
-        case 'Others':
-            $health_insurance = 'Others';
-            break;
-        default:
-            $health_insurance = 'N/A';
-            break;
-    }
-
-    $current_date = date('Y-m-d');
-    $religion_value = empty($religion) ? "NULL" : "'$religion'";
-    
-    // Validation (simple checks)
-    if ($household_id <= 0) { $error = "Household is required."; }
-    if (empty($first_name) || empty($surname) || empty($sex) || empty($birthdate) || empty($civil_status) || empty($nationality) || empty($address) || empty($education_level)) { 
-        $error = "Required fields cannot be empty."; 
-    }
-    
-    if (!$error) {
-        if ($editMode) {
-            // Update mode
-            $residency_update = "";
-            if (empty($resData['residency_start_date']) || $resData['residency_start_date'] == '0000-00-00') {
-                 $residency_update = ", residency_start_date='$current_date'";
-            }
-            
-            $sql = "UPDATE residents SET 
-                household_id=$household_id,
-                first_name='$first_name',
-                middle_name='$middle_name',
-                surname='$surname',
-                suffix='$suffix',
-                sex='$sex',
-                birthdate='$birthdate',
-                civil_status='$civil_status',
-                nationality='$nationality',
-                religion=$religion_value,
-                purok=$purok,
-                address='$address',
-                education_level='$education_level',
-                occupation='$occupation',
-                vaccination='$vaccination',
-                is_senior=$is_senior,
-                is_disabled=$is_disabled,
-                is_pregnant=$is_pregnant,
-                health_insurance='$health_insurance', 
-                children_count=$children_count
-                $residency_update 
-                WHERE person_id=$residentId";
-            $actionMsg = "updated";
-            
-            if ($conn->query($sql)) {
-                $_SESSION['status_success'] = "Resident **" . htmlspecialchars($first_name) . " " . htmlspecialchars($surname) . "** updated successfully!";
-                header("Location: residents.php"); 
-                exit();
-            } else {
-                $error = "Error: " . $conn->error;
-            }
-            
-        } else {
-            // Insert mode
-            $sql = "INSERT INTO residents 
-                (household_id, first_name, middle_name, surname, suffix, sex, birthdate, civil_status, nationality, religion, purok, address, education_level, occupation, vaccination, is_senior, is_disabled, is_pregnant, residency_start_date, health_insurance, children_count)
-                VALUES 
-                ($household_id, '$first_name', '$middle_name', '$surname', '$suffix', '$sex', '$birthdate', '$civil_status', '$nationality', $religion_value, $purok, '$address', '$education_level', '$occupation', '$vaccination', $is_senior, $is_disabled, $is_pregnant, '$current_date', '$health_insurance', $children_count)"; 
-            
-            if ($conn->query($sql)) {
-                $new_resident_id = $conn->insert_id;
-                
-                // --- PWD Upload Logic ---
-                if ($special_status === 'PWD') {
-                    $pwd_gov_id = $conn->real_escape_string($_POST['pwd_gov_id'] ?? '');
-                    $disability_type = $conn->real_escape_string($_POST['disability_type'] ?? '');
-                    
-                    $pwd_image_path = null;
-                    $uploadErrors = [];
-                    
-                    if (isset($_FILES['pwd_id_image']) && $_FILES['pwd_id_image']['error'] === 0) {
-                        $fileTmpPath = $_FILES['pwd_id_image']['tmp_name'];
-                        $fileName = $_FILES['pwd_id_image']['name'];
-                        $fileSize = $_FILES['pwd_id_image']['size'];
-                        $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-                        
-                        $allowedExtensions = ['jpg', 'jpeg', 'png'];
-                        
-                        if (in_array($fileExtension, $allowedExtensions) && $fileSize <= 5242880) { // 5MB
-                            $uploadDir = 'uploads/pwd_documents/';
-                            if (!is_dir($uploadDir)) {
-                                mkdir($uploadDir, 0777, true);
-                            }
-                            
-                            $newFileName = 'pwd_' . $new_resident_id . '_' . uniqid() . '.' . $fileExtension;
-                            $destPath = $uploadDir . $newFileName;
-                            
-                            if (move_uploaded_file($fileTmpPath, $destPath)) {
-                                $pwd_image_path = $destPath;
-                            } else {
-                                $uploadErrors[] = "Failed to move uploaded PWD file.";
-                            }
-                        } else {
-                            $uploadErrors[] = "Invalid PWD file type or size (max 5MB).";
-                        }
-                    } else {
-                         // Check required fields for PWD if status is PWD
-                         if (empty($pwd_gov_id) || empty($disability_type)) {
-                              $uploadErrors[] = "PWD ID Number and Disability Type are required for PWD status.";
-                         }
-                         if (isset($_FILES['pwd_id_image']) && $_FILES['pwd_id_image']['error'] !== 4) {
-                            $uploadErrors[] = "PWD ID file upload error: " . $_FILES['pwd_id_image']['error'];
-                         }
-                    }
-                    
-                    if (empty($uploadErrors)) {
-                        $stmt = $conn->prepare("INSERT INTO disabled_persons (resident_id, pwd_gov_id, disability_type, id_picture_path, date_registered) VALUES (?, ?, ?, ?, ?)");
-                        $stmt->bind_param("issss", $new_resident_id, $pwd_gov_id, $disability_type, $pwd_image_path, $current_date);
-                        $stmt->execute();
-                        $stmt->close();
-                    } else {
-                         // If there are upload errors, it's a serious issue, log it and possibly rollback or notify user
-                         error_log("PWD Insert Errors for Resident ID $new_resident_id: " . implode(", ", $uploadErrors));
-                         $_SESSION['status_warning'] = "Resident added, but PWD documents failed: " . implode(", ", $uploadErrors);
-                    }
-                }
-                
-                // --- Senior Citizen Upload Logic ---
-                if ($special_status === 'Senior Citizen') {
-                    $senior_gov_id = $conn->real_escape_string($_POST['senior_gov_id'] ?? '');
-                    
-                    $senior_image_path = null;
-                    $uploadErrors = [];
-
-                    if (isset($_FILES['senior_id_image']) && $_FILES['senior_id_image']['error'] === 0) {
-                        $fileTmpPath = $_FILES['senior_id_image']['tmp_name'];
-                        $fileName = $_FILES['senior_id_image']['name'];
-                        $fileSize = $_FILES['senior_id_image']['size'];
-                        $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-                        
-                        $allowedExtensions = ['jpg', 'jpeg', 'png'];
-                        
-                        if (in_array($fileExtension, $allowedExtensions) && $fileSize <= 5242880) {
-                            $uploadDir = 'uploads/senior_documents/';
-                            if (!is_dir($uploadDir)) {
-                                mkdir($uploadDir, 0777, true);
-                            }
-                            
-                            $newFileName = 'senior_' . $new_resident_id . '_' . uniqid() . '.' . $fileExtension;
-                            $destPath = $uploadDir . $newFileName;
-                            
-                            if (move_uploaded_file($fileTmpPath, $destPath)) {
-                                $senior_image_path = $destPath;
-                            } else {
-                                $uploadErrors[] = "Failed to move uploaded Senior file.";
-                            }
-                        } else {
-                            $uploadErrors[] = "Invalid Senior file type or size (max 5MB).";
-                        }
-                    } else {
-                         // Check required fields for Senior if status is Senior
-                         if (empty($senior_gov_id)) {
-                             $uploadErrors[] = "Senior Citizen ID Number is required for Senior Citizen status.";
-                         }
-                         if (isset($_FILES['senior_id_image']) && $_FILES['senior_id_image']['error'] !== 4) {
-                            $uploadErrors[] = "Senior ID file upload error: " . $_FILES['senior_id_image']['error'];
-                         }
-                    }
-
-                    if (empty($uploadErrors)) {
-                        $stmt = $conn->prepare("INSERT INTO senior_citizens (resident_id, senior_gov_id, id_picture_path, date_registered, status) VALUES (?, ?, ?, ?, 'Active')");
-                        $stmt->bind_param("isss", $new_resident_id, $senior_gov_id, $senior_image_path, $current_date);
-                        $stmt->execute();
-                        $stmt->close();
-                    } else {
-                         error_log("Senior Insert Errors for Resident ID $new_resident_id: " . implode(", ", $uploadErrors));
-                         $_SESSION['status_warning'] = ($_SESSION['status_warning'] ?? '') . " Resident added, but Senior documents failed: " . implode(", ", $uploadErrors);
-                    }
-                }
-                
-                $actionMsg = "added";
-                $_SESSION['status_success'] = ($_SESSION['status_success'] ?? '') . "Resident **" . htmlspecialchars($first_name) . " " . htmlspecialchars($surname) . "** $actionMsg successfully!";
-                header("Location: residents.php"); 
-                exit();
-            } else {
-                $error = "Error: " . $conn->error;
-            }
-        }
-    }
-}
-
-// Function to determine which special status is currently selected (used for dropdown)
+// Function to determine which special status is currently selected for drop down
 function getSelectedStatus($resData) {
     if (isset($resData['is_senior']) && $resData['is_senior']) return 'Senior Citizen';
     if (isset($resData['is_disabled']) && $resData['is_disabled']) return 'PWD';
     if (isset($resData['is_pregnant']) && $resData['is_pregnant']) return 'Pregnant';
-    if (($resData['health_insurance'] ?? '') === 'Others') return 'Others';
-    return 'None';
+    if (isset($resData['health_insurance']) && $resData['health_insurance'] === 'Others') {
+    return 'Others';
+}
+
 }
 $current_status = getSelectedStatus($resData);
 
@@ -554,7 +329,8 @@ a { text-decoration: none; }
 if(isset($error)) echo "<div class='alert-error'><strong>Error!</strong> " . htmlspecialchars($error) . "</div>";
 ?>
 
-<form id="residentForm" method="POST" enctype="multipart/form-data">
+<form id="residentForm" enctype="multipart/form-data">
+
 <div class="form-grid">
 
 <div class="input-group">
@@ -740,6 +516,25 @@ if(isset($error)) echo "<div class='alert-error'><strong>Error!</strong> " . htm
 </div>
 
 <script>
+document.getElementById("residentForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const form = e.target;
+  const formData = new FormData(form);
+
+  const res = await fetch("http://127.0.0.1:5000/admin/residents", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    window.location.href = "residents.php";
+  } else {
+    alert(data.error || "Failed to add resident");
+  }
+});
 function toggleSpecialSections() {
     const specialStatus = document.getElementById('specialStatus').value;
     const pwdSection = document.getElementById('pwdSection');
