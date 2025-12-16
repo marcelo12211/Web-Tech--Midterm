@@ -11,10 +11,41 @@ app.use(express.json());
 
 const pool = mysql.createPool(dbConfig);
 
+/* Health check */
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
+/* Admin login validation */
+app.post("/admin/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: "Missing credentials" });
+  }
+
+  try {
+    const [rows] = await pool.query(
+      "SELECT user_id, role FROM users WHERE email = ? AND password = ?",
+      [email, password]
+    );
+
+    if (rows.length === 0 || rows[0].role !== "admin") {
+      return res.status(401).json({ error: "Invalid admin credentials" });
+    }
+
+    res.json({
+      success: true,
+      user_id: rows[0].user_id,
+      role: rows[0].role
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Login error" });
+  }
+});
+
+/* Get all users (admin) */
 app.get("/admin/users", async (req, res) => {
   try {
     const [rows] = await pool.query(
