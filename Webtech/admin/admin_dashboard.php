@@ -269,17 +269,17 @@ a {
 <body>
 <div class="app-container">
     <div class="sidebar">
-        <div class="logo">Happy Hallow<br>Barangay System</div>
-        <nav class="main-nav">
-            <ul>
-                <li><a href="admin_dashboard.php" class="active">Dashboard</a></li>
-                <li><a href="residents.php">Manage Residents</a></li>
-                <li><a href="#">Add Resident</a></li>
-                <li><a href="deaths.php">Deaths</a></li>
-                <li><a href="documents.php">Documents</a></li>
-            </ul>
-        </nav>
-    </div>
+            <div class="logo">Happy Hallow<br />Barangay System</div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="admin_dashboard.php">Dashboard</a></li>
+                    <li><a href="residents.php" class="active">Manage Residents</a></li>
+                    <li><a href="users.php">Manage Users</a></li>
+                    <li><a href="documents.php">Documents</a></li>
+                    <li><a href="logout.php">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
     <div class="main-content">
         <div class="topbar">
             <div class="topbar-right">

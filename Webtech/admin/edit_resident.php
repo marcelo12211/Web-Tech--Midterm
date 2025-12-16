@@ -1,60 +1,184 @@
 <?php
+// Include the database connection file.
+// Assuming this file is located in the same directory as db_connect.php (or adjusts path as necessary)
 include __DIR__ . '/db_connect.php'; 
 
+// Start session and check login status (based on previous files)
+session_start();
+if (!isset($_SESSION['user_id'])) { 
+    header("Location: login.php");
+    exit();
+}
+$logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User';
+
+
+// --- 1. POST HANDLING (UPDATE LOGIC) ---
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    
+    // Helper function to safely get POST data and set null if empty
+    function getPostData($field) {
+        global $conn;
+        if (isset($_POST[$field]) && $_POST[$field] !== '') {
+            // Use trim and basic escaping for string values
+            return $conn->real_escape_string(trim($_POST[$field]));
+        }
+        return null; 
+    }
+
+    // Get the required Person ID for the WHERE clause (crucial for updating)
+    $person_id = getPostData('person_id'); 
+
+    // Get all fields
+    $household_id = getPostData('household_id');
+    $first_name = getPostData('first_name');
+    $surname = getPostData('surname');
+    $sex = getPostData('sex');
+    $birthdate = getPostData('birthdate');
+    $civil_status = getPostData('civil_status');
+    $purok = getPostData('purok');
+    $address = getPostData('address');
+    
+    // Get optional/special status fields
+    $middle_name = getPostData('middle_name');
+    $suffix = getPostData('suffix');
+    // NOTE: Nationality and Religion can also be NULL if empty
+    $nationality = getPostData('nationality'); 
+    $religion = getPostData('religion');
+    $residency_start_date = getPostData('residency_start_date');
+    $education_level = getPostData('education_level');
+    $occupation = getPostData('occupation');
+    $children_count = getPostData('children_count') ?? 0;
+    $vaccination = getPostData('vaccination'); 
+    $health_insurance = getPostData('health_insurance');
+
+    // Handle special status selection
+    $special_status = getPostData('special_status'); 
+    $is_senior = ($special_status == 'Senior Citizen') ? 1 : 0;
+    $is_disabled = ($special_status == 'PWD') ? 1 : 0;
+    $is_pregnant = ($special_status == 'Pregnant') ? 1 : 0;
+
+    // Force health_insurance to be 'Others' if 'Others' is selected in special_status
+    if ($special_status == 'Others') {
+        $health_insurance = $health_insurance ?? 'Others'; 
+    }
+    
+    // 2. Validation 
+    if (empty($person_id) || empty($household_id) || empty($first_name) || empty($surname) || empty($sex) || empty($birthdate) || empty($civil_status) || empty($purok) || empty($address)) {
+        $_SESSION['error_message'] = "Please fill in all required fields (*).";
+        header("Location: edit_resident.php?id=" . $person_id);
+        exit();
+    }
+
+    // Helper function for safely formatting string/NULL values for SQL
+    function formatSqlValue($value) {
+        return $value !== null ? "'" . $value . "'" : "NULL";
+    }
+
+    // 3. Construct the SQL UPDATE Query (Using formatSqlValue helper)
+    $sql = "
+        UPDATE residents 
+        SET
+            household_id = ".formatSqlValue($household_id).",
+            first_name = ".formatSqlValue($first_name).",
+            middle_name = ".formatSqlValue($middle_name).",
+            surname = ".formatSqlValue($surname).",
+            suffix = ".formatSqlValue($suffix).",
+            sex = ".formatSqlValue($sex).",
+            birthdate = ".formatSqlValue($birthdate).",
+            civil_status = ".formatSqlValue($civil_status).",
+            nationality = ".formatSqlValue($nationality).",
+            religion = ".formatSqlValue($religion).",
+            purok = ".formatSqlValue($purok).",
+            address = ".formatSqlValue($address).",
+            residency_start_date = ".formatSqlValue($residency_start_date).",
+            education_level = ".formatSqlValue($education_level).",
+            occupation = ".formatSqlValue($occupation).",
+            is_senior = ".formatSqlValue($is_senior).",
+            is_disabled = ".formatSqlValue($is_disabled).",
+            is_pregnant = ".formatSqlValue($is_pregnant).",
+            health_insurance = ".formatSqlValue($health_insurance).",
+            vaccination = ".formatSqlValue($vaccination).",
+            children_count = ".formatSqlValue($children_count)."
+        WHERE person_id = ".formatSqlValue($person_id)."
+    ";
+
+    // 4. Execute the Query
+    if ($conn->query($sql) === TRUE) {
+        $_SESSION['status_success'] = "Resident ID $person_id: '$first_name $surname' information successfully updated.";
+        // Redirect to prevent form resubmission and show new data
+        header("Location: residents.php"); 
+        exit();
+    } else {
+        $_SESSION['error_message'] = "Error updating resident ID $person_id: " . $conn->error;
+        header("Location: edit_resident.php?id=" . $person_id);
+        exit();
+    }
+}
+// --- END OF POST HANDLING (UPDATE LOGIC) ---
+
+
+// Check if resident ID is provided in GET request
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     header('Location: residents.php');
     exit();
 }
 
-$residentId = $conn->real_escape_string($_GET['id']);
+// Use prepared statements for robust security (GET LOGIC)
+$residentId = intval($_GET['id']);
+$residentData = null;
 
-$sql = "
+$stmt = $conn->prepare("
     SELECT 
-        person_id,
-        household_id,
-        first_name,
-        middle_name,
-        surname,
-        suffix,
-        sex,
-        birthdate,
-        civil_status,
-        nationality,
-        religion,
-        purok,
-        address,
-        education_level,
-        occupation,
-        is_senior,
-        is_disabled,
-        health_insurance,
-        vaccination,
-        is_pregnant,
-        children_count
+        person_id, household_id, first_name, middle_name, surname, suffix, sex, birthdate, 
+        civil_status, nationality, religion, purok, address, residency_start_date, education_level, occupation, 
+        is_senior, is_disabled, is_pregnant, health_insurance, vaccination, children_count
     FROM residents
-    WHERE person_id = '$residentId'
-";
-
-$result = $conn->query($sql);
+    WHERE person_id = ?
+");
+$stmt->bind_param("i", $residentId);
+$stmt->execute();
+$result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    echo "<p>Error: Resident not found.</p>";
+    // Handle case where resident is not found
+    $_SESSION['error_message'] = "Resident ID $residentId not found.";
+    header('Location: residents.php');
     exit();
 }
 
 $residentData = $result->fetch_assoc();
+$stmt->close();
 
+// Fetch household data for dropdown
+$householdResult = $conn->query("SELECT household_id, household_head FROM household ORDER BY household_id ASC");
+
+// Helper function to check selected option
 function isSelected($currentValue, $targetValue) {
     $safeCurrentValue = $currentValue ?? '';
+    // Use loose comparison for '0' and '1' from database TINYINT to string '0'/'1'
     return ($safeCurrentValue == $targetValue) ? 'selected' : '';
 }
 
+// Helper function for HTML escaping
 function safeHtml($value) {
     return htmlspecialchars($value ?? '');
 }
 
-$householdResult = $conn->query("SELECT household_id, household_head FROM household ORDER BY household_id ASC");
+// Determine the Special Status for the dropdown in the Edit page 
+function getSelectedStatusForEdit($resData) {
+    if (isset($resData['is_senior']) && $resData['is_senior'] == 1) return 'Senior Citizen';
+    if (isset($resData['is_disabled']) && $resData['is_disabled'] == 1) return 'PWD';
+    if (isset($resData['is_pregnant']) && $resData['is_pregnant'] == 1) return 'Pregnant';
+    // Check if it's 'Others' based on health_insurance, assuming the other three are 0
+    if (!empty($resData['health_insurance']) && $resData['is_senior'] == 0 && $resData['is_disabled'] == 0 && $resData['is_pregnant'] == 0) return 'Others';
+    return 'None';
+}
+$current_status = getSelectedStatusForEdit($residentData);
 
+// Check if there are any pending status/error messages from redirect
+$status_success = $_SESSION['status_success'] ?? null;
+$error_message = $_SESSION['error_message'] ?? null;
+unset($_SESSION['status_success'], $_SESSION['error_message']);
 
 ?>
 <!DOCTYPE html>
@@ -63,40 +187,273 @@ $householdResult = $conn->query("SELECT household_id, household_head FROM househ
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Edit Resident: <?php echo safeHtml($residentData['first_name'] . ' ' . $residentData['surname']); ?></title>
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .form-group-full {
-            grid-column: 1 / -1;
-        }
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 30px;
-        }
-        .form-card {
-            padding: 30px;
-        }
-        .section-title {
-            margin-top: 30px;
-            margin-bottom: 15px;
-            color: #333;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 10px;
-        }
+/* --- General Styles (Copied from users.php/add_resident.php) --- */
+:root {
+    --primary-color: #226b8dff;
+    --primary-dark: #1b546b;
+    --secondary-color: #5f6368;
+    --danger-color: #ea4335;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --background-color: #f8f9fa;
+    --card-background: #ffffff;
+    --sidebar-bg: #212121;
+    --text-color: #202124;
+    --text-light: #5f6368;
+    --border-color: #dadce0;
+    --radius: 10px;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: "Roboto", Arial, sans-serif;
+    background: var(--background-color);
+    color: var(--text-color);
+}
+a { text-decoration: none; }
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 250px;
+    background: var(--sidebar-bg);
+    color: white;
+}
+.logo {
+    padding: 25px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.15rem;
+    line-height: 1.3;
+}
+.main-nav ul { list-style: none; padding: 0; margin: 0; }
+.main-nav a {
+    display: block;
+    padding: 14px 20px;
+    color: #bdc1c6;
+}
+.main-nav a:hover,
+.main-nav a.active {
+    background: var(--primary-dark);
+    color: white;
+}
+
+/* Main Content/Topbar Styles */
+.main-content { flex: 1; }
+.topbar {
+    background: white;
+    padding: 15px 30px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+.topbar-right { display: flex; align-items: center; }
+.user-info { margin-right: 15px; color: var(--text-light); }
+.logout-btn {
+    padding: 8px 15px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+    font-weight: 500;
+}
+.logout-btn:hover { background: var(--background-color); }
+
+.page-content { padding: 30px; }
+.page-content h2 { 
+    margin-top: 0; 
+    margin-bottom: 25px; 
+    color: var(--text-color); 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+}
+
+/* Form Card Styles */
+.form-card {
+    background: var(--card-background);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 30px;
+    max-width: 900px; 
+    margin: 0 auto; 
+    position: relative;
+}
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--text-light);
+    transition: color 0.2s;
+}
+.close-btn:hover {
+    color: var(--danger-color);
+}
+.form-title {
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+/* Form Grid Layout */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+.input-group {
+    margin-bottom: 0; 
+}
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+.input-group input,
+.input-group select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #ffffff;
+}
+.input-group input:focus,
+.input-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(34, 107, 141, 0.2); 
+}
+
+/* Section Titles within Form */
+.section-title {
+    grid-column: 1 / -1;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    color: var(--primary-dark);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 5px;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+/* Full Width Group (e.g. for Address/Insurance) */
+.form-group-full {
+    grid-column: 1 / -1;
+}
+
+/* Form Actions */
+.form-actions {
+    grid-column: 1 / -1;
+    margin-top: 30px;
+    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+.btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+.primary-btn {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+.primary-btn:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+.secondary-btn {
+    background: white;
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+.secondary-btn:hover {
+    background: var(--background-color);
+}
+
+/* Alert Styles */
+.alert-success {
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    background-color: #d4edda;
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
+}
+.alert-error {
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    background-color: #fce4e4;
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
+}
+.alert-info {
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    background-color: #cce5ff;
+    color: #004085;
+    border: 1px solid #b8daff;
+}
+
+/* Conditional Styling for Special Status */
+.special-status-display {
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 5px;
+    font-weight: 700;
+    text-align: center;
+}
+.status-senior { background-color: #d4edda; color: var(--success-color); border: 1px solid var(--success-color); }
+.status-pwd { background-color: #fff3cd; color: var(--warning-color); border: 1px solid var(--warning-color); }
+.status-pregnant { background-color: #f8d7da; color: var(--danger-color); border: 1px solid var(--danger-color); }
+.status-others { background-color: #cce5ff; color: var(--primary-color); border: 1px solid var(--primary-color); }
+.status-none { background-color: #f0f0f0; color: var(--text-light); border: 1px solid var(--border-color); }
+
+@media (max-width: 900px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 768px) {
+    .sidebar { width: 100%; height: auto; }
+    .app-container { flex-direction: column; }
+    .page-content { padding: 20px; }
+    .form-card { padding: 20px; }
+    .topbar { padding: 15px 20px; }
+}
     </style>
 </head>
 
 <body>
 <div class="app-container">
-    <div class="sidebar">
-        <div class="logo">Happy Hallow<br>Barangay System</div>
+    <aside class="sidebar">
+        <div class="logo">Happy Hallow<br />Barangay System</div>
         <nav class="main-nav">
             <ul>
                 <li><a href="admin_dashboard.php">Dashboard</a></li>
@@ -106,65 +463,76 @@ $householdResult = $conn->query("SELECT household_id, household_head FROM househ
                 <li><a href="logout.php">Logout</a></li>
             </ul>
         </nav>
-    </div>
+    </aside>
 
     <div class="main-content">
         <header class="topbar">
             <div class="topbar-right">
-              <span id="userName" class="user-info">Welcome, User</span>
-              <button id="logoutBtn" class="btn logout-btn">Logout</button>
+                <span id="userName" class="user-info">Welcome, <?php echo htmlspecialchars($logged_in_username); ?></span>
+                <button id="logoutBtn" class="btn logout-btn">Logout</button>
             </div>
         </header>
 
         <main class="page-content">
-            <div class="card form-card">
-                <h2>Edit Resident Information</h2>
-                <p>ID: <?php echo safeHtml($residentData['person_id']); ?> - <?php echo safeHtml($residentData['first_name'] . ' ' . $residentData['surname']); ?></p>
-                <hr>
+            <div class="form-card">
+                <a href="residents.php" class="close-btn" title="Back to Residents List">&times;</a>
                 
-                <form action="update_resident.php" method="POST">
+                <h2 class="form-title">
+                     Edit Resident: <?php echo safeHtml($residentData['first_name'] . ' ' . $residentData['surname']); ?> 
+                </h2>
+                
+                <?php if ($status_success): ?>
+                    <div class="alert-success"><i class="fas fa-check-circle"></i> <?php echo $status_success; ?></div>
+                <?php endif; ?>
+                <?php if ($error_message): ?>
+                    <div class="alert-error"><i class="fas fa-exclamation-triangle"></i> <?php echo $error_message; ?></div>
+                <?php endif; ?>
+
+                <form action="edit_resident.php?id=<?php echo safeHtml($residentData['person_id']); ?>" method="POST">
                     <input type="hidden" name="person_id" value="<?php echo safeHtml($residentData['person_id']); ?>">
 
-                    <h3 class="section-title">Personal Information</h3>
                     <div class="form-grid">
+                        
+                        <div class="section-title">Personal Information</div>
+
                         <div class="input-group">
                             <label for="first_name">First Name *</label>
                             <input type="text" id="first_name" name="first_name" 
-                                   value="<?php echo safeHtml($residentData['first_name']); ?>" required>
+                                        value="<?php echo safeHtml($residentData['first_name']); ?>" required>
                         </div>
                         
                         <div class="input-group">
                             <label for="middle_name">Middle Name</label>
                             <input type="text" id="middle_name" name="middle_name" 
-                                   value="<?php echo safeHtml($residentData['middle_name']); ?>">
+                                        value="<?php echo safeHtml($residentData['middle_name']); ?>">
                         </div>
                         
                         <div class="input-group">
                             <label for="surname">Surname *</label>
                             <input type="text" id="surname" name="surname" 
-                                   value="<?php echo safeHtml($residentData['surname']); ?>" required>
+                                        value="<?php echo safeHtml($residentData['surname']); ?>" required>
                         </div>
                         
                         <div class="input-group">
                             <label for="suffix">Suffix</label>
                             <input type="text" id="suffix" name="suffix" 
-                                   value="<?php echo safeHtml($residentData['suffix']); ?>" 
-                                   placeholder="Jr., Sr., III, etc.">
+                                        value="<?php echo safeHtml($residentData['suffix']); ?>" 
+                                        placeholder="Jr., Sr., III, etc.">
                         </div>
                         
                         <div class="input-group">
                             <label for="sex">Sex *</label>
                             <select id="sex" name="sex" required>
                                 <option value="">Select Sex</option>
-                                <option value="M" <?php echo isSelected($residentData['sex'], 'M'); ?>>Male</option>
-                                <option value="F" <?php echo isSelected($residentData['sex'], 'F'); ?>>Female</option>
+                                <option value="Male" <?php echo isSelected($residentData['sex'], 'Male'); ?>>Male</option>
+                                <option value="Female" <?php echo isSelected($residentData['sex'], 'Female'); ?>>Female</option>
                             </select>
                         </div>
                         
                         <div class="input-group">
                             <label for="birthdate">Birthdate *</label>
                             <input type="date" id="birthdate" name="birthdate" 
-                                   value="<?php echo safeHtml($residentData['birthdate']); ?>" required>
+                                        value="<?php echo safeHtml($residentData['birthdate']); ?>" required>
                         </div>
                         
                         <div class="input-group">
@@ -175,54 +543,50 @@ $householdResult = $conn->query("SELECT household_id, household_head FROM househ
                                 <option value="Married" <?php echo isSelected($residentData['civil_status'], 'Married'); ?>>Married</option>
                                 <option value="Widowed" <?php echo isSelected($residentData['civil_status'], 'Widowed'); ?>>Widowed</option>
                                 <option value="Separated" <?php echo isSelected($residentData['civil_status'], 'Separated'); ?>>Separated</option>
-                                <option value="Divorced" <?php echo isSelected($residentData['civil_status'], 'Divorced'); ?>>Divorced</option>
-                            </select>
+                                </select>
                         </div>
                         
                         <div class="input-group">
                             <label for="nationality">Nationality</label>
                             <input type="text" id="nationality" name="nationality" 
-                                   value="<?php echo safeHtml($residentData['nationality']); ?>">
+                                        value="<?php echo safeHtml($residentData['nationality']); ?>">
                         </div>
                         
                         <div class="input-group">
                             <label for="religion">Religion</label>
                             <input type="text" id="religion" name="religion" 
-                                   value="<?php echo safeHtml($residentData['religion']); ?>">
+                                        value="<?php echo safeHtml($residentData['religion']); ?>">
                         </div>
                         
                         <div class="input-group">
                             <label for="children_count">Number of Children</label>
                             <input type="number" id="children_count" name="children_count" 
-                                   value="<?php echo safeHtml($residentData['children_count']); ?>" min="0">
+                                        value="<?php echo safeHtml($residentData['children_count']); ?>" min="0">
                         </div>
-                    </div>
-
-                    <h3 class="section-title">Address & Location</h3>
-                    <div class="form-grid">
+                        
+                        <div class="section-title">Address & Affiliation</div>
+                        
                         <div class="input-group">
-                            <label>Household</label>
+                            <label>Household *</label>
                             <select name="household_id" required>
-                            <option value="">Select Household</option>
-                            <?php 
-                            if ($householdResult->num_rows > 0) {
-                            $householdResult->data_seek(0);
-                            }
-                            while($row = $householdResult->fetch_assoc()): ?>
-                            <option value="<?= $row['household_id'] ?>" <?php if(($resData['household_id'] ?? '') == $row['household_id']) echo 'selected'; ?>>
-                            <?= htmlspecialchars($row['household_id']) ?> - <?= htmlspecialchars($row['household_head'] ?? 'No Head') ?>
-                            </option>
-                            <?php endwhile; ?>
+                                <option value="">Select Household</option>
+                                <?php 
+                                while($row = $householdResult->fetch_assoc()): ?>
+                                <option value="<?= htmlspecialchars($row['household_id']) ?>" 
+                                    <?php echo isSelected($residentData['household_id'], $row['household_id']); ?>>
+                                    <?= htmlspecialchars($row['household_id']) ?> - <?= htmlspecialchars($row['household_head'] ?? 'No Head') ?>
+                                </option>
+                                <?php endwhile; ?>
                             </select>
-                    </div>
+                        </div>
                         
                         <div class="input-group">
                             <label for="purok">Purok *</label>
                             <select id="purok" name="purok" required>
                                 <option value="">Select Purok</option>
-                                <?php for ($i = 0; $i <= 5; $i++): ?>
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
                                     <option value="<?php echo $i; ?>" <?php echo isSelected($residentData['purok'], $i); ?>>
-                                        <?php echo $i == 0 ? 'None' : "Purok $i"; ?>
+                                        Purok <?php echo $i; ?>
                                     </option>
                                 <?php endfor; ?>
                             </select>
@@ -231,76 +595,63 @@ $householdResult = $conn->query("SELECT household_id, household_head FROM househ
                         <div class="input-group form-group-full">
                             <label for="address">Address *</label>
                             <input type="text" id="address" name="address" 
-                                   value="<?php echo safeHtml($residentData['address']); ?>" required>
+                                        value="<?php echo safeHtml($residentData['address']); ?>" required>
+                            <small class="text-light">Current barangay address details.</small>
                         </div>
-                    </div>
 
-                    <h3 class="section-title">Education & Employment</h3>
-                    <div class="form-grid">
+                        <div class="section-title">Education & Employment</div>
+                        
                         <div class="input-group">
                             <label for="education_level">Education Level</label>
                             <select id="education_level" name="education_level">
                                 <option value="">Select Education Level</option>
                                 <option value="Elementary" <?php echo isSelected($residentData['education_level'], 'Elementary'); ?>>Elementary</option>
                                 <option value="High School" <?php echo isSelected($residentData['education_level'], 'High School'); ?>>High School</option>
-                                <option value="College" <?php echo isSelected($residentData['education_level'], 'College'); ?>>College</option>
                                 <option value="Vocational" <?php echo isSelected($residentData['education_level'], 'Vocational'); ?>>Vocational</option>
-                                <option value="Graduate" <?php echo isSelected($residentData['education_level'], 'Graduate'); ?>>Graduate</option>
+                                <option value="College" <?php echo isSelected($residentData['education_level'], 'College'); ?>>College</option>
+                                <option value="Graduate Studies" <?php echo isSelected($residentData['education_level'], 'Graduate Studies'); ?>>Graduate Studies</option>
                             </select>
                         </div>
                         
                         <div class="input-group">
                             <label for="occupation">Occupation</label>
                             <input type="text" id="occupation" name="occupation" 
-                                   value="<?php echo safeHtml($residentData['occupation']); ?>">
+                                        value="<?php echo safeHtml($residentData['occupation']); ?>">
                         </div>
-                    </div>
+                        
 
-                    <h3 class="section-title">Health & Status</h3>
-                    <div class="form-grid">
-                        <div class="input-group">
-                            <label for="is_senior">Senior Citizen?</label>
-                            <select id="is_senior" name="is_senior">
-                                <option value="0" <?php echo isSelected($residentData['is_senior'], '0'); ?>>No</option>
-                                <option value="1" <?php echo isSelected($residentData['is_senior'], '1'); ?>>Yes</option>
-                            </select>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label for="is_disabled">Person With Disability (PWD)?</label>
-                            <select id="is_disabled" name="is_disabled">
-                                <option value="0" <?php echo isSelected($residentData['is_disabled'], '0'); ?>>No</option>
-                                <option value="1" <?php echo isSelected($residentData['is_disabled'], '1'); ?>>Yes</option>
-                            </select>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label for="is_pregnant">Pregnant?</label>
-                            <select id="is_pregnant" name="is_pregnant">
-                                <option value="0" <?php echo isSelected($residentData['is_pregnant'], '0'); ?>>No</option>
-                                <option value="1" <?php echo isSelected($residentData['is_pregnant'], '1'); ?>>Yes</option>
-                            </select>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label for="vaccination">Vaccinated?</label>
-                            <select id="vaccination" name="vaccination">
-                                <option value="0" <?php echo isSelected($residentData['vaccination'], '0'); ?>>No</option>
-                                <option value="1" <?php echo isSelected($residentData['vaccination'], '1'); ?>>Yes</option>
-                            </select>
-                        </div>
+                        <div class="section-title">Health & Special Status</div>
                         
                         <div class="input-group form-group-full">
-                            <label for="health_insurance">Health Insurance</label>
-                            <input type="text" id="health_insurance" name="health_insurance" 
-                                   value="<?php echo safeHtml($residentData['health_insurance']); ?>" 
-                                   placeholder="e.g., PhilHealth, Private Insurance">
+                            <label>Special Status / Health Insurance</label>
+                            <select name="special_status" id="specialStatus">
+                                <option value="None" <?php echo isSelected($current_status, 'None'); ?>>None</option>
+                                <option value="Senior Citizen" <?php echo isSelected($current_status, 'Senior Citizen'); ?>>Senior Citizen</option>
+                                <option value="PWD" <?php echo isSelected($current_status, 'PWD'); ?>>Person with Disability (PWD)</option>
+                                <option value="Pregnant" <?php echo isSelected($current_status, 'Pregnant'); ?>>Pregnant</option>
+                                <option value="Others" <?php echo isSelected($current_status, 'Others'); ?>>Others (Health Insurance)</option>
+                            </select>
+                            <small class="text-light">Automatically updates is_senior/is_disabled/is_pregnant/health_insurance fields.</small>
                         </div>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <a href="residents.php" class="btn secondary-btn">Cancel</a>
-                        <button type="submit" class="btn primary-btn">Save Changes</button>
+                        
+                        <div class="input-group">
+                            <label for="vaccination">Vaccination Status</label>
+                            <input type="text" id="vaccination" name="vaccination" 
+                                        value="<?php echo safeHtml($residentData['vaccination']); ?>" placeholder="e.g., Fully Vaccinated (3 doses)">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="health_insurance">Health Insurance Type/Notes</label>
+                            <input type="text" id="health_insurance" name="health_insurance" 
+                                        value="<?php echo safeHtml($residentData['health_insurance']); ?>" 
+                                        placeholder="e.g., PhilHealth, Private, N/A">
+                            <small class="text-light">This is manually updateable.</small>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <a href="residents.php" class="btn secondary-btn"><i class="fas fa-arrow-alt-circle-left"></i> Back to List</a>
+                            <button type="submit" class="btn primary-btn"><i class="fas fa-save"></i> Save Changes</button>
+                        </div>
                     </div>
                 </form>
 
@@ -310,28 +661,20 @@ $householdResult = $conn->query("SELECT household_id, household_head FROM househ
 </div>
 
 <script>
-function setupLogout() {
-    const logoutBtn = document.getElementById("logoutBtn");
-    logoutBtn.addEventListener("click", () => {
-        localStorage.removeItem("rms_user");
-        window.location.href = "login.html";
-    });
-}
-
-function showUser() {
-    const user = JSON.parse(localStorage.getItem("rms_user"));
-    const userNameSpan = document.getElementById("userName");
-    if (user && user.name) {
-        userNameSpan.textContent = `Welcome, ${user.name}`;
-    } else {
-        userNameSpan.textContent = `Welcome, Guest`;
+    // Logout Setup (keeping the implementation simple based on the previous files)
+    function setupLogout() {
+        const logoutBtn = document.getElementById("logoutBtn");
+        logoutBtn.addEventListener("click", () => {
+            // Using PHP session-based logout
+            window.location.href = "logout.php"; 
+        });
     }
-}
 
-window.onload = function () {
-    showUser();
-    setupLogout();
-};
+    window.onload = function () {
+        setupLogout();
+        // Since we are in the Admin panel and logged in via PHP session, 
+        // the username is set in PHP. No need for complex local storage handling here unless required.
+    };
 </script>
 </body>
 </html>
