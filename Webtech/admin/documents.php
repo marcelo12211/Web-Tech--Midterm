@@ -667,8 +667,6 @@ th, td {
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-
-    // Function to collapse all detail rows
     function collapseAllDetails() {
         document.querySelectorAll('.detail-row').forEach(otherDetail => {
             otherDetail.classList.remove('expanded'); 
@@ -677,11 +675,8 @@ document.addEventListener("DOMContentLoaded", () => {
             otherRow.classList.remove('expanded');
         });
     }
-
-    // 1. Row Click Handler (Toggle Detail View) - Renamed to doc-row
     document.querySelectorAll(".doc-row").forEach((row) => {
         row.addEventListener("click", (e) => {
-            // Prevent detail view from toggling if an action button is clicked
             if (e.target.closest(".action-btn, a")) {
                 return;
             }
@@ -693,16 +688,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (detailRow) {
                 const isExpanded = row.classList.contains("expanded");
-                
-                // Collapse all other rows
                 collapseAllDetails();
                 
                 if (!isExpanded) {
-                    // Expand the clicked row and its detail row
                     row.classList.add("expanded");
                     detailRow.classList.add('expanded');
-                    
-                    // Reset tabs to the first one (Document Details) when expanding
                     const allTabs = detailRow.querySelectorAll(".detail-tab");
                     const allContents = detailRow.querySelectorAll(".tab-content");
                     const firstTab = detailRow.querySelector(".detail-tab");
@@ -719,19 +709,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
-
-    // 2. Tab Click Handler (Switch Detail Tab Content)
     document.querySelectorAll(".detail-tab").forEach((tab) => {
         tab.addEventListener("click", (e) => {
             const detailContainer = e.target.closest(".detail-container");
             const tabName = e.target.dataset.tab;
             
             if (detailContainer) {
-                // Deactivate all tabs and content in this specific detail container
                 detailContainer.querySelectorAll(".detail-tabs .detail-tab").forEach((t) => t.classList.remove("active"));
                 detailContainer.querySelectorAll(".tab-content").forEach((c) => c.classList.remove("active"));
-                
-                // Activate the clicked tab and its content
                 e.target.classList.add("active");
                 detailContainer.querySelector(`#${tabName}`).classList.add("active");
             }

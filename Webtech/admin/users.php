@@ -1,78 +1,22 @@
 <?php
 session_start();
-include '../db_connect.php'; 
-function fetchUserData($conn) {
-    $users = [];
-    $search_term = $_GET['search'] ?? '';
-    $role_filter = $_GET['role'] ?? '';
-    $status_filter = $_GET['status'] ?? '';
+// TANGGAL NA: include '../db_connect.php'; 
+// TINANGGAL NA: Ang lahat ng PHP functions na may kinalaman sa database connection (fetchUserData) ay inalis.
+// Kukunin na lang natin ang mga filter values mula sa URL para sa initial state ng form.
 
-    $where_clauses = [];
-    $bind_params = [];
-    $bind_types = '';
-    $error = ''; 
-    $sql = "SELECT user_id, fullname, email, role, status FROM users";
-    if (!empty($search_term)) {
-        $search_like = "%" . $search_term . "%";
-        $where_clauses[] = "(fullname LIKE ? OR email LIKE ?)";
-        $bind_types .= 'ss';
-        $bind_params[] = &$search_like;
-        $bind_params[] = &$search_like;
-    }
-
-    if (!empty($role_filter)) {
-        $where_clauses[] = "role = ?";
-        $bind_types .= 's'; 
-        $bind_params[] = &$role_filter;
-    }
-
-    if (!empty($status_filter)) {
-        $where_clauses[] = "status = ?";
-        $bind_types .= 's';
-        $bind_params[] = &$status_filter;
-    }
-    if (!empty($where_clauses)) {
-        $sql .= " WHERE " . implode(" AND ", $where_clauses);
-    }
-
-    $sql .= " ORDER BY fullname ASC";
-    $stmt = $conn->prepare($sql);
-
-    if ($stmt === false) {
-        $error = "SQL Prepare Error: " . $conn->error;
-    } else {
-        if (!empty($bind_params)) {
-            $bind_references = array_merge([$bind_types], $bind_params);
-            foreach ($bind_references as $key => &$value) {
-            }
-            $call_array = [$stmt, 'bind_param'];
-            $call_array = array_merge($call_array, [$bind_types], $bind_params);
-            $ref_params = [];
-            $ref_params[] = $bind_types;
-            foreach ($bind_params as $key => $value) {
-                $ref_params[] = &$bind_params[$key];
-            }
-            call_user_func_array(array($stmt, 'bind_param'), $ref_params);
-        }
-
-        if ($stmt->execute()) {
-            $result = $stmt->get_result();
-            while($row = $result->fetch_assoc()) {
-                $users[] = $row;
-            }
-            $stmt->close();
-        } else {
-            $error = "Error executing query: " . $stmt->error;
-        }
-    }
-    
-    return ['users' => $users, 'error' => $error, 'count' => count($users), 'search' => $search_term, 'role' => $role_filter, 'status' => $status_filter];
-}
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 $logged_in_username = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Admin';
+
+// Kukunin ang filter values mula sa URL para sa initial rendering ng filter controls
+$search_term = $_GET['search'] ?? '';
+$role_filter = $_GET['role'] ?? '';
+$status_filter = $_GET['status'] ?? '';
+
+// Ang mga PHP functions na ito ay ginawa na lang para sa initial rendering ng HTML structure.
+// Ang data fetching at table rendering ay gagawin na ng JAVASCRIPT.
 function getRoleBadge($role) {
     switch(strtolower($role)) {
         case 'admin': return ['text' => 'Administrator', 'class' => 'badge-admin'];
@@ -93,12 +37,13 @@ function getStatusBadge($status) {
     return ['text' => ucfirst($status), 'class' => 'badge-none']; 
 }
 
-function renderUserTable($data) {
-    $users = $data['users'];
+// Ang PHP function na ito ay gagamitin lang para mag-render ng EMPTY table structure
+// dahil ang data ay ire-render na ng JavaScript.
+function renderEmptyTableStructure() {
     $html = '
     <div class="card data-table-card">
         <div class="table-responsive">
-            <table>
+            <table id="users-main-table">
                 <thead>
                     <tr>
                         <th>Full Name</th>
@@ -109,120 +54,23 @@ function renderUserTable($data) {
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>';
-    
-    if (empty($users)) {
-        $html .= '
-            <tr>
-                <td colspan="6" style="text-align: center;">No users found matching the criteria.</td>
-            </tr>';
-    } else {
-        foreach ($users as $user) { 
-            $role_badge = getRoleBadge($user['role']);
-            $status_badge = getStatusBadge($user['status'] ?? 'inactive'); 
-            $user_id = htmlspecialchars($user['user_id']);
-            
-            $html .= '
-                <tr class="user-row" data-user-id="' . $user_id . '">
-                    <td>' . htmlspecialchars($user['fullname']) . '</td>
-                    <td>' . htmlspecialchars($user['email']) . '</td>
-                    <td><span class="special-status-bar ' . $role_badge['class'] . '" style="margin-bottom: 0;">' . htmlspecialchars(ucfirst($user['role'])) . '</span></td>
-                    <td>' . $user_id . '</td>
-                    <td><span class="special-status-bar ' . $status_badge['class'] . '" style="margin-bottom: 0;">' . $status_badge['text'] . '</span></td>
-                    <td>
-                        <div class="action-icon-group">
-                            <a href="edit_user.php?id=' . $user_id . '" class="action-btn edit-btn" title="Edit User">
-                                <i class="fas fa-edit"></i> </a>
-                            <a href="delete_user.php?id=' . $user_id . '" class="action-btn delete-btn" title="Delete User" onclick="return confirm(\'Are you sure you want to delete this user (ID: ' . $user_id . ')?\');">
-                                <i class="fas fa-trash"></i> </a>
-                        </div>
-                    </td>
-                </tr>
-                <tr class="detail-row" data-detail-id="' . $user_id . '">
-                    <td colspan="6">
-                        <div class="detail-container">
-                            <div class="special-status-bar ' . $role_badge['class'] . '">
-                                Role: ' . $role_badge['text'] . '
-                            </div>
-                            <div class="detail-tabs">
-                                <span class="detail-tab active" data-tab="account-' . $user_id . '">Account Info</span>
-                                <span class="detail-tab" data-tab="permissions-' . $user_id . '">Role & Permissions</span>
-                            </div>
-                            <div class="tab-content active" id="account-' . $user_id . '">
-                                <div class="detail-grid">
-                                    <div class="detail-box">
-                                        <h4>IDENTIFICATION</h4>
-                                        <p><strong>User ID:</strong> ' . $user_id . '</p>
-                                        <p><strong>Full Name:</strong> ' . htmlspecialchars($user['fullname']) . '</p>
-                                        <p><strong>Email:</strong> ' . htmlspecialchars($user['email']) . '</p>
-                                    </div>
-                                    <div class="detail-box">
-                                        <h4>STATUS & DATE</h4>
-                                        <p><strong>Current Status:</strong> <span class="special-status-bar ' . $status_badge['class'] . '" style="padding: 3px 8px; margin: 0;">' . $status_badge['text'] . '</span></p>
-                                        <p><strong>Account Created:</strong> N/A (Placeholder)</p> 
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tab-content" id="permissions-' . $user_id . '">
-                                <div class="detail-box">
-                                    <h4>USER ROLE & ACCESS LEVEL</h4>
-                                    <p><strong>Role:</strong> <span class="special-status-bar ' . $role_badge['class'] . '" style="padding: 3px 8px; margin: 0;">' . $role_badge['text'] . '</span></p>';
-            
-            $role_info = [
-                'admin' => 'Full control over all system data, including residents, users, and documents.',
-                'staff' => 'Can manage (add/edit/view) residents and documents, but has limited user management access.',
-                'clerk' => 'Primarily for data entry and document retrieval. View and limited edit access to resident data.',
-                'default' => 'Limited or no specific permissions defined.'
-            ];
-            $role_key = strtolower($user['role']);
-            
-            $html .= '
-                                    <p><strong>Permissions:</strong></p>
-                                    <p><em>' . ($role_info[$role_key] ?? $role_info['default']) . '</em></p>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                </tr>';
-        }
-    }
-    
-    $html .= '
+                <tbody id="users-table-body">
+                    <tr>
+                        <td colspan="6" style="text-align: center;">Loading user data from Node.js API...</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>';
-    
     return $html;
 }
 
-if (isset($_GET['ajax']) && $_GET['ajax'] === 'true') {
-    $data = fetchUserData($conn);
-    if (isset($conn) && $conn->ping()) {
-        $conn->close();
-    }
-    
-    $response = [
-        'html' => renderUserTable($data),
-        'count' => $data['count'],
-        'error' => $data['error']
-    ];
-    
-    header('Content-Type: application/json');
-    echo json_encode($response);
-    exit;
-}
+// Ang mga variables na ito ay ginamit dati sa PHP fetching, ngayon ay placeholder na lang.
+$data = ['count' => 0]; // Placeholder lang
 
-$data = fetchUserData($conn);
-$users = $data['users'];
-$error = $data['error'];
-$search_term = $data['search'];
-$role_filter = $data['role'];
-$status_filter = $data['status'];
-
-if (isset($conn) && $conn->ping()) {
-    $conn->close();
-}
+// TINANGGAL NA: $data = fetchUserData($conn);
+// TINANGGAL NA: $users = $data['users'];
+// TINANGGAL NA: if (isset($conn) && $conn->ping()) { $conn->close(); }
 
 ?>
 
@@ -237,7 +85,7 @@ if (isset($conn) && $conn->ping()) {
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
     <style>
-
+/* CSS Styles from your original file here */
 :root {
     --primary-color: #226b8dff;
     --primary-dark: #226b8dff;
@@ -607,9 +455,8 @@ th, td {
         <div class="page-content">
             <h2 id="user-count-header">**User Directory** (<?php echo $data['count']; ?> Found)</h2>
             
-            <?php if (!empty($error)): ?>
-                <div class="alert-error" id="server-error-message"><?php echo $error; ?></div>
-            <?php endif; ?>
+            <?php // Error message placeholders na lang ang iniwan ?>
+            <div class="alert-error" id="server-error-message" style="display:none;"></div>
             <?php if (isset($_SESSION['success_message'])): ?>
                 <div class="alert-success"><?php echo htmlspecialchars($_SESSION['success_message']); ?></div>
                 <?php unset($_SESSION['success_message']); ?>
@@ -648,15 +495,116 @@ th, td {
                 <a href="add_user.php" class="btn primary-btn add-btn">
                     <i class="fas fa-plus"></i> Add New User
                 </a>
-            </form>            
+            </form>            
+            
             <div id="user-table-container">
-                <?php echo renderUserTable($data); ?>
+                <?php echo renderEmptyTableStructure(); ?>
             </div>
+            
             </div>
     </div>
 </div>
+
 <script>
+// I-convert ang PHP logic na nag-rerequire ng HTML rendering sa JavaScript
+const roleInfoMap = {
+    'admin': { text: 'Administrator', class: 'badge-admin', permission: 'Full control over all system data, including residents, users, and documents.' },
+    'staff': { text: 'Staff Member', class: 'badge-staff', permission: 'Can manage (add/edit/view) residents and documents, but has limited user management access.' },
+    'clerk': { text: 'Clerk', class: 'badge-clerk', permission: 'Primarily for data entry and document retrieval. View and limited edit access to resident data.' },
+    'default': { text: 'Unknown', class: 'badge-none', permission: 'Limited or no specific permissions defined.' }
+};
+
+function getRoleBadgeJS(role) {
+    const key = role ? role.toLowerCase() : 'default';
+    return roleInfoMap[key] || roleInfoMap.default;
+}
+
+function getStatusBadgeJS(status) {
+    const s = status ? status.toLowerCase() : 'inactive';
+    if (s === 'active') {
+        return { text: 'Active', class: 'badge-active' };
+    }
+    if (s === 'inactive') {
+        return { text: 'Inactive', class: 'badge-inactive' };
+    }
+    return { text: s.charAt(0).toUpperCase() + s.slice(1), class: 'badge-none' };
+}
+
+// Function na magr-render ng table rows mula sa JSON data
+function renderUserTableRowsJS(users) {
+    if (!users || users.length === 0) {
+        return `<tr><td colspan="6" style="text-align: center;">No users found matching the criteria.</td></tr>`;
+    }
+
+    let rowsHtml = '';
+    users.forEach(user => {
+        const roleBadge = getRoleBadgeJS(user.role);
+        const statusBadge = getStatusBadgeJS(user.status);
+        const userId = user.user_id;
+
+        // User Row
+        rowsHtml += `
+            <tr class="user-row" data-user-id="${userId}">
+                <td>${user.fullname || ''}</td>
+                <td>${user.email || ''}</td>
+                <td><span class="special-status-bar ${roleBadge.class}" style="margin-bottom: 0;">${roleBadge.text}</span></td>
+                <td>${userId}</td>
+                <td><span class="special-status-bar ${statusBadge.class}" style="margin-bottom: 0;">${statusBadge.text}</span></td>
+                <td>
+                    <div class="action-icon-group">
+                        <a href="edit_user.php?id=${userId}" class="action-btn edit-btn" title="Edit User">
+                            <i class="fas fa-edit"></i> </a>
+                        <a href="delete_user.php?id=${userId}" class="action-btn delete-btn" title="Delete User" onclick="return confirm('Are you sure you want to delete this user (ID: ${userId})?');">
+                            <i class="fas fa-trash"></i> </a>
+                    </div>
+                </td>
+            </tr>`;
+
+        // Detail Row
+        rowsHtml += `
+            <tr class="detail-row" data-detail-id="${userId}">
+                <td colspan="6">
+                    <div class="detail-container">
+                        <div class="special-status-bar ${roleBadge.class}">
+                            Role: ${roleBadge.text}
+                        </div>
+                        <div class="detail-tabs">
+                            <span class="detail-tab active" data-tab="account-${userId}">Account Info</span>
+                            <span class="detail-tab" data-tab="permissions-${userId}">Role & Permissions</span>
+                        </div>
+                        <div class="tab-content active" id="account-${userId}">
+                            <div class="detail-grid">
+                                <div class="detail-box">
+                                    <h4>IDENTIFICATION</h4>
+                                    <p><strong>User ID:</strong> ${userId}</p>
+                                    <p><strong>Full Name:</strong> ${user.fullname || ''}</p>
+                                    <p><strong>Email:</strong> ${user.email || ''}</p>
+                                </div>
+                                <div class="detail-box">
+                                    <h4>STATUS & DATE</h4>
+                                    <p><strong>Current Status:</strong> <span class="special-status-bar ${statusBadge.class}" style="padding: 3px 8px; margin: 0;">${statusBadge.text}</span></p>
+                                    <p><strong>Account Created:</strong> N/A (Placeholder)</p> 
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-content" id="permissions-${userId}">
+                            <div class="detail-box">
+                                <h4>USER ROLE & ACCESS LEVEL</h4>
+                                <p><strong>Role:</strong> <span class="special-status-bar ${roleBadge.class}" style="padding: 3px 8px; margin: 0;">${roleBadge.text}</span></p>
+                                <p><strong>Permissions:</strong></p>
+                                <p><em>${roleBadge.permission}</em></p>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>`;
+    });
+    return rowsHtml;
+}
+
+
 function setupDetailRowHandlers() {
+    // [Iwanan ang iyong existing logic para sa toggleDetailView at switchDetailTab]
     document.querySelectorAll(".user-row").forEach((row) => {
         row.removeEventListener("click", toggleDetailView); 
         row.addEventListener("click", toggleDetailView);
@@ -716,69 +664,70 @@ function switchDetailTab(e) {
     }
 }
 
+
 function fetchUsers(search, role, status) {
-    const container = document.getElementById('user-table-container');
+    const tableBody = document.getElementById('users-table-body');
     const header = document.getElementById('user-count-header');
     const errorAlert = document.getElementById('server-error-message');
-    container.style.opacity = '0.5'; 
+    const tableContainer = document.getElementById('user-table-container');
+
+    tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">Loading...</td></tr>`;
+    tableContainer.style.opacity = '0.5'; 
+    errorAlert.style.display = 'none';
 
     const params = new URLSearchParams({
-        ajax: 'true',
         search: search,
         role: role,
         status: status
     }).toString();
-    fetch(`users.php?${params}`)
+    
+    // TAWAGIN ANG NODE.JS API!
+    fetch(`http://localhost:3000/api/users?${params}`) 
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                // Kung hindi OK ang response (e.g., 500 server error)
+                throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
             }
-            return response.json();
+            return response.json(); 
         })
         .then(data => {
-            container.innerHTML = data.html;
-            header.innerHTML = `**User Directory** (${data.count} Found)`;
-    
+            // Data structure: { users: [...], count: X, error: null }
             if (data.error) {
-                 let newErrorAlert = document.getElementById('ajax-error-alert');
-                 if (!newErrorAlert) {
-                     newErrorAlert = document.createElement('div');
-                     newErrorAlert.id = 'ajax-error-alert';
-                     newErrorAlert.classList.add('alert-error');
-                     container.parentNode.insertBefore(newErrorAlert, container);
-                 }
-                 newErrorAlert.innerHTML = `**AJAX Error:** ${data.error}`;
-                 newErrorAlert.style.display = 'block';
-            } else if (errorAlert) {
-                 errorAlert.style.display = 'none';
+                throw new Error(data.error);
             }
-            setupDetailRowHandlers(); 
+
+            // I-render ang data gamit ang JavaScript function
+            tableBody.innerHTML = renderUserTableRowsJS(data.users); 
+            header.innerHTML = `**User Directory** (${data.count} Found)`;
             
-            container.style.opacity = '1'; 
+            setupDetailRowHandlers(); 
+            tableContainer.style.opacity = '1'; 
         })
         .catch(error => {
             console.error('Fetch error:', error);
-            let newErrorAlert = document.getElementById('ajax-error-alert');
-            if (!newErrorAlert) {
-                newErrorAlert = document.createElement('div');
-                newErrorAlert.id = 'ajax-error-alert';
-                newErrorAlert.classList.add('alert-error');
-                container.parentNode.insertBefore(newErrorAlert, container);
-            }
-            newErrorAlert.innerHTML = `**AJAX Failed:** Could not retrieve data. Please check network connection.`;
-            newErrorAlert.style.display = 'block';
-
-            container.style.opacity = '1';
+            // Ipakita ang error sa user
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">Error loading data. See console for details.</td></tr>`;
+            errorAlert.innerHTML = `**API Error:** ${error.message}. Please ensure the Node.js server is running on port 3000.`;
+            errorAlert.style.display = 'block';
+            tableContainer.style.opacity = '1';
         });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    setupDetailRowHandlers(); 
+    // Kukunin ang initial filter values mula sa PHP (na kinuha sa URL)
+    const initialSearch = document.getElementById('search-input').value;
+    const initialRole = document.getElementById('role-filter').value;
+    const initialStatus = document.getElementById('status-filter').value;
+    
+    // 1. Unang tawag sa API (Node.js) para i-load ang data
+    fetchUsers(initialSearch, initialRole, initialStatus);
 
+    // 2. Set up event listeners para sa filtering
     const searchInput = document.getElementById('search-input');
     const roleFilter = document.getElementById('role-filter');
     const statusFilter = document.getElementById('status-filter');
     let searchTimer;
+
     searchInput.addEventListener('input', () => {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(() => {

@@ -1,6 +1,6 @@
 <?php
-$resident_name = "MARIA F. SANTOS";
-$address = "123 Sunflower St., Happy Hallow";
+$resident_name = "________________________";
+$address = "________________________";
 $years = 15;
 $date = date("F d, Y");
 ?>

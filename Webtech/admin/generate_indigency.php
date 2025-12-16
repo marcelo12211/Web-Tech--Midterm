@@ -1,6 +1,6 @@
 <?php
-$resident_name = "LITA S. RAMOS";
-$reason = "Medical Assistance";
+$resident_name = "________________________";
+$reason = "________________________";
 $date = date("F d, Y");
 ?>
 <!DOCTYPE html>

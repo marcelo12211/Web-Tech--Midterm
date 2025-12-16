@@ -1,7 +1,7 @@
 <?php
 // PHP logic to process the request (not included for simplicity)
-$resident_name = "JUAN C. DELA CRUZ";
-$purpose = "JOB APPLICATION";
+$resident_name = "________________________";
+$purpose = "________________________";
 $date = date("F d, Y");
 ?>
 <!DOCTYPE html>
