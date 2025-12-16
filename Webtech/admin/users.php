@@ -1,28 +1,27 @@
 <?php
 session_start();
-// TANGGAL NA: include '../db_connect.php'; 
-// TINANGGAL NA: Ang lahat ng PHP functions na may kinalaman sa database connection (fetchUserData) ay inalis.
-// Kukunin na lang natin ang mga filter values mula sa URL para sa initial state ng form.
 
+// Tiyakin na naka-login ang user
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 $logged_in_username = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Admin';
+require_once 'db_connect.php'; 
 
-// Kukunin ang filter values mula sa URL para sa initial rendering ng filter controls
+// Kukunin ang filter values mula sa URL
 $search_term = $_GET['search'] ?? '';
 $role_filter = $_GET['role'] ?? '';
 $status_filter = $_GET['status'] ?? '';
 
-// Ang mga PHP functions na ito ay ginawa na lang para sa initial rendering ng HTML structure.
-// Ang data fetching at table rendering ay gagawin na ng JAVASCRIPT.
+// --- PHP FUNCTIONS (Utility) ---
+
 function getRoleBadge($role) {
     switch(strtolower($role)) {
-        case 'admin': return ['text' => 'Administrator', 'class' => 'badge-admin'];
-        case 'staff': return ['text' => 'Staff Member', 'class' => 'badge-staff'];
-        case 'clerk': return ['text' => 'Clerk', 'class' => 'badge-clerk'];
-        default: return ['text' => ucfirst($role), 'class' => 'badge-none'];
+        case 'admin': return ['text' => 'Administrator', 'class' => 'badge-admin', 'permission' => 'Full control over all system data, including residents, users, and documents.'];
+        case 'staff': return ['text' => 'Staff Member', 'class' => 'badge-staff', 'permission' => 'Can manage (add/edit/view) residents and documents, but has limited user management access.'];
+        case 'clerk': return ['text' => 'Clerk', 'class' => 'badge-clerk', 'permission' => 'Primarily for data entry and document retrieval. View and limited edit access to resident data.'];
+        default: return ['text' => ucfirst($role), 'class' => 'badge-none', 'permission' => 'Limited or no specific permissions defined.'];
     }
 }
 
@@ -37,40 +36,156 @@ function getStatusBadge($status) {
     return ['text' => ucfirst($status), 'class' => 'badge-none']; 
 }
 
-// Ang PHP function na ito ay gagamitin lang para mag-render ng EMPTY table structure
-// dahil ang data ay ire-render na ng JavaScript.
-function renderEmptyTableStructure() {
-    $html = '
-    <div class="card data-table-card">
-        <div class="table-responsive">
-            <table id="users-main-table">
-                <thead>
-                    <tr>
-                        <th>Full Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>User ID</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="users-table-body">
-                    <tr>
-                        <td colspan="6" style="text-align: center;">Loading user data from Node.js API...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>';
-    return $html;
+// --- DATABASE FETCHING LOGIC ---
+
+$data = ['count' => 0, 'users' => []];
+
+// Query Building
+$where_clauses = [];
+$params = [];
+$types = '';
+
+// 1. Search Filter (fullname OR email)
+if (!empty($search_term)) {
+    // Note: Assuming you are using MySQLi and not PDO for the $conn object.
+    $search_pattern = '%' . $search_term . '%';
+    $where_clauses[] = "(fullname LIKE ? OR email LIKE ?)";
+    $params[] = $search_pattern;
+    $params[] = $search_pattern;
+    $types .= 'ss';
 }
 
-// Ang mga variables na ito ay ginamit dati sa PHP fetching, ngayon ay placeholder na lang.
-$data = ['count' => 0]; // Placeholder lang
+// 2. Role Filter
+if (!empty($role_filter)) {
+    $where_clauses[] = "role = ?";
+    $params[] = $role_filter;
+    $types .= 's';
+}
 
-// TINANGGAL NA: $data = fetchUserData($conn);
-// TINANGGAL NA: $users = $data['users'];
-// TINANGGAL NA: if (isset($conn) && $conn->ping()) { $conn->close(); }
+// 3. Status Filter
+if (!empty($status_filter)) {
+    $where_clauses[] = "status = ?";
+    $params[] = $status_filter;
+    $types .= 's';
+}
+
+$sql = "SELECT user_id, fullname, email, role, status FROM users";
+
+if (!empty($where_clauses)) {
+    $sql .= " WHERE " . implode(" AND ", $where_clauses);
+}
+
+$sql .= " ORDER BY user_id DESC"; // I-sort ang data
+
+
+// Execute the query using prepared statements to prevent SQL Injection
+try {
+    $stmt = $conn->prepare($sql);
+    
+    // Bind parameters if there are any
+    if (!empty($params)) {
+        // Tiyakin na ang 'bind_param' ay tinatawag gamit ang reference (kailangan para sa PHP)
+        $stmt->bind_param($types, ...$params); 
+    }
+
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result && $result->num_rows > 0) {
+        $users_array = [];
+        while($row = $result->fetch_assoc()) {
+            $users_array[] = $row;
+        }
+        $data['users'] = $users_array;
+        $data['count'] = count($users_array);
+    }
+    $stmt->close();
+} catch (Exception $e) {
+    // Error handling: Ipakita ang error sa admin (Optional: Sa live server, i-log na lang ito)
+    $_SESSION['error_message'] = "Database Error: " . htmlspecialchars($e->getMessage());
+}
+
+
+$conn->close();
+
+// --- PHP TABLE RENDERING FUNCTION (Ngayon ay gagamitin na ang $data) ---
+
+function renderUserTableRows($users) {
+    if (empty($users)) {
+        return '<tr><td colspan="6" style="text-align: center;">No users found matching the criteria.</td></tr>';
+    }
+
+    $rowsHtml = '';
+    foreach ($users as $user) {
+        $roleBadge = getRoleBadge($user['role']);
+        $statusBadge = getStatusBadge($user['status']);
+        $userId = htmlspecialchars($user['user_id']);
+        $fullname = htmlspecialchars($user['fullname'] ?? '');
+        $email = htmlspecialchars($user['email'] ?? '');
+        $createdAt = htmlspecialchars($user['created_at'] ?? 'N/A');
+
+        // Main User Row
+        $rowsHtml .= '
+            <tr class="user-row" data-user-id="' . $userId . '">
+                <td>' . $fullname . '</td>
+                <td>' . $email . '</td>
+                <td><span class="special-status-bar ' . $roleBadge['class'] . '" style="margin-bottom: 0;">' . $roleBadge['text'] . '</span></td>
+                <td>' . $userId . '</td>
+                <td><span class="special-status-bar ' . $statusBadge['class'] . '" style="margin-bottom: 0;">' . $statusBadge['text'] . '</span></td>
+                <td>
+                    <div class="action-icon-group">
+                        <a href="edit_user.php?id=' . $userId . '" class="action-btn edit-btn" title="Edit User">
+                            <i class="fas fa-edit"></i> </a>
+                        <a href="delete_user.php?id=' . $userId . '" class="action-btn delete-btn" title="Delete User" onclick="return confirm(\'Are you sure you want to delete this user (ID: ' . $userId . ')?\');">
+                            <i class="fas fa-trash"></i> </a>
+                    </div>
+                </td>
+            </tr>';
+
+        // Detail Row (for expansion via JavaScript)
+        $rowsHtml .= '
+            <tr class="detail-row" data-detail-id="' . $userId . '">
+                <td colspan="6">
+                    <div class="detail-container">
+                        <div class="special-status-bar ' . $roleBadge['class'] . '">
+                            Role: ' . $roleBadge['text'] . '
+                        </div>
+                        <div class="detail-tabs">
+                            <span class="detail-tab active" data-tab="account-' . $userId . '">Account Info</span>
+                            <span class="detail-tab" data-tab="permissions-' . $userId . '">Role & Permissions</span>
+                        </div>
+                        <div class="tab-content active" id="account-' . $userId . '">
+                            <div class="detail-grid">
+                                <div class="detail-box">
+                                    <h4>IDENTIFICATION</h4>
+                                    <p><strong>User ID:</strong> ' . $userId . '</p>
+                                    <p><strong>Full Name:</strong> ' . $fullname . '</p>
+                                    <p><strong>Email:</strong> ' . $email . '</p>
+                                </div>
+                                <div class="detail-box">
+                                    <h4>STATUS & DATE</h4>
+                                    <p><strong>Current Status:</strong> <span class="special-status-bar ' . $statusBadge['class'] . '" style="padding: 3px 8px; margin: 0;">' . $statusBadge['text'] . '</span></p>
+                                    <p><strong>Account Created:</strong> ' . $createdAt . '</p> 
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-content" id="permissions-' . $userId . '">
+                            <div class="detail-box">
+                                <h4>USER ROLE & ACCESS LEVEL</h4>
+                                <p><strong>Role:</strong> <span class="special-status-bar ' . $roleBadge['class'] . '" style="padding: 3px 8px; margin: 0;">' . $roleBadge['text'] . '</span></p>
+                                <p><strong>Permissions:</strong></p>
+                                <p><em>' . htmlspecialchars($roleBadge['permission']) . '</em></p>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>';
+    }
+    return $rowsHtml;
+}
+
+// Hindi na kailangan ang renderEmptyTableStructure() pero iniwan ko na lang para hindi mag-break ang code structure.
+// Tinanggal na ang JAVASCRIPT dependency para sa Table rendering.
 
 ?>
 
@@ -85,7 +200,7 @@ $data = ['count' => 0]; // Placeholder lang
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
     <style>
-/* CSS Styles from your original file here */
+/* ... (Ito ang iyong CSS Styles. Hindi na ito binago.) ... */
 :root {
     --primary-color: #226b8dff;
     --primary-dark: #226b8dff;
@@ -453,10 +568,9 @@ th, td {
         </div>
         
         <div class="page-content">
-            <h2 id="user-count-header">**User Directory** (<?php echo $data['count']; ?> Found)</h2>
+            <h2 id="user-count-header">User Directory</h2>
             
-            <?php // Error message placeholders na lang ang iniwan ?>
-            <div class="alert-error" id="server-error-message" style="display:none;"></div>
+            <?php // Displaying messages from session ?>
             <?php if (isset($_SESSION['success_message'])): ?>
                 <div class="alert-success"><?php echo htmlspecialchars($_SESSION['success_message']); ?></div>
                 <?php unset($_SESSION['success_message']); ?>
@@ -466,7 +580,7 @@ th, td {
                 <?php unset($_SESSION['error_message']); ?>
             <?php endif; ?>
             
-            <form id="filter-form" method="GET" action="users.php" class="data-control-panel" onsubmit="event.preventDefault(); return false;">
+            <form id="filter-form" method="GET" action="users.php" class="data-control-panel">
                 <div class="search-and-filter-wrapper">
                     <input
                         type="text"
@@ -477,28 +591,45 @@ th, td {
                         value="<?php echo htmlspecialchars($search_term); ?>"
                     />
                     <div class="filter-group">
-                        <select class="filter-select" name="role" id="role-filter">
+                        <select class="filter-select" name="role" id="role-filter" onchange="this.form.submit()">
                             <option value="">-- Select Role --</option>
                             <option value="admin" <?php echo $role_filter == 'admin' ? 'selected' : ''; ?>>Admin</option>
                             <option value="staff" <?php echo $role_filter == 'staff' ? 'selected' : ''; ?>>Staff</option>
                             <option value="clerk" <?php echo $role_filter == 'clerk' ? 'selected' : ''; ?>>Clerk</option>
                         </select>
-                        <select class="filter-select" name="status" id="status-filter">
-                            <option value="">-- All Status --</option>
-                            <option value="active" <?php echo $status_filter == 'active' ? 'selected' : ''; ?>>Active</option>
-                            <option value="inactive" <?php echo $status_filter == 'inactive' ? 'selected' : ''; ?>>Inactive</option>
-                        </select>
-                        <button type="submit" class="btn primary-btn" style="display: none;">Filter</button> 
+                        <select class="filter-select" name="status" id="status-filter" onchange="this.form.submit()">
+    <option value="">-- All Status --</option>
+    <option value="active" <?php echo $status_filter == 'active' ? 'selected' : ''; ?>>Active</option>
+    <option value="inactive" <?php echo $status_filter == 'inactive' ? 'selected' : ''; ?>>Inactive</option>
+</select>
                         <a href="users.php" class="btn">Reset</a>
                     </div>
                 </div>
                 <a href="add_user.php" class="btn primary-btn add-btn">
                     <i class="fas fa-plus"></i> Add New User
                 </a>
-            </form>            
+            </form> 
             
             <div id="user-table-container">
-                <?php echo renderEmptyTableStructure(); ?>
+                <div class="card data-table-card">
+                    <div class="table-responsive">
+                        <table id="users-main-table">
+                            <thead>
+                                <tr>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>User ID</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body">
+                                <?php echo renderUserTableRows($data['users']); ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
             
             </div>
@@ -506,106 +637,12 @@ th, td {
 </div>
 
 <script>
-// I-convert ang PHP logic na nag-rerequire ng HTML rendering sa JavaScript
-const roleInfoMap = {
-    'admin': { text: 'Administrator', class: 'badge-admin', permission: 'Full control over all system data, including residents, users, and documents.' },
-    'staff': { text: 'Staff Member', class: 'badge-staff', permission: 'Can manage (add/edit/view) residents and documents, but has limited user management access.' },
-    'clerk': { text: 'Clerk', class: 'badge-clerk', permission: 'Primarily for data entry and document retrieval. View and limited edit access to resident data.' },
-    'default': { text: 'Unknown', class: 'badge-none', permission: 'Limited or no specific permissions defined.' }
-};
-
-function getRoleBadgeJS(role) {
-    const key = role ? role.toLowerCase() : 'default';
-    return roleInfoMap[key] || roleInfoMap.default;
-}
-
-function getStatusBadgeJS(status) {
-    const s = status ? status.toLowerCase() : 'inactive';
-    if (s === 'active') {
-        return { text: 'Active', class: 'badge-active' };
-    }
-    if (s === 'inactive') {
-        return { text: 'Inactive', class: 'badge-inactive' };
-    }
-    return { text: s.charAt(0).toUpperCase() + s.slice(1), class: 'badge-none' };
-}
-
-// Function na magr-render ng table rows mula sa JSON data
-function renderUserTableRowsJS(users) {
-    if (!users || users.length === 0) {
-        return `<tr><td colspan="6" style="text-align: center;">No users found matching the criteria.</td></tr>`;
-    }
-
-    let rowsHtml = '';
-    users.forEach(user => {
-        const roleBadge = getRoleBadgeJS(user.role);
-        const statusBadge = getStatusBadgeJS(user.status);
-        const userId = user.user_id;
-
-        // User Row
-        rowsHtml += `
-            <tr class="user-row" data-user-id="${userId}">
-                <td>${user.fullname || ''}</td>
-                <td>${user.email || ''}</td>
-                <td><span class="special-status-bar ${roleBadge.class}" style="margin-bottom: 0;">${roleBadge.text}</span></td>
-                <td>${userId}</td>
-                <td><span class="special-status-bar ${statusBadge.class}" style="margin-bottom: 0;">${statusBadge.text}</span></td>
-                <td>
-                    <div class="action-icon-group">
-                        <a href="edit_user.php?id=${userId}" class="action-btn edit-btn" title="Edit User">
-                            <i class="fas fa-edit"></i> </a>
-                        <a href="delete_user.php?id=${userId}" class="action-btn delete-btn" title="Delete User" onclick="return confirm('Are you sure you want to delete this user (ID: ${userId})?');">
-                            <i class="fas fa-trash"></i> </a>
-                    </div>
-                </td>
-            </tr>`;
-
-        // Detail Row
-        rowsHtml += `
-            <tr class="detail-row" data-detail-id="${userId}">
-                <td colspan="6">
-                    <div class="detail-container">
-                        <div class="special-status-bar ${roleBadge.class}">
-                            Role: ${roleBadge.text}
-                        </div>
-                        <div class="detail-tabs">
-                            <span class="detail-tab active" data-tab="account-${userId}">Account Info</span>
-                            <span class="detail-tab" data-tab="permissions-${userId}">Role & Permissions</span>
-                        </div>
-                        <div class="tab-content active" id="account-${userId}">
-                            <div class="detail-grid">
-                                <div class="detail-box">
-                                    <h4>IDENTIFICATION</h4>
-                                    <p><strong>User ID:</strong> ${userId}</p>
-                                    <p><strong>Full Name:</strong> ${user.fullname || ''}</p>
-                                    <p><strong>Email:</strong> ${user.email || ''}</p>
-                                </div>
-                                <div class="detail-box">
-                                    <h4>STATUS & DATE</h4>
-                                    <p><strong>Current Status:</strong> <span class="special-status-bar ${statusBadge.class}" style="padding: 3px 8px; margin: 0;">${statusBadge.text}</span></p>
-                                    <p><strong>Account Created:</strong> N/A (Placeholder)</p> 
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-content" id="permissions-${userId}">
-                            <div class="detail-box">
-                                <h4>USER ROLE & ACCESS LEVEL</h4>
-                                <p><strong>Role:</strong> <span class="special-status-bar ${roleBadge.class}" style="padding: 3px 8px; margin: 0;">${roleBadge.text}</span></p>
-                                <p><strong>Permissions:</strong></p>
-                                <p><em>${roleBadge.permission}</em></p>
-                            </div>
-                        </div>
-                    </div>
-                </td>
-            </tr>`;
-    });
-    return rowsHtml;
-}
-
+// Tinanggal na ang MOCK_USERS_DATA, renderUserTableRowsJS, at fetchUsers.
+// Ngayon, ang JavaScript ay para na lang sa Table Interaction (Row expansion)
 
 function setupDetailRowHandlers() {
-    // [Iwanan ang iyong existing logic para sa toggleDetailView at switchDetailTab]
     document.querySelectorAll(".user-row").forEach((row) => {
+        // Tiyakin na walang duplicate listeners
         row.removeEventListener("click", toggleDetailView); 
         row.addEventListener("click", toggleDetailView);
     });
@@ -637,13 +674,16 @@ function toggleDetailView(e) {
         if (!isExpanded) {
             row.classList.add("expanded");
             detailRow.classList.add('expanded');
+            
+            // Re-initialize tab state inside the newly expanded row
             const allTabs = detailRow.querySelectorAll(".detail-tab");
             const allContents = detailRow.querySelectorAll(".tab-content");
-            const firstTab = detailRow.querySelector(".detail-tab");
             
             allTabs.forEach((tab) => tab.classList.remove("active"));
             allContents.forEach((content) => content.classList.remove("active"));
             
+            // Activate the first tab by default
+            const firstTab = detailRow.querySelector(".detail-tab");
             if (firstTab) {
                 firstTab.classList.add("active");
                 const firstContentId = firstTab.dataset.tab;
@@ -665,81 +705,21 @@ function switchDetailTab(e) {
 }
 
 
-function fetchUsers(search, role, status) {
-    const tableBody = document.getElementById('users-table-body');
-    const header = document.getElementById('user-count-header');
-    const errorAlert = document.getElementById('server-error-message');
-    const tableContainer = document.getElementById('user-table-container');
-
-    tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">Loading...</td></tr>`;
-    tableContainer.style.opacity = '0.5'; 
-    errorAlert.style.display = 'none';
-
-    const params = new URLSearchParams({
-        search: search,
-        role: role,
-        status: status
-    }).toString();
-    
-    // TAWAGIN ANG NODE.JS API!
-    fetch(`http://localhost:3000/api/users?${params}`) 
-        .then(response => {
-            if (!response.ok) {
-                // Kung hindi OK ang response (e.g., 500 server error)
-                throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
-            }
-            return response.json(); 
-        })
-        .then(data => {
-            // Data structure: { users: [...], count: X, error: null }
-            if (data.error) {
-                throw new Error(data.error);
-            }
-
-            // I-render ang data gamit ang JavaScript function
-            tableBody.innerHTML = renderUserTableRowsJS(data.users); 
-            header.innerHTML = `**User Directory** (${data.count} Found)`;
-            
-            setupDetailRowHandlers(); 
-            tableContainer.style.opacity = '1'; 
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-            // Ipakita ang error sa user
-            tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">Error loading data. See console for details.</td></tr>`;
-            errorAlert.innerHTML = `**API Error:** ${error.message}. Please ensure the Node.js server is running on port 3000.`;
-            errorAlert.style.display = 'block';
-            tableContainer.style.opacity = '1';
-        });
-}
-
 document.addEventListener("DOMContentLoaded", () => {
-    // Kukunin ang initial filter values mula sa PHP (na kinuha sa URL)
-    const initialSearch = document.getElementById('search-input').value;
-    const initialRole = document.getElementById('role-filter').value;
-    const initialStatus = document.getElementById('status-filter').value;
+    // 1. Setup row click and tab handlers
+    setupDetailRowHandlers();
     
-    // 1. Unang tawag sa API (Node.js) para i-load ang data
-    fetchUsers(initialSearch, initialRole, initialStatus);
-
-    // 2. Set up event listeners para sa filtering
+    // 2. Setup event listener para sa search input (automatic submit after a delay)
     const searchInput = document.getElementById('search-input');
-    const roleFilter = document.getElementById('role-filter');
-    const statusFilter = document.getElementById('status-filter');
     let searchTimer;
 
     searchInput.addEventListener('input', () => {
+        collapseAllDetails();
         clearTimeout(searchTimer);
         searchTimer = setTimeout(() => {
-            fetchUsers(searchInput.value, roleFilter.value, statusFilter.value);
+            // I-submit ang form para ma-trigger ang PHP filtering
+            document.getElementById('filter-form').submit();
         }, 300); 
-    });
-    roleFilter.addEventListener('change', () => {
-        fetchUsers(searchInput.value, roleFilter.value, statusFilter.value);
-    });
-
-    statusFilter.addEventListener('change', () => {
-        fetchUsers(searchInput.value, roleFilter.value, statusFilter.value);
     });
 });
 </script>
