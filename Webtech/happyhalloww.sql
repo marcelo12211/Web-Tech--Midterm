@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Dec 11, 2025 at 07:47 PM
+-- Generation Time: Dec 15, 2025 at 02:54 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -250,6 +250,7 @@ CREATE TABLE IF NOT EXISTS `senior_citizens` (
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `user_id` int NOT NULL AUTO_INCREMENT,
+  `fullname` varchar(255) DEFAULT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` varchar(10) NOT NULL,
@@ -260,12 +261,12 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`user_id`, `email`, `password`, `role`) VALUES
-(5004, 'staff4@example.com', 'password123', 'staff'),
-(5005, 'staff5@example.com', 'password123', 'staff'),
-(9001, 'admin101@example.com', 'password123', 'staff'),
-(9002, 'admin102@example.com', 'password123', 'admin'),
-(9003, 'admin103@example.com', 'password123', 'admin');
+INSERT INTO `users` (`user_id`, `fullname`, `email`, `password`, `role`) VALUES
+(5004, '', 'staff4@example.com', 'password123', 'staff'),
+(5005, '', 'staff5@example.com', 'password123', 'staff'),
+(9001, '', 'admin101@example.com', 'password123', 'staff'),
+(9002, '', 'admin102@example.com', 'password123', 'admin'),
+(9003, '', 'admin103@example.com', 'password123', 'admin');
 
 -- --------------------------------------------------------
 
