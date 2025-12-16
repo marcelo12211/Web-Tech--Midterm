@@ -6,19 +6,35 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 $logged_in_username = htmlspecialchars($_SESSION['user_name'] ?? 'Guest');
-function getCount($conn, $table) {
-    $table = mysqli_real_escape_string($conn, $table); 
-    $sql = "SELECT COUNT(*) AS total FROM $table";
-    $res = $conn->query($sql);
-    return ($res && $row = $res->fetch_assoc()) ? (int)$row['total'] : 0;
+/*NODE API version for counting from db instead of php queries*/
+$stats = [
+    "total_residents" => 0,
+    "senior" => 0,
+    "pwd" => 0,
+    "pregnant" => 0,
+    "regular" => 0,
+    "total_children" => 0
+];
+
+$ch = curl_init("http://127.0.0.1:5000/admin/dashboard/stats");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$response = curl_exec($ch);
+curl_close($ch);
+
+if ($response) {
+    $decoded = json_decode($response, true);
+    if (is_array($decoded)) {
+        $stats = array_merge($stats, $decoded);
+    }
 }
-$total_residents = getCount($conn, 'residents');
-$senior = getCount($conn, "residents WHERE is_senior = 1");
-$pwd = getCount($conn, "residents WHERE is_disabled = 1");
-$pregnant = getCount($conn, "residents WHERE is_pregnant = 1");
-$total_children = 5; 
-$regular = $total_residents - ($senior + $pwd + $pregnant);
-if ($regular < 0) $regular = 0;
+
+$total_residents = $stats['total_residents'];
+$senior = $stats['senior'];
+$pwd = $stats['pwd'];
+$pregnant = $stats['pregnant'];
+$regular = $stats['regular'];
+$total_children = $stats['total_children'];
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
