@@ -93,6 +93,41 @@ app.get("/admin/dashboard/stats", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch dashboard stats" });
   }
 });
+/*for manage residents fetch */
+app.get("/admin/residents", async (req, res) => {
+  try {
+    const { search = "", purok = "", category = "" } = req.query;
+
+    let sql = "SELECT * FROM residents WHERE 1=1";
+    let params = [];
+
+    if (search) {
+      sql += " AND (first_name LIKE ? OR surname LIKE ? OR person_id = ?)";
+      params.push(`%${search}%`, `%${search}%`, isNaN(search) ? 0 : Number(search));
+    }
+
+    if (purok) {
+      sql += " AND purok = ?";
+      params.push(Number(purok));
+    }
+
+    if (category === "senior") {
+      sql += " AND is_senior = 1";
+    } else if (category === "pwd") {
+      sql += " AND is_disabled = 1";
+    } else if (category === "pregnant") {
+      sql += " AND is_pregnant = 1 AND sex = 'Female'";
+    }
+
+    sql += " ORDER BY surname ASC";
+
+    const [rows] = await pool.query(sql, params);
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch residents" });
+  }
+});
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Admin API running on http://127.0.0.1:${PORT}`);

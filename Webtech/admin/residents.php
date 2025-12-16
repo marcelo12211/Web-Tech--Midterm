@@ -452,133 +452,172 @@ th, td {
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            
-            const tableBody = document.getElementById("resident-table-body");
-            const searchInput = document.getElementById("search-input");
-            const categorySelect = document.getElementById("category-select");
-            const purokSelect = document.getElementById("purok-select");
-            const residentCountSpan = document.getElementById("resident-count");
-            let searchTimeout;
-            
-            function loadResidents() {
-                collapseAllDetails();
-                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Filtering data...</td></tr>';
-                
-                const searchTerm = searchInput.value;
-                const category = categorySelect.value;
-                const purok = purokSelect.value;
-                const url = `fetch_residents.php?search=${encodeURIComponent(searchTerm)}&category=${encodeURIComponent(category)}&purok=${encodeURIComponent(purok)}`;
+document.addEventListener("DOMContentLoaded", () => {
 
-                fetch(url)
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.text().then(text => { throw new Error(text) });
-                        }
-                        return response.text();
-                    })
-                    .then(html => {
-                        tableBody.innerHTML = html; 
-                        const residentRows = tableBody.querySelectorAll('.resident-row');
-                        residentCountSpan.textContent = residentRows.length;
-                        attachRowClickListeners();
-                        attachDetailTabListeners();
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                        tableBody.innerHTML = `<tr><td colspan="7" class="alert-error" style="text-align: center;">${error.message || 'Failed to load data. Please check network and server logs.'}</td></tr>`;
-                        residentCountSpan.textContent = '0';
-                    });
-            }
-            searchInput.addEventListener('input', () => {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(loadResidents, 300);
-            });
-            categorySelect.addEventListener('change', loadResidents);
-            purokSelect.addEventListener('change', loadResidents);
-            function collapseAllDetails() {
-                document.querySelectorAll('.detail-row').forEach(otherDetail => {
-                    otherDetail.classList.remove('expanded'); 
-                });
-                document.querySelectorAll('.resident-row').forEach(otherRow => {
-                    otherRow.classList.remove('expanded');
-                });
-            }
-            
-            function handleRowClick(e) {
-                if (e.target.closest(".action-btn, a")) {
+    const tableBody = document.getElementById("resident-table-body");
+    const searchInput = document.getElementById("search-input");
+    const categorySelect = document.getElementById("category-select");
+    const purokSelect = document.getElementById("purok-select");
+    const residentCountSpan = document.getElementById("resident-count");
+    let searchTimeout;
+function formatDate(dateString) {
+    if (!dateString) return "";
+    return dateString.split("T")[0];
+}
+    /* dati fetch but now it is node for getting the residents  */
+    function loadResidents() {
+        collapseAllDetails();
+
+        tableBody.innerHTML =
+            '<tr><td colspan="7" style="text-align: center;">Filtering data...</td></tr>';
+
+        const params = new URLSearchParams({
+            search: searchInput.value,
+            category: categorySelect.value,
+            purok: purokSelect.value
+        });
+
+        fetch(`http://127.0.0.1:5000/admin/residents?${params.toString()}`)
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                tableBody.innerHTML = "";
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    tableBody.innerHTML =
+                        '<tr><td colspan="7" style="text-align:center;">No residents found matching the criteria.</td></tr>';
+                    residentCountSpan.textContent = "0";
                     return;
                 }
 
-                const row = e.currentTarget;
-                const residentId = row.dataset.residentId;
-                const detailRow = document.querySelector(
-                    `.detail-row[data-detail-id="${residentId}"]`
-                );
+                data.forEach(res => {
+                    const residentId = res.person_id;
 
-                if (detailRow) {
-                    const isExpanded = row.classList.contains("expanded");
-                    document.querySelectorAll('.resident-row.expanded').forEach(r => {
-                        if (r !== row) r.classList.remove('expanded');
-                    });
-                    document.querySelectorAll('.detail-row.expanded').forEach(dr => {
-                        if (dr !== detailRow) dr.classList.remove('expanded');
-                    });
-                    if (!isExpanded) {
-                        row.classList.add("expanded");
-                        detailRow.classList.add('expanded');
-                        const allTabs = detailRow.querySelectorAll(".detail-tab");
-                        const allContents = detailRow.querySelectorAll(".tab-content");
-                        const firstTab = detailRow.querySelector(".detail-tab");
-                        
-                        allTabs.forEach((tab) => tab.classList.remove("active"));
-                        allContents.forEach((content) => content.classList.remove("active"));
-                        
-                        if (firstTab) {
-                            firstTab.classList.add("active");
-                            const firstContentId = firstTab.dataset.tab;
-                            const firstContent = document.getElementById(firstContentId);
-                            if (firstContent) {
-                                firstContent.classList.add("active");
-                            }
-                        }
-                    } else {
-                         row.classList.remove("expanded");
-                         detailRow.classList.remove('expanded');
-                    }
-                }
-            }
+                    tableBody.innerHTML += `
+                        <tr class="resident-row" data-resident-id="${residentId}">
+                            <td>${buildFullName(res)}</td>
+                            <td>${res.sex}</td>
+                            <td>${formatDate(res.birthdate)}</td>
+                            <td>${res.civil_status}</td>
+                            <td>Purok ${res.purok}</td>
+                            <td>${res.address}</td>
+                            <td>
+                                <a href="editresident.php?id=${residentId}" class="action-btn" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="deleteresident.php?id=${residentId}" class="action-btn delete-btn"
+                                   title="Delete"
+                                   onclick="return confirm('Are you sure you want to delete this resident?');">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                });
 
-            function attachRowClickListeners() {
-                document.querySelectorAll(".resident-row").forEach((row) => {
-                    row.removeEventListener("click", handleRowClick);
-                    row.addEventListener("click", handleRowClick);
-                });
-            }
-            
-            function handleTabClick(e) {
-                const detailContainer = e.target.closest(".detail-container");
-                const tabName = e.target.dataset.tab;
-                
-                if (detailContainer) {
-                    detailContainer.querySelectorAll(".detail-tabs .detail-tab").forEach((t) => t.classList.remove("active"));
-                    detailContainer.querySelectorAll(".tab-content").forEach((c) => c.classList.remove("active"));
-                    e.target.classList.add("active");
-                    const contentElement = detailContainer.querySelector(`#${tabName}`);
-                    if (contentElement) {
-                        contentElement.classList.add("active");
-                    }
-                }
-            }
-            
-            function attachDetailTabListeners() {
-                document.querySelectorAll(".detail-tab").forEach((tab) => {
-                    tab.removeEventListener("click", handleTabClick);
-                    tab.addEventListener("click", handleTabClick);
-                });
-            }
-            loadResidents();
+                residentCountSpan.textContent = data.length;
+                attachRowClickListeners();
+                attachDetailTabListeners();
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                tableBody.innerHTML =
+                    `<tr><td colspan="7" class="alert-error" style="text-align:center;">
+                        ${error.message || "Failed to load data."}
+                     </td></tr>`;
+                residentCountSpan.textContent = "0";
+            });
+    }
+
+    /* helpers of fetch but node */
+    function buildFullName(res) {
+        let name = res.first_name + " ";
+        if (res.middle_name) {
+            name += res.middle_name.charAt(0) + ". ";
+        }
+        name += res.surname;
+        if (res.suffix) {
+            name += " " + res.suffix;
+        }
+        return name;
+    }
+
+    function calculateAge(birthdate) {
+        const birth = new Date(birthdate);
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const m = today.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+            age--;
+        }
+        return age;
+    }
+
+    searchInput.addEventListener("input", () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(loadResidents, 300);
+    });
+
+    categorySelect.addEventListener("change", loadResidents);
+    purokSelect.addEventListener("change", loadResidents);
+
+    function collapseAllDetails() {
+        document.querySelectorAll(".detail-row").forEach(row => row.classList.remove("expanded"));
+        document.querySelectorAll(".resident-row").forEach(row => row.classList.remove("expanded"));
+    }
+
+    function handleRowClick(e) {
+        if (e.target.closest(".action-btn, a")) return;
+
+        const row = e.currentTarget;
+        const residentId = row.dataset.residentId;
+        const detailRow = document.querySelector(`.detail-row[data-detail-id="${residentId}"]`);
+
+        if (!detailRow) return;
+
+        const isExpanded = row.classList.contains("expanded");
+
+        document.querySelectorAll(".resident-row.expanded").forEach(r => r.classList.remove("expanded"));
+        document.querySelectorAll(".detail-row.expanded").forEach(r => r.classList.remove("expanded"));
+
+        if (!isExpanded) {
+            row.classList.add("expanded");
+            detailRow.classList.add("expanded");
+        }
+    }
+
+    function attachRowClickListeners() {
+        document.querySelectorAll(".resident-row").forEach(row => {
+            row.removeEventListener("click", handleRowClick);
+            row.addEventListener("click", handleRowClick);
         });
-    </script>
+    }
+
+    function handleTabClick(e) {
+        const container = e.target.closest(".detail-container");
+        if (!container) return;
+
+        container.querySelectorAll(".detail-tab").forEach(t => t.classList.remove("active"));
+        container.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+
+        e.target.classList.add("active");
+        const content = container.querySelector(`#${e.target.dataset.tab}`);
+        if (content) content.classList.add("active");
+    }
+
+    function attachDetailTabListeners() {
+        document.querySelectorAll(".detail-tab").forEach(tab => {
+            tab.removeEventListener("click", handleTabClick);
+            tab.addEventListener("click", handleTabClick);
+        });
+    }
+
+    loadResidents();
+});
+</script>
 </body>
 </html>
