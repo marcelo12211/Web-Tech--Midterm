@@ -9,13 +9,14 @@ if (!isset($_SESSION['user_id'])) {
 }
 $logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User';
 
-include '../db_connect.php'; 
+include '../db_connect.php'; // Assuming db_connect.php is one level up
 
-$error = null;
+$error = null; // Use a single error variable for simplicity
 $editMode = false;
 $residentId = isset($_GET['id']) ? intval($_GET['id']) : null;
 $resData = [];
 
+// --- Fetch Resident Data for Edit Mode ---
 if ($residentId) {
     $editMode = true;
     $stmt = $conn->prepare("SELECT * FROM residents WHERE person_id = ?");
@@ -30,8 +31,10 @@ if ($residentId) {
         exit();
     }
 }
+// Fetch household data for dropdown
 $householdResult = $conn->query("SELECT household_id, household_head FROM household ORDER BY household_id ASC");
 
+// Function to determine which special status is currently selected for drop down
 function getSelectedStatus($resData) {
     if (isset($resData['is_senior']) && $resData['is_senior']) return 'Senior Citizen';
     if (isset($resData['is_disabled']) && $resData['is_disabled']) return 'PWD';
@@ -43,6 +46,7 @@ function getSelectedStatus($resData) {
 }
 $current_status = getSelectedStatus($resData);
 
+// Re-fetch household data if needed, as the pointer might be at the end after POST logic
 if ($householdResult->num_rows > 0) {
     $householdResult->data_seek(0);
 }
@@ -56,6 +60,7 @@ if ($householdResult->num_rows > 0) {
 <title><?php echo $editMode ? "Edit" : "Add"; ?> Resident</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 <style>
+/* --- General Styles (Copied from users.php) --- */
 :root {
     --primary-color: #226b8dff;
     --primary-dark: #226b8dff;
@@ -85,6 +90,7 @@ a { text-decoration: none; }
     min-height: 100vh;
 }
 
+/* Sidebar Styles */
 .sidebar {
     width: 250px;
     background: var(--sidebar-bg);
@@ -109,6 +115,7 @@ a { text-decoration: none; }
     color: white;
 }
 
+/* Main Content/Topbar Styles */
 .main-content { flex: 1; }
 .topbar {
     background: white;
@@ -148,6 +155,7 @@ a { text-decoration: none; }
     margin-bottom: 30px;
 }
 
+/* Alert Styles */
 .alert-error {
     padding: 15px;
     border-radius: 6px;
@@ -158,12 +166,13 @@ a { text-decoration: none; }
     border: 1px solid var(--danger-color);
 }
 
+/* --- Form Specific Styles (Based on users.php) --- */
 .form-card {
     background: var(--card-background);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     padding: 30px;
-    max-width: 900px;
+    max-width: 900px; /* Mas malaki para sa resident form */
     margin: 0 auto; 
     position: relative;
 }
@@ -186,7 +195,7 @@ a { text-decoration: none; }
     gap: 20px;
 }
 .input-group {
-    margin-bottom: 0;
+    margin-bottom: 0; /* Handled by grid gap */
 }
 .input-group label {
     display: block;
@@ -214,19 +223,20 @@ a { text-decoration: none; }
     box-shadow: 0 0 0 3px rgba(34, 107, 141, 0.2); 
 }
 
+/* Specific Section Styles */
 .pwd-section, .senior-section {
     display: none;
-    grid-column: 1 / -1; 
+    grid-column: 1 / -1; /* Gawing full-width ang section */
     padding: 20px;
     border-radius: 8px;
     margin-top: 10px;
 }
 .pwd-section {
-    background: #fff3cd; 
+    background: #fff3cd; /* Light warning color */
     border: 2px solid var(--warning-color);
 }
 .senior-section {
-    background: #d4edda;
+    background: #d4edda; /* Light success color */
     border: 2px solid var(--success-color);
 }
 .pwd-section.show, .senior-section.show {
@@ -265,6 +275,7 @@ a { text-decoration: none; }
     border-color: var(--primary-dark);
 }
 
+/* Media Queries */
 @media (max-width: 900px) {
     .form-grid {
         grid-template-columns: 1fr;
@@ -505,71 +516,48 @@ if(isset($error)) echo "<div class='alert-error'><strong>Error!</strong> " . htm
 </div>
 
 <script>
-document.getElementById("residentForm").addEventListener("submit", async e => {
-  e.preventDefault();
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("residentForm");
 
-  const form = e.target;
-  const formData = new FormData(form);
-
-  const res = await fetch("http://127.0.0.1:5000/admin/residents", {
-    method: "POST",
-    body: formData
-  });
-
-  const data = await res.json();
-
-  if (data.success) {
-    window.location.href = "residents.php";
-  } else {
-    alert(data.error || "Failed to add resident");
+  if (!form) {
+    console.error("residentForm not found");
+    return;
   }
+
+  console.log("JS READY");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault(); 
+
+    console.log("SUBMIT INTERCEPTED");
+
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch("http://127.0.0.1:5000/admin/residents", {
+        method: "POST",
+        body: formData
+      });
+
+      console.log("STATUS:", res.status);
+
+      const text = await res.text();
+      console.log("RAW RESPONSE:", text);
+
+      const data = JSON.parse(text);
+
+      if (data.success) {
+        window.location.href = "residents.php";
+      } else {
+        alert(data.error || "Failed to add resident");
+      }
+    } catch (err) {
+      console.error("FETCH ERROR:", err);
+      alert("Cannot connect to Node server");
+    }
+  });
 });
-function toggleSpecialSections() {
-    const specialStatus = document.getElementById('specialStatus').value;
-    const pwdSection = document.getElementById('pwdSection');
-    const seniorSection = document.getElementById('seniorSection');
-    
-    if (pwdSection) {
-        pwdSection.classList.remove('show');
-        document.getElementById('pwdGovId').required = false;
-        document.getElementById('disabilityType').required = false;
-        document.getElementById('pwdIdImage').required = false;
-        
-        if (specialStatus === 'PWD') {
-            pwdSection.classList.add('show');
-            document.getElementById('pwdGovId').required = true;
-            document.getElementById('disabilityType').required = true;
-            document.getElementById('pwdIdImage').required = true;
-        }
-    }
-    
-    if (seniorSection) {
-        seniorSection.classList.remove('show');
-        document.getElementById('seniorGovId').required = false;
-        document.getElementById('seniorIdImage').required = false;
-        
-        if (specialStatus === 'Senior Citizen') {
-            seniorSection.classList.add('show');
-            document.getElementById('seniorGovId').required = true;
-            document.getElementById('seniorIdImage').required = true;
-        }
-    }
-}
-
-window.onload = function() {
-    <?php if (!$editMode): ?>
-        toggleSpecialSections(); 
-    <?php endif; ?>
-   
-    setupLogout();
-};
-
-function setupLogout() {
-    const logoutBtn = document.getElementById("logoutBtn");
-    logoutBtn.addEventListener("click", () => {
-        window.location.href = "logout.php"; 
-    });
-}
 </script>
+
 </body>
 </html>

@@ -144,7 +144,112 @@ app.get("/admin/residents", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch residents" });
   }
 });
+// FOR ADD NEW RESIDENT VIA ADMIN !!!!!!!!IMPORTANT
 
-app.listen(PORT, "0.0.0.0", () => {
+// Multer storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    if (file.fieldname === "pwd_id_image") {
+      cb(null, "uploads/pwd_documents");
+    } else if (file.fieldname === "senior_id_image") {
+      cb(null, "uploads/senior_documents");
+    } else {
+      cb(null, "uploads");
+    }
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "_" + file.originalname);
+  }
+});
+
+const upload = multer({
+  limits: { fileSize: 5 * 1024 * 1024 },
+  storage
+});
+
+app.post(
+  "/admin/residents",
+  upload.fields([
+    { name: "pwd_id_image", maxCount: 1 },
+    { name: "senior_id_image", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    try {
+      console.log("ADD RESIDENT ROUTE HIT");
+
+      const data = req.body;
+
+      const [
+        result
+      ] = await pool.query(
+        `INSERT INTO residents
+        (household_id, first_name, middle_name, surname, suffix, sex, birthdate,
+         civil_status, nationality, religion, purok, address, education_level,
+         occupation, vaccination, children_count, is_senior, is_disabled, is_pregnant)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        [
+          data.household_id,
+          data.first_name,
+          data.middle_name || "",
+          data.surname,
+          data.suffix || "",
+          data.sex,
+          data.birthdate,
+          data.civil_status,
+          data.nationality,
+          data.religion || null,
+          data.purok,
+          data.address,
+          data.education_level,
+          data.occupation || "",
+          data.vaccination || "",
+          data.children_count || 0,
+          data.special_status === "Senior Citizen" ? 1 : 0,
+          data.special_status === "PWD" ? 1 : 0,
+          data.special_status === "Pregnant" ? 1 : 0
+        ]
+      );
+
+      const residentId = result.insertId;
+
+      // PWD extra table
+      if (data.special_status === "PWD") {
+        await pool.query(
+          `INSERT INTO disabled_persons
+           (resident_id, pwd_gov_id, disability_type, id_picture_path)
+           VALUES (?,?,?,?)`,
+          [
+            residentId,
+            data.pwd_gov_id,
+            data.disability_type,
+            req.files?.pwd_id_image?.[0]?.path || null
+          ]
+        );
+      }
+
+      // Senior extra table
+      if (data.special_status === "Senior Citizen") {
+        await pool.query(
+          `INSERT INTO senior_citizens
+           (resident_id, senior_gov_id, id_picture_path)
+           VALUES (?,?,?)`,
+          [
+            residentId,
+            data.senior_gov_id,
+            req.files?.senior_id_image?.[0]?.path || null
+          ]
+        );
+      }
+
+      res.json({ success: true });
+
+    } catch (err) {
+      console.error("ADD RESIDENT ERROR:", err);
+      res.status(500).json({ error: "Failed to add resident" });
+    }
+  }
+);
+
+app.listen(PORT, () => {
   console.log(`Admin API running on http://127.0.0.1:${PORT}`);
 });
