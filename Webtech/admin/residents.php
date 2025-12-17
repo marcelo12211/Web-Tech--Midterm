@@ -505,10 +505,10 @@ function formatDate(dateString) {
                             <td>Purok ${res.purok}</td>
                             <td>${res.address}</td>
                             <td>
-                                <a href="editresident.php?id=${residentId}" class="action-btn" title="Edit">
+                                <a href="edit_resident.php?id=${residentId}" class="action-btn" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="deleteresident.php?id=${residentId}" class="action-btn delete-btn"
+                                <a href="delete_resident.php?id=${residentId}" class="action-btn delete-btn"
                                    title="Delete"
                                    onclick="return confirm('Are you sure you want to delete this resident?');">
                                     <i class="fas fa-trash-alt"></i>
