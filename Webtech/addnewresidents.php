@@ -266,6 +266,7 @@ $current_status = getSelectedStatus($resData);
             <li><a href="<?php echo $editMode ? "edit_resident.php?id=$residentId" : "addnewresidents.php"; ?>" class="active"><?php echo $editMode ? "Edit Resident" : "Add Resident"; ?></a></li>
             <li><a href="deaths.php">Deaths</a></li>
             <li><a href="documents.php">Documents</a></li>
+            <li><a href="staff_documents.php" class=>Generate Certificates</a></li>
         </ul>
     </nav>
 </aside>

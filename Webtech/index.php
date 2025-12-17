@@ -8,6 +8,7 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
+
 include __DIR__ . '/db_connect.php';
 
 $sql = "SELECT
@@ -20,7 +21,8 @@ $sql = "SELECT
     SUM(PUROK = 2) AS purok2_count,
     SUM(PUROK = 3) AS purok3_count,
     SUM(PUROK = 4) AS purok4_count,
-    SUM(PUROK = 5) AS purok5_count
+    SUM(PUROK = 5) AS purok5_count,
+    SUM(children_count) AS total_children
 FROM residents";
 
 $result = $conn->query($sql);
@@ -66,7 +68,6 @@ $conn->close();
     </style>
 </head>
 <body>
-
 <div class="app-container">
     <aside class="sidebar">
         <div class="logo">Happy Hallow Barangay System</div>
@@ -78,9 +79,11 @@ $conn->close();
                 <li><a href="addnewresidents.php">Add Resident</a></li>
                 <li><a href="deaths.php">Deaths</a></li>
                 <li><a href="documents.php">Documents</a></li>
+                <li><a href="staff_documents.php">Generate Certificates</a></li>
             </ul>
         </nav>
     </aside>
+    
     <div class="main-content">
         <header class="topbar">
             <div class="topbar-right">
@@ -88,18 +91,19 @@ $conn->close();
                 <button id="logoutBtn" class="btn logout-btn">Logout</button>
             </div>
         </header>
+        
         <main class="page-content">
             <h2>Dashboard Overview</h2>
+            
             <div class="dashboard-grid">
-                
                 <div class="stat-card">
-                    <p class="stat-label" >Total Residents</p>
+                    <p class="stat-label">Total Residents</p>
                     <p class="stat-value"><span><?php echo $stats['total_residents']; ?></span></p>
                 </div>
                 
-                <div class="stat-card" >
+                <div class="stat-card">
                     <p class="stat-label">Senior Citizen</p>
-                    <p class="stat-value" ><span><?php echo $stats['senior_count']; ?></span></p>
+                    <p class="stat-value"><span><?php echo $stats['senior_count']; ?></span></p>
                 </div>
                 
                 <div class="stat-card">
@@ -110,6 +114,11 @@ $conn->close();
                 <div class="stat-card">
                     <p class="stat-label">Pregnant Residents</p>
                     <p class="stat-value"><span><?php echo $stats['pregnant_count']; ?></span></p>
+                </div>
+                
+                <div class="stat-card">
+                    <p class="stat-label">Children Reported</p>
+                    <p class="stat-value"><span><?php echo $stats['total_children'] ?? 0; ?></span></p>
                 </div>
             </div>
 
@@ -133,39 +142,30 @@ $conn->close();
 </div>
 
 <script>
-
 const categoryData = {
     senior: <?php echo $stats['senior_count']; ?>,
     pwd: <?php echo $stats['pwd_count']; ?>,
     pregnant: <?php echo $stats['pregnant_count']; ?>,
-    regular: <?php echo $stats['total_residents'] - $stats['senior_count'] - $stats['pwd_count'] - $stats['pregnant_count']; ?>
+    children: <?php echo $stats['total_children'] ?? 0; ?>,
+    regular: <?php echo $stats['total_residents'] - $stats['senior_count'] - $stats['pwd_count'] - $stats['pregnant_count'] - $stats['total_children']; ?>
 };
 
 const colors = {
     blue: 'rgba(54, 162, 235, 0.8)',
     green: 'rgba(75, 192, 192, 0.8)',
     yellow: 'rgba(255, 206, 86, 0.8)',
-    red: 'rgba(255, 99, 132, 0.8)'
+    red: 'rgba(255, 99, 132, 0.8)',
+    purple: 'rgba(153, 102, 255, 0.8)'
 };
 
 const doughnutCtx = document.getElementById('categoriesChart').getContext('2d');
 new Chart(doughnutCtx, {
     type: 'doughnut',
     data: {
-        labels: ['Senior Citizens', 'PWD', 'Pregnant', 'Regular Residents'],
+        labels: ['Senior Citizens', 'PWD', 'Pregnant', 'Children', 'Regular Residents'],
         datasets: [{
-            data: [
-                categoryData.senior,
-                categoryData.pwd,
-                categoryData.pregnant,
-                categoryData.regular
-            ],
-            backgroundColor: [
-                colors.green,
-                colors.yellow,
-                colors.red,
-                colors.blue
-            ],
+            data: [categoryData.senior, categoryData.pwd, categoryData.pregnant, categoryData.children, categoryData.regular],
+            backgroundColor: [colors.green, colors.yellow, colors.red, colors.purple, colors.blue],
             borderWidth: 2,
             borderColor: '#fff'
         }]
@@ -173,11 +173,7 @@ new Chart(doughnutCtx, {
     options: {
         responsive: true, 
         maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom'
-            }
-        }
+        plugins: { legend: { position: 'bottom' } }
     }
 });
 
@@ -197,21 +193,14 @@ new Chart(purokCtx, {
         labels: ['No Purok', 'Purok 1', 'Purok 2', 'Purok 3', 'Purok 4', 'Purok 5'],
         datasets: [{
             label: 'Number of Residents',
-            data: [
-                purokData.purok0,
-                purokData.purok1,
-                purokData.purok2,
-                purokData.purok3,
-                purokData.purok4,
-                purokData.purok5
-            ],
+            data: [purokData.purok0, purokData.purok1, purokData.purok2, purokData.purok3, purokData.purok4, purokData.purok5],
             backgroundColor: [
-                'rgba(156, 163, 175, 0.8)', 
-                'rgba(59, 130, 246, 0.8)', 
-                'rgba(16, 185, 129, 0.8)', 
-                'rgba(245, 158, 11, 0.8)', 
-                'rgba(239, 68, 68, 0.8)', 
-                'rgba(139, 92, 246, 0.8)' 
+                'rgba(156, 163, 175, 0.8)',
+                'rgba(59, 130, 246, 0.8)',
+                'rgba(16, 185, 129, 0.8)',
+                'rgba(245, 158, 11, 0.8)',
+                'rgba(239, 68, 68, 0.8)',
+                'rgba(139, 92, 246, 0.8)'
             ],
             borderColor: [
                 'rgba(156, 163, 175, 1)',
@@ -227,37 +216,27 @@ new Chart(purokCtx, {
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            }
-        },
+        plugins: { legend: { display: false } },
         scales: {
             y: {
                 beginAtZero: true,
-                ticks: {
-                    stepSize: 1
-                }
+                ticks: { stepSize: 1 }
             }
         }
     }
 });
 
 function setupLogout() {
-    const logoutBtn = document.getElementById("logoutBtn");
-    logoutBtn.addEventListener("click", () => {
-        window.location.href = "logout.php"; 
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+        window.location.href = "logout.php";
     });
 }
+
 function showUser() {
     const user = JSON.parse(localStorage.getItem("rms_user") || "{}");
-    const userNameSpan = document.getElementById("userName");
-    if (user && user.name) {
-        userNameSpan.textContent = `Welcome, ${user.name}`;
-    } else {
-        userNameSpan.textContent = `Welcome, Guest`;
-    }
+    document.getElementById("userName").textContent = user?.name ? `Welcome, ${user.name}` : "Welcome, Guest";
 }
+
 window.onload = function () {
     showUser();
     setupLogout();

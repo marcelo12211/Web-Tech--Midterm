@@ -118,6 +118,7 @@ function formatDate($date) {
             <li><a href="addnewresidents.php">Add Resident</a></li>
             <li><a href="deaths.php">Deaths</a></li>
             <li><a href="documents.php">Documents</a></li>
+            <li><a href="staff_documents.php">Generate Certificates</a></li>
           </ul>
         </nav>
       </aside>
