@@ -26,7 +26,6 @@
   </div>
 </div>
 
-<!-- EDIT USER MODAL -->
 <div id="editModal" class="modal">
   <div class="modal-content">
     <span id="closeEdit" class="close">&times;</span>

@@ -17,37 +17,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $first_digit = substr($login_id, 0, 1);
 
-        /* ===============================
-           UNIFIED LOGIN (ADMIN / CLIENT / STAFF)
-           -------------------------------
-           This block replaces the previous separate 'if ($first_digit === '9')'
-           and 'else' logic to handle all logins using PHP/MySQL for validation.
-           We select user_id, password, role, AND email (for completeness).
-           =============================== */
         $stmt = mysqli_prepare($conn, "SELECT user_id, password, role, email FROM users WHERE user_id = ?");
         mysqli_stmt_bind_param($stmt, "i", $login_id);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_bind_result($stmt, $user_id, $db_password, $user_role, $email);
 
         if (mysqli_stmt_fetch($stmt)) {
-            // NOTE: This uses plaintext comparison for passwords, matching your current DB schema.
-            // For production, use password_verify().
+            
             if ($password === $db_password) {
                 session_regenerate_id(true);
                 $_SESSION['user_id'] = $user_id;
                 $_SESSION['role'] = $user_role;
 
-                // --- REDIRECTION LOGIC ---
                 if ($user_role === 'admin' && $first_digit === '9') {
-                    // Admin login successful (e.g., 9002)
                     header("Location: admin/admin_dashboard.php");
                     exit;
                 } elseif ($first_digit === '5') {
-                    // Staff/Client login successful (e.g., 5004)
                     header("Location: index.php");
                     exit;
                 } else {
-                    // Account found, but ID/Role doesn't match expected redirection logic
                     $message = "Account found, but invalid ID format or role for redirection.";
                 }
             } else {

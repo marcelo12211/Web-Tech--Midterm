@@ -2,7 +2,6 @@
 session_start();
 include '../db_connect.php'; 
 
-// Security Check: Only Admin can add new users
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'Admin') {
     header("Location: admin_dashboard.php");
     exit();
@@ -13,18 +12,15 @@ $success = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    // --- 1. Get and Sanitize Input ---
     $user_name = $_POST['user_name'] ?? '';
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
     $user_role = $_POST['user_role'] ?? '';
-    $user_status = $_POST['user_status'] ?? 0; // Default: Inactive (0)
-    
-    // Basic Validation
+    $user_status = $_POST['user_status'] ?? 0; 
+
     if (empty($user_name) || empty($username) || empty($password) || empty($user_role)) {
         $error = "Please fill in all required fields (Full Name, Username, Password, Role).";
     } else {
-        // --- 2. Check if username already exists ---
         $sql_check = "SELECT user_id FROM users WHERE username = ?";
         $stmt_check = $conn->prepare($sql_check);
         $stmt_check->bind_param("s", $username);
@@ -45,7 +41,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($stmt_insert === false) {
                 $error = "Database Error (Insert Prepare): " . $conn->error;
             } else {
-                // Bind parameters (s=string, i=integer)
                 $stmt_insert->bind_param(
                     "ssssi", 
                     $user_name, $username, $hashed_password, $user_role, $user_status
@@ -55,7 +50,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $new_user_id = $conn->insert_id;
                     $_SESSION['success_message'] = "New user '" . htmlspecialchars($user_name) . "' added successfully! ID: " . $new_user_id;
                     
-                    // Redirect back to manage_users list
                     header("Location: manage_users.php");
                     exit();
                 } else {
@@ -67,7 +61,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Close connection
 if ($conn && $conn->ping()) {
     $conn->close();
 }

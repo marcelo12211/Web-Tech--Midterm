@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Tiyakin na naka-login ang user
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -9,12 +8,9 @@ if (!isset($_SESSION['user_id'])) {
 $logged_in_username = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Admin';
 require_once 'db_connect.php'; 
 
-// Kukunin ang filter values mula sa URL
 $search_term = $_GET['search'] ?? '';
 $role_filter = $_GET['role'] ?? '';
 $status_filter = $_GET['status'] ?? '';
-
-// --- PHP FUNCTIONS (Utility) ---
 
 function getRoleBadge($role) {
     switch(strtolower($role)) {
@@ -36,18 +32,13 @@ function getStatusBadge($status) {
     return ['text' => ucfirst($status), 'class' => 'badge-none']; 
 }
 
-// --- DATABASE FETCHING LOGIC ---
-
 $data = ['count' => 0, 'users' => []];
 
-// Query Building
 $where_clauses = [];
 $params = [];
 $types = '';
 
-// 1. Search Filter (fullname OR email)
 if (!empty($search_term)) {
-    // Note: Assuming you are using MySQLi and not PDO for the $conn object.
     $search_pattern = '%' . $search_term . '%';
     $where_clauses[] = "(fullname LIKE ? OR email LIKE ?)";
     $params[] = $search_pattern;
@@ -55,14 +46,12 @@ if (!empty($search_term)) {
     $types .= 'ss';
 }
 
-// 2. Role Filter
 if (!empty($role_filter)) {
     $where_clauses[] = "role = ?";
     $params[] = $role_filter;
     $types .= 's';
 }
 
-// 3. Status Filter
 if (!empty($status_filter)) {
     $where_clauses[] = "status = ?";
     $params[] = $status_filter;
@@ -75,16 +64,13 @@ if (!empty($where_clauses)) {
     $sql .= " WHERE " . implode(" AND ", $where_clauses);
 }
 
-$sql .= " ORDER BY user_id DESC"; // I-sort ang data
+$sql .= " ORDER BY user_id DESC";
 
 
-// Execute the query using prepared statements to prevent SQL Injection
 try {
     $stmt = $conn->prepare($sql);
     
-    // Bind parameters if there are any
     if (!empty($params)) {
-        // Tiyakin na ang 'bind_param' ay tinatawag gamit ang reference (kailangan para sa PHP)
         $stmt->bind_param($types, ...$params); 
     }
 
@@ -101,14 +87,11 @@ try {
     }
     $stmt->close();
 } catch (Exception $e) {
-    // Error handling: Ipakita ang error sa admin (Optional: Sa live server, i-log na lang ito)
     $_SESSION['error_message'] = "Database Error: " . htmlspecialchars($e->getMessage());
 }
 
 
 $conn->close();
-
-// --- PHP TABLE RENDERING FUNCTION (Ngayon ay gagamitin na ang $data) ---
 
 function renderUserTableRows($users) {
     if (empty($users)) {
@@ -124,7 +107,6 @@ function renderUserTableRows($users) {
         $email = htmlspecialchars($user['email'] ?? '');
         $createdAt = htmlspecialchars($user['created_at'] ?? 'N/A');
 
-        // Main User Row
         $rowsHtml .= '
             <tr class="user-row" data-user-id="' . $userId . '">
                 <td>' . $fullname . '</td>
@@ -142,7 +124,6 @@ function renderUserTableRows($users) {
                 </td>
             </tr>';
 
-        // Detail Row (for expansion via JavaScript)
         $rowsHtml .= '
             <tr class="detail-row" data-detail-id="' . $userId . '">
                 <td colspan="6">
@@ -184,9 +165,6 @@ function renderUserTableRows($users) {
     return $rowsHtml;
 }
 
-// Hindi na kailangan ang renderEmptyTableStructure() pero iniwan ko na lang para hindi mag-break ang code structure.
-// Tinanggal na ang JAVASCRIPT dependency para sa Table rendering.
-
 ?>
 
 <!DOCTYPE html>
@@ -200,7 +178,6 @@ function renderUserTableRows($users) {
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
     <style>
-/* ... (Ito ang iyong CSS Styles. Hindi na ito binago.) ... */
 :root {
     --primary-color: #226b8dff;
     --primary-dark: #226b8dff;
@@ -570,7 +547,7 @@ th, td {
         <div class="page-content">
             <h2 id="user-count-header">User Directory</h2>
             
-            <?php // Displaying messages from session ?>
+            <?php ?>
             <?php if (isset($_SESSION['success_message'])): ?>
                 <div class="alert-success"><?php echo htmlspecialchars($_SESSION['success_message']); ?></div>
                 <?php unset($_SESSION['success_message']); ?>
@@ -637,12 +614,9 @@ th, td {
 </div>
 
 <script>
-// Tinanggal na ang MOCK_USERS_DATA, renderUserTableRowsJS, at fetchUsers.
-// Ngayon, ang JavaScript ay para na lang sa Table Interaction (Row expansion)
 
 function setupDetailRowHandlers() {
     document.querySelectorAll(".user-row").forEach((row) => {
-        // Tiyakin na walang duplicate listeners
         row.removeEventListener("click", toggleDetailView); 
         row.addEventListener("click", toggleDetailView);
     });
@@ -675,14 +649,12 @@ function toggleDetailView(e) {
             row.classList.add("expanded");
             detailRow.classList.add('expanded');
             
-            // Re-initialize tab state inside the newly expanded row
             const allTabs = detailRow.querySelectorAll(".detail-tab");
             const allContents = detailRow.querySelectorAll(".tab-content");
             
             allTabs.forEach((tab) => tab.classList.remove("active"));
             allContents.forEach((content) => content.classList.remove("active"));
             
-            // Activate the first tab by default
             const firstTab = detailRow.querySelector(".detail-tab");
             if (firstTab) {
                 firstTab.classList.add("active");
@@ -706,10 +678,8 @@ function switchDetailTab(e) {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Setup row click and tab handlers
     setupDetailRowHandlers();
     
-    // 2. Setup event listener para sa search input (automatic submit after a delay)
     const searchInput = document.getElementById('search-input');
     let searchTimer;
 
@@ -717,7 +687,6 @@ document.addEventListener("DOMContentLoaded", () => {
         collapseAllDetails();
         clearTimeout(searchTimer);
         searchTimer = setTimeout(() => {
-            // I-submit ang form para ma-trigger ang PHP filtering
             document.getElementById('filter-form').submit();
         }, 300); 
     });

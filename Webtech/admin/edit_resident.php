@@ -1,9 +1,6 @@
 <?php
-// Include the database connection file.
-// Assuming this file is located in the same directory as db_connect.php (or adjusts path as necessary)
 include __DIR__ . '/db_connect.php'; 
 
-// Start session and check login status (based on previous files)
 session_start();
 if (!isset($_SESSION['user_id'])) { 
     header("Location: login.php");
@@ -12,23 +9,18 @@ if (!isset($_SESSION['user_id'])) {
 $logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User';
 
 
-// --- 1. POST HANDLING (UPDATE LOGIC) ---
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    // Helper function to safely get POST data and set null if empty
     function getPostData($field) {
         global $conn;
         if (isset($_POST[$field]) && $_POST[$field] !== '') {
-            // Use trim and basic escaping for string values
             return $conn->real_escape_string(trim($_POST[$field]));
         }
         return null; 
     }
 
-    // Get the required Person ID for the WHERE clause (crucial for updating)
     $person_id = getPostData('person_id'); 
 
-    // Get all fields
     $household_id = getPostData('household_id');
     $first_name = getPostData('first_name');
     $surname = getPostData('surname');
@@ -38,10 +30,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $purok = getPostData('purok');
     $address = getPostData('address');
     
-    // Get optional/special status fields
     $middle_name = getPostData('middle_name');
     $suffix = getPostData('suffix');
-    // NOTE: Nationality and Religion can also be NULL if empty
     $nationality = getPostData('nationality'); 
     $religion = getPostData('religion');
     $residency_start_date = getPostData('residency_start_date');
@@ -51,30 +41,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $vaccination = getPostData('vaccination'); 
     $health_insurance = getPostData('health_insurance');
 
-    // Handle special status selection
     $special_status = getPostData('special_status'); 
     $is_senior = ($special_status == 'Senior Citizen') ? 1 : 0;
     $is_disabled = ($special_status == 'PWD') ? 1 : 0;
     $is_pregnant = ($special_status == 'Pregnant') ? 1 : 0;
 
-    // Force health_insurance to be 'Others' if 'Others' is selected in special_status
     if ($special_status == 'Others') {
         $health_insurance = $health_insurance ?? 'Others'; 
     }
     
-    // 2. Validation 
     if (empty($person_id) || empty($household_id) || empty($first_name) || empty($surname) || empty($sex) || empty($birthdate) || empty($civil_status) || empty($purok) || empty($address)) {
         $_SESSION['error_message'] = "Please fill in all required fields (*).";
         header("Location: edit_resident.php?id=" . $person_id);
         exit();
     }
 
-    // Helper function for safely formatting string/NULL values for SQL
     function formatSqlValue($value) {
         return $value !== null ? "'" . $value . "'" : "NULL";
     }
 
-    // 3. Construct the SQL UPDATE Query (Using formatSqlValue helper)
     $sql = "
         UPDATE residents 
         SET
@@ -102,10 +87,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         WHERE person_id = ".formatSqlValue($person_id)."
     ";
 
-    // 4. Execute the Query
     if ($conn->query($sql) === TRUE) {
         $_SESSION['status_success'] = "Resident ID $person_id: '$first_name $surname' information successfully updated.";
-        // Redirect to prevent form resubmission and show new data
         header("Location: residents.php"); 
         exit();
     } else {
@@ -114,16 +97,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 }
-// --- END OF POST HANDLING (UPDATE LOGIC) ---
 
-
-// Check if resident ID is provided in GET request
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     header('Location: residents.php');
     exit();
 }
 
-// Use prepared statements for robust security (GET LOGIC)
 $residentId = intval($_GET['id']);
 $residentData = null;
 
@@ -140,7 +119,6 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    // Handle case where resident is not found
     $_SESSION['error_message'] = "Resident ID $residentId not found.";
     header('Location: residents.php');
     exit();
@@ -149,33 +127,26 @@ if ($result->num_rows === 0) {
 $residentData = $result->fetch_assoc();
 $stmt->close();
 
-// Fetch household data for dropdown
 $householdResult = $conn->query("SELECT household_id, household_head FROM household ORDER BY household_id ASC");
 
-// Helper function to check selected option
 function isSelected($currentValue, $targetValue) {
     $safeCurrentValue = $currentValue ?? '';
-    // Use loose comparison for '0' and '1' from database TINYINT to string '0'/'1'
     return ($safeCurrentValue == $targetValue) ? 'selected' : '';
 }
 
-// Helper function for HTML escaping
 function safeHtml($value) {
     return htmlspecialchars($value ?? '');
 }
 
-// Determine the Special Status for the dropdown in the Edit page 
 function getSelectedStatusForEdit($resData) {
     if (isset($resData['is_senior']) && $resData['is_senior'] == 1) return 'Senior Citizen';
     if (isset($resData['is_disabled']) && $resData['is_disabled'] == 1) return 'PWD';
     if (isset($resData['is_pregnant']) && $resData['is_pregnant'] == 1) return 'Pregnant';
-    // Check if it's 'Others' based on health_insurance, assuming the other three are 0
     if (!empty($resData['health_insurance']) && $resData['is_senior'] == 0 && $resData['is_disabled'] == 0 && $resData['is_pregnant'] == 0) return 'Others';
     return 'None';
 }
 $current_status = getSelectedStatusForEdit($residentData);
 
-// Check if there are any pending status/error messages from redirect
 $status_success = $_SESSION['status_success'] ?? null;
 $error_message = $_SESSION['error_message'] ?? null;
 unset($_SESSION['status_success'], $_SESSION['error_message']);
@@ -189,7 +160,6 @@ unset($_SESSION['status_success'], $_SESSION['error_message']);
     <title>Edit Resident: <?php echo safeHtml($residentData['first_name'] . ' ' . $residentData['surname']); ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
-/* --- General Styles (Copied from users.php/add_resident.php) --- */
 :root {
     --primary-color: #226b8dff;
     --primary-dark: #1b546b;
@@ -219,7 +189,6 @@ a { text-decoration: none; }
     min-height: 100vh;
 }
 
-/* Sidebar Styles */
 .sidebar {
     width: 250px;
     background: var(--sidebar-bg);
@@ -244,7 +213,6 @@ a { text-decoration: none; }
     color: white;
 }
 
-/* Main Content/Topbar Styles */
 .main-content { flex: 1; }
 .topbar {
     background: white;
@@ -279,7 +247,6 @@ a { text-decoration: none; }
     gap: 10px; 
 }
 
-/* Form Card Styles */
 .form-card {
     background: var(--card-background);
     border-radius: var(--radius);
@@ -308,7 +275,6 @@ a { text-decoration: none; }
     font-size: 1.5rem;
 }
 
-/* Form Grid Layout */
 .form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -340,7 +306,6 @@ a { text-decoration: none; }
     box-shadow: 0 0 0 3px rgba(34, 107, 141, 0.2); 
 }
 
-/* Section Titles within Form */
 .section-title {
     grid-column: 1 / -1;
     margin-top: 25px;
@@ -352,12 +317,10 @@ a { text-decoration: none; }
     font-weight: 700;
 }
 
-/* Full Width Group (e.g. for Address/Insurance) */
 .form-group-full {
     grid-column: 1 / -1;
 }
 
-/* Form Actions */
 .form-actions {
     grid-column: 1 / -1;
     margin-top: 30px;
@@ -392,7 +355,6 @@ a { text-decoration: none; }
     background: var(--background-color);
 }
 
-/* Alert Styles */
 .alert-success {
     padding: 15px;
     border-radius: 6px;
@@ -421,7 +383,6 @@ a { text-decoration: none; }
     border: 1px solid #b8daff;
 }
 
-/* Conditional Styling for Special Status */
 .special-status-display {
     padding: 10px;
     border-radius: 6px;
@@ -661,19 +622,15 @@ a { text-decoration: none; }
 </div>
 
 <script>
-    // Logout Setup (keeping the implementation simple based on the previous files)
     function setupLogout() {
         const logoutBtn = document.getElementById("logoutBtn");
         logoutBtn.addEventListener("click", () => {
-            // Using PHP session-based logout
             window.location.href = "logout.php"; 
         });
     }
 
     window.onload = function () {
         setupLogout();
-        // Since we are in the Admin panel and logged in via PHP session, 
-        // the username is set in PHP. No need for complex local storage handling here unless required.
     };
 </script>
 </body>

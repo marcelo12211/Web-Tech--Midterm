@@ -1,11 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   loadDashboard();
 
-  // logout
   const logoutBtn = document.getElementById("logoutBtn");
   if (logoutBtn) {
     logoutBtn.addEventListener("click", (e) => {
-      e.preventDefault(); // stops page from jumping to top
+      e.preventDefault();
       window.location.href = "../login.php";
     });
   }

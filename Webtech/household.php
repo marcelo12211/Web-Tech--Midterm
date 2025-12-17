@@ -9,7 +9,6 @@ if (!isset($_SESSION['user_id'])) {
 }
 $logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User';
 
-// Check for success/error messages from session
 $update_success = false;
 $update_error = false;
 $error_msg = '';

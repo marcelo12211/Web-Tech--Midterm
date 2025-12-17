@@ -464,7 +464,6 @@ function formatDate(dateString) {
     if (!dateString) return "";
     return dateString.split("T")[0];
 }
-    /* dati fetch but now it is node for getting the residents  */
     function loadResidents() {
         collapseAllDetails();
 
@@ -533,7 +532,6 @@ function formatDate(dateString) {
             });
     }
 
-    /* helpers of fetch but node */
     function buildFullName(res) {
         let name = res.first_name + " ";
         if (res.middle_name) {

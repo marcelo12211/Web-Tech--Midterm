@@ -1,6 +1,5 @@
 <?php
 session_start();
-// Tiyakin na ang path ay tama
 include '../db_connect.php'; 
 
 if (!isset($_SESSION['user_id'])) {
@@ -18,7 +17,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $confirm_password = $_POST['confirm_password'] ?? '';
     $role = $_POST['role'] ?? 'staff';
     
-    // --- Validation ---
     if (empty($fullname)) { $errors[] = "Full Name is required."; }
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) { $errors[] = "A valid Email is required."; }
     if (empty($password) || strlen($password) < 6) { $errors[] = "Password is required and must be at least 6 characters long."; }
@@ -26,7 +24,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $valid_roles = ['admin', 'staff', 'clerk'];
     if (!in_array(strtolower($role), $valid_roles)) { $errors[] = "Invalid role selected."; }
     
-    // Check if email already exists
     if (empty($errors)) {
         $check_stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ?");
         $check_stmt->bind_param("s", $email);
@@ -38,9 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $check_stmt->close();
     }
     
-    // --- Execution ---
     if (empty($errors)) {
-        // !!! SECURITY WARNING: Dito tinanggal ang password_hash() !!!
         $raw_password = $password; 
         $status = 'active'; 
         
@@ -50,11 +45,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($stmt === false) {
             $errors[] = "Database error (Prepare): " . $conn->error;
         } else {
-            // Gumagamit ng $raw_password (plain text)
             $stmt->bind_param("sssss", $fullname, $email, $raw_password, $role, $status); 
             
             if ($stmt->execute()) {
-                // Binago ang success message para maging malinaw ang security issue
                 $_SESSION['success_message'] = "User **" . htmlspecialchars($fullname) . "** added successfully. **WARNING: Password stored in plain text.**";
                 header("Location: users.php");
                 exit(); 
@@ -66,7 +59,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Close connection if it's still open
 if ($conn && $conn->ping()) {
     $conn->close();
 }
@@ -84,7 +76,6 @@ function set_value($field, $default = '') {
     <title>Add New User</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
-/* --- General and Layout Styles (Consistent with users.php) --- */
 :root {
     --primary-color: #226b8dff;
     --primary-dark: #226b8dff;
@@ -112,7 +103,6 @@ a { text-decoration: none; }
     min-height: 100vh;
 }
 
-/* Sidebar Styles */
 .sidebar {
     width: 250px;
     background: var(--sidebar-bg);
@@ -137,7 +127,6 @@ a { text-decoration: none; }
     color: white;
 }
 
-/* Main Content/Topbar Styles */
 .main-content { flex: 1; }
 .topbar {
     background: white;
@@ -184,7 +173,6 @@ a { text-decoration: none; }
     border-color: var(--primary-dark);
 }
 
-/* Alert Styles */
 .alert-error {
     padding: 15px;
     border-radius: 6px;
@@ -202,7 +190,6 @@ a { text-decoration: none; }
     font-weight: 700;
 }
 
-/* --- Form Specific Styles --- */
 .form-card {
     background: var(--card-background);
     border-radius: var(--radius);
@@ -257,7 +244,6 @@ a { text-decoration: none; }
     gap: 8px;
 }
 
-/* Media Queries */
 @media (max-width: 768px) {
     .sidebar { width: 100%; height: auto; }
     .app-container { flex-direction: column; }

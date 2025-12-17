@@ -1,4 +1,3 @@
-// dashboard.js — handles dashboard UI, modals, and localStorage record management
 document.addEventListener("DOMContentLoaded", () => {
   const user = requireLogin();
   if (!user) return;
@@ -6,7 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("userName").textContent = user.name || "User";
   document.getElementById("logoutBtn").addEventListener("click", logout);
 
-  // Elements
   const addBtn = document.getElementById("addRecordBtn");
   const modal = document.getElementById("recordModal");
   const modalTitle = document.getElementById("modalTitle");
@@ -14,7 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const cancelModal = document.getElementById("cancelModal");
   const tbody = document.querySelector("#recordsTable tbody");
 
-  // Load and display records
   function loadRecords() {
     const records = JSON.parse(localStorage.getItem("rms_records") || "[]");
     renderRecordsTable(records);
@@ -22,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadRecords();
 
-  // Open modal (add or edit)
   function openModal(mode = "add", rec = null) {
     modal.classList.add("show");
     modal.setAttribute("aria-hidden", "false");
@@ -45,13 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.setAttribute("aria-hidden", "true");
   }
 
-  // Add record button
   addBtn.addEventListener("click", () => openModal("add"));
 
-  // Cancel modal button
   cancelModal.addEventListener("click", () => closeModal());
 
-  // Handle form submit (add/edit)
   recordForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const form = new FormData(recordForm);
@@ -61,14 +54,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (form.get("id")) {
-      // Update record
       const resp = updateRecord(form);
       if (resp.success) {
         loadRecords();
         closeModal();
       } else alert(resp.message || "Update failed");
     } else {
-      // Add new record
       const resp = addRecord(form);
       if (resp.success) {
         loadRecords();
@@ -77,7 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Handle edit and delete buttons
   tbody.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if (!btn) return;

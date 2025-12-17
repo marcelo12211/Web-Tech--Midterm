@@ -10,7 +10,6 @@ if (!isset($_SESSION['user_id'])) {
 }
 include __DIR__ . '/db_connect.php';
 
-// fetch data from db
 $sql = "SELECT
     COUNT(*) AS total_residents,
     SUM(is_senior = 1) AS senior_count,
@@ -23,7 +22,7 @@ $sql = "SELECT
     SUM(PUROK = 4) AS purok4_count,
     SUM(PUROK = 5) AS purok5_count
 FROM residents";
-//execute the queryy
+
 $result = $conn->query($sql);
 
 if ($result === false) {
@@ -67,7 +66,7 @@ $conn->close();
     </style>
 </head>
 <body>
-    <!-- //side bar nav -->
+
 <div class="app-container">
     <aside class="sidebar">
         <div class="logo">Happy Hallow Barangay System</div>
@@ -134,7 +133,7 @@ $conn->close();
 </div>
 
 <script>
-    //resident chart
+
 const categoryData = {
     senior: <?php echo $stats['senior_count']; ?>,
     pwd: <?php echo $stats['pwd_count']; ?>,
@@ -182,7 +181,6 @@ new Chart(doughnutCtx, {
     }
 });
 
-// Purok Chart data from sa db
 const purokData = {
     purok0: <?php echo isset($stats['purok0_count']) ? $stats['purok0_count'] : 0; ?>,
     purok1: <?php echo $stats['purok1_count']; ?>,
@@ -192,7 +190,6 @@ const purokData = {
     purok5: <?php echo $stats['purok5_count']; ?>
 };
 
-// Purok Bar Chart
 const purokCtx = document.getElementById('purokChart').getContext('2d');
 new Chart(purokCtx, {
     type: 'bar',
@@ -209,12 +206,12 @@ new Chart(purokCtx, {
                 purokData.purok5
             ],
             backgroundColor: [
-                'rgba(156, 163, 175, 0.8)',  // Gray for No Purok
-                'rgba(59, 130, 246, 0.8)',   // Blue
-                'rgba(16, 185, 129, 0.8)',   // Green
-                'rgba(245, 158, 11, 0.8)',   // Yellow
-                'rgba(239, 68, 68, 0.8)',    // Red
-                'rgba(139, 92, 246, 0.8)'    // Purple
+                'rgba(156, 163, 175, 0.8)', 
+                'rgba(59, 130, 246, 0.8)', 
+                'rgba(16, 185, 129, 0.8)', 
+                'rgba(245, 158, 11, 0.8)', 
+                'rgba(239, 68, 68, 0.8)', 
+                'rgba(139, 92, 246, 0.8)' 
             ],
             borderColor: [
                 'rgba(156, 163, 175, 1)',

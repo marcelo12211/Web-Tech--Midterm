@@ -1,4 +1,3 @@
-// records.js — localStorage-only version (no backend)
 function renderRecordsTable(records) {
   const tbody = document.querySelector("#recordsTable tbody");
   tbody.innerHTML = "";
@@ -22,17 +21,14 @@ function escapeHtml(s) {
   return s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
-// Load all records
 function getRecords() {
   return JSON.parse(localStorage.getItem("rms_records") || "[]");
 }
 
-// Save all records
 function saveRecords(records) {
   localStorage.setItem("rms_records", JSON.stringify(records));
 }
 
-// Add a record
 function addRecord(formData) {
   const records = getRecords();
   const newRecord = {
@@ -46,7 +42,6 @@ function addRecord(formData) {
   return { success: true, record: newRecord };
 }
 
-// Update a record
 function updateRecord(formData) {
   const records = getRecords();
   const id = Number(formData.get("id"));
@@ -61,7 +56,6 @@ function updateRecord(formData) {
   return { success: false, message: "Record not found" };
 }
 
-// Delete a record
 function deleteRecord(id) {
   let records = getRecords();
   records = records.filter((r) => r.id !== Number(id));

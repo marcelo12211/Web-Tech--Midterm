@@ -1,6 +1,5 @@
 <?php
 session_start();
-// Tiyaking tama ang path papunta sa database connection file
 include '../db_connect.php'; 
 
 if (!isset($_SESSION['user_id'])) {
@@ -10,10 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $logged_in_username = htmlspecialchars($_SESSION['user_name'] ?? 'Guest');
 
-// --- DATABASE STATS FETCHING (PHP/MySQLi) ---
-// Tiyakin na ang $conn ay galing sa db_connect.php
 if (!isset($conn) || $conn === null) {
-    // Kung hindi gumana ang connection, i-log ang error at mag-exit
     error_log("Database connection failed in admin_dashboard.php");
     $stats = [
         "total_residents" => 0,
@@ -24,39 +20,29 @@ if (!isset($conn) || $conn === null) {
         "total_children" => 0
     ];
 } else {
-    // 1. Total Residents
     $sql_total = "SELECT COUNT(person_id) AS total FROM residents";
     $result_total = mysqli_query($conn, $sql_total);
     $total_residents = mysqli_fetch_assoc($result_total)['total'] ?? 0;
 
-    // 2. Senior Citizens (is_senior = 1)
     $sql_senior = "SELECT COUNT(person_id) AS senior FROM residents WHERE is_senior = 1";
     $result_senior = mysqli_query($conn, $sql_senior);
     $senior = mysqli_fetch_assoc($result_senior)['senior'] ?? 0;
 
-    // 3. PWD (is_disabled = 1)
     $sql_pwd = "SELECT COUNT(person_id) AS pwd FROM residents WHERE is_disabled = 1";
     $result_pwd = mysqli_query($conn, $sql_pwd);
     $pwd = mysqli_fetch_assoc($result_pwd)['pwd'] ?? 0;
 
-    // 4. Pregnant Residents (is_pregnant = 1 AND sex = 'Female')
     $sql_pregnant = "SELECT COUNT(person_id) AS pregnant FROM residents WHERE is_pregnant = 1 AND sex = 'F'";
     $result_pregnant = mysqli_query($conn, $sql_pregnant);
     $pregnant = mysqli_fetch_assoc($result_pregnant)['pregnant'] ?? 0;
 
-    // 5. Total Children (is_senior=0 AND is_disabled=0 AND is_pregnant=0) (This is an assumption for 'Regular')
-    // NOTE: Ang 'regular' residents ay ang mga hindi pasok sa special categories.
     $regular = $total_residents - $senior - $pwd - $pregnant;
-    // Tiyakin na hindi ito magiging negative
     $regular = max(0, $regular); 
     
-    // 6. Total Children Count (Sum of all children_count columns)
     $sql_children = "SELECT SUM(children_count) AS total_children FROM residents";
     $result_children = mysqli_query($conn, $sql_children);
     $total_children = mysqli_fetch_assoc($result_children)['total_children'] ?? 0;
 
-    // Isara ang koneksyon pagkatapos mag-fetch
-    // mysqli_close($conn); // Maaari mong iwanan ito kung kailangan pa ang $conn sa ibang file
 }
 
 ?>
@@ -68,7 +54,6 @@ if (!isset($conn) || $conn === null) {
 <title>Happy Hallow Barangay System - Dashboard</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-/* --- CSS CODE (NO CHANGE) --- */
 :root {
     --primary-color: #226b8dff;
     --primary-dark: #226b8dff;
@@ -251,7 +236,6 @@ a { text-decoration: none; }
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// I-inject ang PHP data sa JavaScript
 const seniorCount = <?php echo $senior; ?>;
 const pwdCount = <?php echo $pwd; ?>;
 const pregnantCount = <?php echo $pregnant; ?>;

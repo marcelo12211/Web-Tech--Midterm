@@ -1,5 +1,4 @@
 <?php
-// PHP logic to process the request (not included for simplicity)
 $resident_name = "________________________";
 $purpose = "________________________";
 $date = date("F d, Y");
