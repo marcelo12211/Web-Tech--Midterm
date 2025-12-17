@@ -1,116 +1,34 @@
 <?php
-include __DIR__ . '/db_connect.php'; 
+include __DIR__ . '/db_connect.php';
 
 session_start();
-if (!isset($_SESSION['user_id'])) { 
+if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
-$logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User';
 
+$logged_in_username = $_SESSION['user_name'] ?? 'User';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    
-    function getPostData($field) {
-        global $conn;
-        if (isset($_POST[$field]) && $_POST[$field] !== '') {
-            return $conn->real_escape_string(trim($_POST[$field]));
-        }
-        return null; 
-    }
-
-    $person_id = getPostData('person_id'); 
-
-    $household_id = getPostData('household_id');
-    $first_name = getPostData('first_name');
-    $surname = getPostData('surname');
-    $sex = getPostData('sex');
-    $birthdate = getPostData('birthdate');
-    $civil_status = getPostData('civil_status');
-    $purok = getPostData('purok');
-    $address = getPostData('address');
-    
-    $middle_name = getPostData('middle_name');
-    $suffix = getPostData('suffix');
-    $nationality = getPostData('nationality'); 
-    $religion = getPostData('religion');
-    $residency_start_date = getPostData('residency_start_date');
-    $education_level = getPostData('education_level');
-    $occupation = getPostData('occupation');
-    $children_count = getPostData('children_count') ?? 0;
-    $vaccination = getPostData('vaccination'); 
-    $health_insurance = getPostData('health_insurance');
-
-    $special_status = getPostData('special_status'); 
-    $is_senior = ($special_status == 'Senior Citizen') ? 1 : 0;
-    $is_disabled = ($special_status == 'PWD') ? 1 : 0;
-    $is_pregnant = ($special_status == 'Pregnant') ? 1 : 0;
-
-    if ($special_status == 'Others') {
-        $health_insurance = $health_insurance ?? 'Others'; 
-    }
-    
-    if (empty($person_id) || empty($household_id) || empty($first_name) || empty($surname) || empty($sex) || empty($birthdate) || empty($civil_status) || empty($purok) || empty($address)) {
-        $_SESSION['error_message'] = "Please fill in all required fields (*).";
-        header("Location: edit_resident.php?id=" . $person_id);
-        exit();
-    }
-
-    function formatSqlValue($value) {
-        return $value !== null ? "'" . $value . "'" : "NULL";
-    }
-
-    $sql = "
-        UPDATE residents 
-        SET
-            household_id = ".formatSqlValue($household_id).",
-            first_name = ".formatSqlValue($first_name).",
-            middle_name = ".formatSqlValue($middle_name).",
-            surname = ".formatSqlValue($surname).",
-            suffix = ".formatSqlValue($suffix).",
-            sex = ".formatSqlValue($sex).",
-            birthdate = ".formatSqlValue($birthdate).",
-            civil_status = ".formatSqlValue($civil_status).",
-            nationality = ".formatSqlValue($nationality).",
-            religion = ".formatSqlValue($religion).",
-            purok = ".formatSqlValue($purok).",
-            address = ".formatSqlValue($address).",
-            residency_start_date = ".formatSqlValue($residency_start_date).",
-            education_level = ".formatSqlValue($education_level).",
-            occupation = ".formatSqlValue($occupation).",
-            is_senior = ".formatSqlValue($is_senior).",
-            is_disabled = ".formatSqlValue($is_disabled).",
-            is_pregnant = ".formatSqlValue($is_pregnant).",
-            health_insurance = ".formatSqlValue($health_insurance).",
-            vaccination = ".formatSqlValue($vaccination).",
-            children_count = ".formatSqlValue($children_count)."
-        WHERE person_id = ".formatSqlValue($person_id)."
-    ";
-
-    if ($conn->query($sql) === TRUE) {
-        $_SESSION['status_success'] = "Resident ID $person_id: '$first_name $surname' information successfully updated.";
-        header("Location: residents.php"); 
-        exit();
-    } else {
-        $_SESSION['error_message'] = "Error updating resident ID $person_id: " . $conn->error;
-        header("Location: edit_resident.php?id=" . $person_id);
-        exit();
-    }
-}
-
+/* ===============================
+   VALIDATE ID
+================================ */
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    header('Location: residents.php');
+    header("Location: residents.php");
     exit();
 }
 
 $residentId = intval($_GET['id']);
-$residentData = null;
 
+/* ===============================
+   FETCH RESIDENT DATA (READ ONLY)
+================================ */
 $stmt = $conn->prepare("
     SELECT 
-        person_id, household_id, first_name, middle_name, surname, suffix, sex, birthdate, 
-        civil_status, nationality, religion, purok, address, residency_start_date, education_level, occupation, 
-        is_senior, is_disabled, is_pregnant, health_insurance, vaccination, children_count
+        person_id, household_id, first_name, middle_name, surname, suffix,
+        sex, birthdate, civil_status, nationality, religion, purok, address,
+        residency_start_date, education_level, occupation,
+        is_senior, is_disabled, is_pregnant,
+        health_insurance, vaccination, children_count
     FROM residents
     WHERE person_id = ?
 ");
@@ -119,38 +37,50 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    $_SESSION['error_message'] = "Resident ID $residentId not found.";
-    header('Location: residents.php');
+    $_SESSION['error_message'] = 'Resident not found.';
+    header("Location: residents.php");
     exit();
 }
 
 $residentData = $result->fetch_assoc();
 $stmt->close();
 
-$householdResult = $conn->query("SELECT household_id, household_head FROM household ORDER BY household_id ASC");
+/* ===============================
+   FETCH HOUSEHOLDS
+================================ */
+$householdResult = $conn->query("
+    SELECT household_id, household_head
+    FROM household
+    ORDER BY household_id ASC
+");
 
-function isSelected($currentValue, $targetValue) {
-    $safeCurrentValue = $currentValue ?? '';
-    return ($safeCurrentValue == $targetValue) ? 'selected' : '';
+/* ===============================
+   HELPERS
+================================ */
+function safeHtml($val) {
+    return htmlspecialchars($val ?? '');
 }
 
-function safeHtml($value) {
-    return htmlspecialchars($value ?? '');
+function isSelected($current, $target) {
+    return ($current == $target) ? 'selected' : '';
 }
 
-function getSelectedStatusForEdit($resData) {
-    if (isset($resData['is_senior']) && $resData['is_senior'] == 1) return 'Senior Citizen';
-    if (isset($resData['is_disabled']) && $resData['is_disabled'] == 1) return 'PWD';
-    if (isset($resData['is_pregnant']) && $resData['is_pregnant'] == 1) return 'Pregnant';
-    if (!empty($resData['health_insurance']) && $resData['is_senior'] == 0 && $resData['is_disabled'] == 0 && $resData['is_pregnant'] == 0) return 'Others';
+function getSelectedStatus($res) {
+    if (!empty($res['is_senior'])) return 'Senior Citizen';
+    if (!empty($res['is_disabled'])) return 'PWD';
+    if (!empty($res['is_pregnant'])) return 'Pregnant';
+    if (!empty($res['health_insurance'])) return 'Others';
     return 'None';
 }
-$current_status = getSelectedStatusForEdit($residentData);
 
+$current_status = getSelectedStatus($residentData);
+
+/* ===============================
+   FLASH MESSAGES
+================================ */
 $status_success = $_SESSION['status_success'] ?? null;
-$error_message = $_SESSION['error_message'] ?? null;
+$error_message  = $_SESSION['error_message'] ?? null;
 unset($_SESSION['status_success'], $_SESSION['error_message']);
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -449,8 +379,10 @@ a { text-decoration: none; }
                     <div class="alert-error"><i class="fas fa-exclamation-triangle"></i> <?php echo $error_message; ?></div>
                 <?php endif; ?>
 
-                <form action="edit_resident.php?id=<?php echo safeHtml($residentData['person_id']); ?>" method="POST">
-                    <input type="hidden" name="person_id" value="<?php echo safeHtml($residentData['person_id']); ?>">
+                
+<form id="editResidentForm">
+
+  <input type="hidden" name="person_id" value="<?php echo $residentId; ?>">
 
                     <div class="form-grid">
                         
@@ -622,16 +554,41 @@ a { text-decoration: none; }
 </div>
 
 <script>
-    function setupLogout() {
-        const logoutBtn = document.getElementById("logoutBtn");
-        logoutBtn.addEventListener("click", () => {
-            window.location.href = "logout.php"; 
-        });
-    }
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("editResidentForm");
+  if (!form) return;
 
-    window.onload = function () {
-        setupLogout();
-    };
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    const residentId = data.person_id;
+
+    try {
+      const res = await fetch(
+        `http://127.0.0.1:5000/admin/residents/${residentId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        }
+      );
+
+      const result = await res.json();
+
+      if (result.success) {
+        window.location.href = "residents.php";
+      } else {
+        alert(result.error || "Failed to update resident");
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Cannot connect to Node server");
+    }
+  });
+});
 </script>
 </body>
 </html>

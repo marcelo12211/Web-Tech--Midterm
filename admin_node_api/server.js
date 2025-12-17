@@ -166,6 +166,69 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
   storage
 });
+// FOR UPDATE/EDIT RESIDENT
+app.put("/admin/residents/:id", async (req, res) => {
+  try {
+    const residentId = req.params.id;
+    const data = req.body;
+
+    console.log("UPDATE RESIDENT HIT:", residentId);
+
+    await pool.query(
+      `UPDATE residents SET
+        household_id = ?,
+        first_name = ?,
+        middle_name = ?,
+        surname = ?,
+        suffix = ?,
+        sex = ?,
+        birthdate = ?,
+        civil_status = ?,
+        nationality = ?,
+        religion = ?,
+        purok = ?,
+        address = ?,
+        education_level = ?,
+        occupation = ?,
+        vaccination = ?,
+        children_count = ?,
+        is_senior = ?,
+        is_disabled = ?,
+        is_pregnant = ?,
+        health_insurance = ?
+       WHERE person_id = ?`,
+      [
+        data.household_id,
+        data.first_name,
+        data.middle_name || "",
+        data.surname,
+        data.suffix || "",
+        data.sex,
+        data.birthdate,
+        data.civil_status,
+        data.nationality,
+        data.religion || null,
+        data.purok,
+        data.address,
+        data.education_level || null,
+        data.occupation || null,
+        data.vaccination || null,
+        data.children_count || 0,
+        data.special_status === "Senior Citizen" ? 1 : 0,
+        data.special_status === "PWD" ? 1 : 0,
+        data.special_status === "Pregnant" ? 1 : 0,
+        data.health_insurance || null,
+        residentId
+      ]
+    );
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("UPDATE RESIDENT ERROR:", err);
+    res.status(500).json({ error: "Failed to update resident" });
+  }
+});
 
 app.post(
   "/admin/residents",
