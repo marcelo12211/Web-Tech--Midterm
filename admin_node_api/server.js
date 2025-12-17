@@ -25,14 +25,9 @@ const ensureDir = dir => {
 ensureDir("uploads");
 ensureDir("uploads/pwd_documents");
 ensureDir("uploads/senior_documents");
-
-
-/* Health check */
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
-
-/* Admin login validation */
 app.post("/admin/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -60,8 +55,6 @@ app.post("/admin/login", async (req, res) => {
     res.status(500).json({ error: "Login error" });
   }
 });
-
-/* Get all users (admin) */
 app.get("/admin/users", async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -73,8 +66,7 @@ app.get("/admin/users", async (req, res) => {
     res.status(500).json({ error: "Database error" });
   }
 });
-
-/*DASHBOARD STATSSS*/
+ FOR STATS DASHBOARD
 app.get("/admin/dashboard/stats", async (req, res) => {
   try {
     const [[total]] = await pool.query(
@@ -108,8 +100,7 @@ app.get("/admin/dashboard/stats", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch dashboard stats" });
   }
-});
-/*for manage residents fetch */
+}); 
 app.get("/admin/residents", async (req, res) => {
   try {
     const { search = "", purok = "", category = "" } = req.query;
@@ -144,9 +135,7 @@ app.get("/admin/residents", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch residents" });
   }
 });
-// FOR ADD NEW RESIDENT VIA ADMIN !!!!!!!!IMPORTANT
 
-// Multer storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     if (file.fieldname === "pwd_id_image") {
@@ -166,7 +155,6 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
   storage
 });
-// FOR UPDATE/EDIT RESIDENT
 app.put("/admin/residents/:id", async (req, res) => {
   try {
     const residentId = req.params.id;
@@ -274,8 +262,6 @@ app.post(
       );
 
       const residentId = result.insertId;
-
-      // PWD extra table
       if (data.special_status === "PWD") {
         await pool.query(
           `INSERT INTO disabled_persons
@@ -289,8 +275,6 @@ app.post(
           ]
         );
       }
-
-      // Senior extra table
       if (data.special_status === "Senior Citizen") {
         await pool.query(
           `INSERT INTO senior_citizens

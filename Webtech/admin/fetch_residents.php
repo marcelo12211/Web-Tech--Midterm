@@ -144,18 +144,15 @@ if (mysqli_num_rows($result) > 0) {
         $output .= '<p><strong>Senior Citizen:</strong> ' . ($res['is_senior'] == 1 ? 'Yes' : 'No') . '</p>';
         $output .= '<p><strong>PWD:</strong> ' . ($res['is_disabled'] == 1 ? 'Yes' : 'No') . '</p>';
         $output .= '<p><strong>Pregnant:</strong> ' . ($res['is_pregnant'] == 1 ? 'Yes' : 'No') . '</p>';
-        $output .= '</div>';
-        
+        $output .= '</div>';        
         $output .= '<div class="detail-box">';
         $output .= '<h4>Health Records</h4>';
         $output .= '<p><strong>Health Insurance:</strong> ' . htmlspecialchars($res['health_insurance']) . '</p>';
         $output .= '<p><strong>Vaccination Status:</strong> ' . htmlspecialchars($res['vaccination']) . '</p>';
         $output .= '<p><strong>No. of Children:</strong> ' . htmlspecialchars($res['children_count']) . '</p>';
         $output .= '</div>';
-
         $output .= '</div>'; 
-        $output .= '</div>'; 
-        
+        $output .= '</div>';        
         $output .= '</div>'; 
         $output .= '</td>';
         $output .= '</tr>';

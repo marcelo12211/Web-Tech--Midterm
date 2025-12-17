@@ -308,7 +308,6 @@ th, td {
     color: var(--danger-color);
 }
 
-/* Alerts */
 .alert-success, .alert-error {
     padding: 15px;
     border-radius: 6px;
@@ -367,7 +366,6 @@ th, td {
                     <li><a href="residents.php" class="active">Manage Residents</a></li>
                     <li><a href="users.php">Manage Users</a></li>
                     <li><a href="documents.php">Documents</a></li>
-                    <li><a href="logout.php">Logout</a></li>
                 </ul>
             </nav>
         </div>

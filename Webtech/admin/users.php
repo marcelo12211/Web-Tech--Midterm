@@ -531,7 +531,6 @@ th, td {
                 <li><a href="residents.php">Manage Residents</a></li>
                 <li><a href="users.php" class="active">Manage Users</a></li>
                 <li><a href="documents.php">Documents</a></li>
-                <li><a href="logout.php">Logout</a></li>
             </ul>
         </nav>
     </div>
@@ -583,7 +582,7 @@ th, td {
                     </div>
                 </div>
                 <a href="add_user.php" class="btn primary-btn add-btn">
-                    <i class="fas fa-plus"></i> Add New User
+                    <i class="fas fa-plus"></i>Add New User
                 </a>
             </form> 
             

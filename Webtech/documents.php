@@ -89,19 +89,20 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
 
   <body>
     <div class="app-container">
-      <aside class="sidebar">
+    <aside class="sidebar">
         <div class="logo">Happy Hallow Barangay System</div>
         <nav class="main-nav">
-          <ul>
-            <li><a href="index.php">Dashboard</a></li>
-            <li><a href="household.php">Households</a></li>
-            <li><a href="residents.php">Residents</a></li>
-            <li><a href="addnewresidents.php">Add Resident</a></li>
-            <li><a href="deaths.php">Deaths</a></li>
-            <li><a href="documents.php" class="active">Documents</a></li>
-          </ul>
+            <ul>
+                <li><a href="index.php">Dashboard</a></li>
+                <li><a href="household.php">Households</a></li>
+                <li><a href="residents.php">Residents</a></li>
+                <li><a href="addnewresidents.php">Add Resident</a></li>
+                <li><a href="deaths.php">Deaths</a></li>
+                <li><a href="documents.php" class="active">Documents</a></li>
+                <li><a href="staff_documents.php">Generate Certificates</a></li>
+            </ul>
         </nav>
-      </aside> 	
+    </aside>	
 
       <div class="main-content">
         <header class="topbar">

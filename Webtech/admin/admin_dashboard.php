@@ -1,6 +1,5 @@
 <?php
 session_start();
-include '../db_connect.php'; 
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -8,43 +7,6 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $logged_in_username = htmlspecialchars($_SESSION['user_name'] ?? 'Guest');
-
-if (!isset($conn) || $conn === null) {
-    error_log("Database connection failed in admin_dashboard.php");
-    $stats = [
-        "total_residents" => 0,
-        "senior" => 0,
-        "pwd" => 0,
-        "pregnant" => 0,
-        "regular" => 0,
-        "total_children" => 0
-    ];
-} else {
-    $sql_total = "SELECT COUNT(person_id) AS total FROM residents";
-    $result_total = mysqli_query($conn, $sql_total);
-    $total_residents = mysqli_fetch_assoc($result_total)['total'] ?? 0;
-
-    $sql_senior = "SELECT COUNT(person_id) AS senior FROM residents WHERE is_senior = 1";
-    $result_senior = mysqli_query($conn, $sql_senior);
-    $senior = mysqli_fetch_assoc($result_senior)['senior'] ?? 0;
-
-    $sql_pwd = "SELECT COUNT(person_id) AS pwd FROM residents WHERE is_disabled = 1";
-    $result_pwd = mysqli_query($conn, $sql_pwd);
-    $pwd = mysqli_fetch_assoc($result_pwd)['pwd'] ?? 0;
-
-    $sql_pregnant = "SELECT COUNT(person_id) AS pregnant FROM residents WHERE is_pregnant = 1 AND sex = 'F'";
-    $result_pregnant = mysqli_query($conn, $sql_pregnant);
-    $pregnant = mysqli_fetch_assoc($result_pregnant)['pregnant'] ?? 0;
-
-    $regular = $total_residents - $senior - $pwd - $pregnant;
-    $regular = max(0, $regular); 
-    
-    $sql_children = "SELECT SUM(children_count) AS total_children FROM residents";
-    $result_children = mysqli_query($conn, $sql_children);
-    $total_children = mysqli_fetch_assoc($result_children)['total_children'] ?? 0;
-
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -53,6 +15,7 @@ if (!isset($conn) || $conn === null) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Happy Hallow Barangay System - Dashboard</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <style>
 :root {
     --primary-color: #226b8dff;
@@ -91,7 +54,7 @@ a { text-decoration: none; }
     background: white;
     padding: 15px 30px;
     border-bottom: 1px solid var(--border-color);
-    display: flex; 
+    display: flex;
     justify-content: flex-end;
     align-items: center;
 }
@@ -101,202 +64,128 @@ a { text-decoration: none; }
     padding: 8px 15px;
     border: 1px solid var(--border-color);
     background: transparent;
-    color: var(--text-color);
-    font-size: 0.9rem;
     cursor: pointer;
     border-radius: 6px;
-    transition: background-color 0.2s;
-    font-weight: 500;
 }
-.logout-btn:hover { background: var(--background-color); }
 .page-content { padding: 30px; }
-.page-content h2 { 
-    margin-top: 0; 
-    margin-bottom: 30px; 
-    padding-bottom: 10px; 
-    border-bottom: 2px solid var(--primary-color); 
-    width: fit-content; 
-    font-size: 1.5rem;
-    font-weight: 500;
-}
-.card {
-    background: white;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 25px;
-    margin-bottom: 30px;
-}
+
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 20px;
-    margin-bottom: 30px;
 }
+
 .stat-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
     padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 100px;
-    margin-bottom: 0 !important;
     border-left: 5px solid var(--border-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); 
 }
 
 .stat-label {
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-light);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
 }
 
 .stat-value {
     font-size: 2.2rem;
     font-weight: 700;
-    color: var(--text-color);
-    line-height: 1; 
 }
-/* Border Colors */
+
 .dashboard-grid .stat-card:nth-child(1) { border-left-color: var(--primary-color); }
 .dashboard-grid .stat-card:nth-child(2) { border-left-color: var(--warning-color); }
 .dashboard-grid .stat-card:nth-child(3) { border-left-color: var(--danger-color); }
-.dashboard-grid .stat-card:nth-child(4) { border-left-color: #64b5f6; } /* Light Blue */
-.dashboard-grid .stat-card:nth-child(5) { border-left-color: #26c6da; } /* Cyan */
-
-.charts-container { margin-top: 30px; }
-.chart-card { padding: 25px; margin-bottom: 0; }
-.chart-card h3 { margin-top: 0; font-weight: 500; color: var(--text-color); }
-.chart-wrapper { max-width: 450px; margin: 0 auto; padding-top: 20px; }
-@media (max-width: 768px) {
-    .sidebar { display: none; }
-    .page-content { padding: 15px; }
-}
+.dashboard-grid .stat-card:nth-child(4) { border-left-color: #64b5f6; }
+.dashboard-grid .stat-card:nth-child(5) { border-left-color: #26c6da; }
 </style>
 </head>
+
 <body>
 <div class="app-container">
+
     <div class="sidebar">
-        <div class="logo">Happy Hallow<br />Barangay System</div>
+        <div class="logo">Happy Hallow<br>Barangay System</div>
         <nav class="main-nav">
             <ul>
                 <li><a href="admin_dashboard.php" class="active">Dashboard</a></li>
                 <li><a href="residents.php">Manage Residents</a></li>
                 <li><a href="users.php">Manage Users</a></li>
                 <li><a href="documents.php">Documents</a></li>
-                <li><a href="logout.php">Logout</a></li>
             </ul>
         </nav>
     </div>
+
     <div class="main-content">
         <div class="topbar">
-            <div class="topbar-right">
-                <span class="user-info">Welcome, <?php echo $logged_in_username; ?></span>
-                <a href="logout.php" class="btn logout-btn">Logout</a>
-            </div>
+            <span class="user-info">Welcome, <?php echo $logged_in_username; ?></span>
+            <a href="logout.php" class="logout-btn">Logout</a>
         </div>
+
         <div class="page-content">
             <h2>Dashboard Overview</h2>
-            
+
             <div class="dashboard-grid">
-                <div class="card stat-card">
+                <div class="stat-card">
                     <div class="stat-label">TOTAL RESIDENTS</div>
-                    <div class="stat-value"><?php echo $total_residents; ?></div>
+                    <div class="stat-value" id="totalResidents">—</div>
                 </div>
-                <div class="card stat-card">
+                <div class="stat-card">
                     <div class="stat-label">SENIOR CITIZEN</div>
-                    <div class="stat-value"><?php echo $senior; ?></div>
+                    <div class="stat-value" id="seniorCount">—</div>
                 </div>
-                <div class="card stat-card">
+                <div class="stat-card">
                     <div class="stat-label">PWD</div>
-                    <div class="stat-value"><?php echo $pwd; ?></div>
+                    <div class="stat-value" id="pwdCount">—</div>
                 </div>
-                <div class="card stat-card">
+                <div class="stat-card">
                     <div class="stat-label">PREGNANT RESIDENTS</div>
-                    <div class="stat-value"><?php echo $pregnant; ?></div>
+                    <div class="stat-value" id="pregnantCount">—</div>
                 </div>
-                <div class="card stat-card">
+                <div class="stat-card">
                     <div class="stat-label">TOTAL CHILDREN</div>
-                    <div class="stat-value"><?php echo $total_children; ?></div>
-                </div>
-            </div>
-            
-            <div class="charts-container">
-                <div class="card chart-card">
-                    <h3>Residents Distribution</h3>
-                    <div class="chart-wrapper">
-                        <canvas id="categoriesChart"></canvas>
-                    </div>
+                    <div class="stat-value" id="childrenCount">—</div>
                 </div>
             </div>
 
+            <canvas id="categoriesChart" width="200" height="200" style="display: block; box-sizing: border-box; "></canvas>
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-const seniorCount = <?php echo $senior; ?>;
-const pwdCount = <?php echo $pwd; ?>;
-const pregnantCount = <?php echo $pregnant; ?>;
-const regularCount = <?php echo $regular; ?>;
 
-const ctx = document.getElementById('categoriesChart').getContext('2d');
-new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-        labels: [
-            'Senior Citizens',
-            'PWD',
-            'Pregnant',
-            'Regular Residents'
-        ],
-        datasets: [{
-            data: [
-                seniorCount,
-                pwdCount,
-                pregnantCount,
-                regularCount
-            ],
-            backgroundColor: [
-                '#76d7d2', 
-                '#ffd97d', 
-                '#ff8fa3', 
-                '#64b5f6'  
-            ],
-            borderWidth: 2,
-            borderColor: '#ffffff'
-        }]
-    },
-    options: {
-        responsive: true,
-        cutout: '60%',
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    padding: 20
-                }
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        let label = context.label || '';
-                        if (label) {
-                            label += ': ';
-                        }
-                        if (context.parsed !== null) {
-                            label += context.parsed;
-                        }
-                        return label;
-                    }
-                }
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+fetch("http://127.0.0.1:5000/admin/dashboard/stats")
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("totalResidents").textContent = data.total_residents;
+        document.getElementById("seniorCount").textContent = data.senior;
+        document.getElementById("pwdCount").textContent = data.pwd;
+        document.getElementById("pregnantCount").textContent = data.pregnant;
+        document.getElementById("childrenCount").textContent = data.total_children;
+
+        new Chart(document.getElementById("categoriesChart"), {
+            type: "doughnut",
+            data: {
+                labels: ["Senior", "PWD", "Pregnant", "Regular"],
+                datasets: [{
+                    data: [
+                        data.senior,
+                        data.pwd,
+                        data.pregnant,
+                        data.regular
+                    ],
+                    backgroundColor: ["#76d7d2", "#ffd97d", "#ff8fa3", "#64b5f6"]
+                }]
             }
-        },
-        maintainAspectRatio: false,
-        aspectRatio: 1
-    }
-});
+        });
+    })
+    .catch(err => {
+        console.error("Dashboard API error:", err);
+    });
 </script>
+
 </body>
 </html>

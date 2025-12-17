@@ -485,7 +485,6 @@ th, td {
                 <li><a href="residents.php">Manage Residents</a></li>
                 <li><a href="users.php">Manage Users</a></li>
                 <li><a href="documents.php" class="active">Documents</a></li>
-                <li><a href="logout.php">Logout</a></li>
             </ul>
         </nav>
     </div>

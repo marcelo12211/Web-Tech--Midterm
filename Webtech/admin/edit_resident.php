@@ -8,20 +8,12 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $logged_in_username = $_SESSION['user_name'] ?? 'User';
-
-/* ===============================
-   VALIDATE ID
-================================ */
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     header("Location: residents.php");
     exit();
 }
 
 $residentId = intval($_GET['id']);
-
-/* ===============================
-   FETCH RESIDENT DATA (READ ONLY)
-================================ */
 $stmt = $conn->prepare("
     SELECT 
         person_id, household_id, first_name, middle_name, surname, suffix,
@@ -44,19 +36,11 @@ if ($result->num_rows === 0) {
 
 $residentData = $result->fetch_assoc();
 $stmt->close();
-
-/* ===============================
-   FETCH HOUSEHOLDS
-================================ */
 $householdResult = $conn->query("
     SELECT household_id, household_head
     FROM household
     ORDER BY household_id ASC
 ");
-
-/* ===============================
-   HELPERS
-================================ */
 function safeHtml($val) {
     return htmlspecialchars($val ?? '');
 }
@@ -74,10 +58,6 @@ function getSelectedStatus($res) {
 }
 
 $current_status = getSelectedStatus($residentData);
-
-/* ===============================
-   FLASH MESSAGES
-================================ */
 $status_success = $_SESSION['status_success'] ?? null;
 $error_message  = $_SESSION['error_message'] ?? null;
 unset($_SESSION['status_success'], $_SESSION['error_message']);
