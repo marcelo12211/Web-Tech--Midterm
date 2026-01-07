@@ -31,6 +31,16 @@ $sql = "
 ";
 
 $result = $conn->query($sql);
+$membersSql = "
+    SELECT person_id, first_name, middle_name, surname
+    FROM residents
+    WHERE household_id = ?
+    ORDER BY surname, first_name
+";
+$stmt = $conn->prepare($membersSql);
+$stmt->bind_param("i", $householdId);
+$stmt->execute();
+$membersResult = $stmt->get_result();
 
 if ($result->num_rows === 0) {
     echo "<p>Error: Household not found.</p>";
@@ -138,10 +148,27 @@ function safeHtml($value) {
                     <h3 class="section-title">Basic Information</h3>
                     <div class="form-grid">
                         <div class="input-group">
-                            <label for="household_head">Household Head</label>
-                            <input type="text" id="household_head" name="household_head" 
-                                   value="<?php echo safeHtml($householdData['household_head']); ?>" required>
-                        </div>
+    <label for="household_head">Household Head</label>
+    <select id="household_head" name="household_head" required>
+        <option value="">Select Household Head</option>
+
+        <?php while ($member = $membersResult->fetch_assoc()): 
+            $fullName = trim(
+                $member['surname'] . ', ' .
+                $member['first_name'] . ' ' .
+                $member['middle_name']
+            );
+        ?>
+            <option
+                value="<?php echo safeHtml($fullName); ?>"
+                <?php echo ($householdData['household_head'] === $fullName) ? 'selected' : ''; ?>
+            >
+                <?php echo safeHtml($fullName); ?>
+            </option>
+        <?php endwhile; ?>
+    </select>
+</div>
+
                         
                         <div class="input-group">
                             <label for="housing_ownership">Housing Ownership</label>
