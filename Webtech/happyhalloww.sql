@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jan 07, 2026 at 09:28 AM
+-- Generation Time: Jan 07, 2026 at 01:33 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -144,19 +144,21 @@ CREATE TABLE IF NOT EXISTS `household` (
   `waste_disposal` varchar(50) DEFAULT NULL,
   `building_type` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`household_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1007 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1009 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `household`
 --
 
 INSERT INTO `household` (`household_id`, `household_head`, `housing_ownership`, `water_source`, `toilet_facility`, `electricity_source`, `waste_disposal`, `building_type`) VALUES
-(1001, NULL, 'Owned', 'Well', 'Flush Toilet', 'Electricity', 'Regular Collection', 'Concrete'),
-(1002, NULL, 'Rented', 'River', 'Pit Latrine', 'Solar', 'Burning', 'Wood'),
-(1003, NULL, 'Owned', 'Well', 'Flush Toilet', 'Electricity', 'Regular Collection', 'Concrete'),
-(1004, NULL, 'Rented', 'River', 'Pit Latrine', 'Solar', 'Burning', 'Wood'),
-(1005, NULL, 'Owned', 'Well', 'Flush Toilet', 'Electricity', 'Regular Collection', 'Concrete'),
-(1006, NULL, 'Rented', 'River', 'Pit Latrine', 'Solar', 'Burning', 'Wood');
+(1001, 'Aguilar, Neil R', 'Owned', 'BAWADI', 'Water Sealed', 'BENECO', 'Collected by Garbage Truck', 'Concrete'),
+(1002, 'Lim, Cathy J', 'Rented', 'BAWADI', 'Pit Latrine', 'Solar', 'Burning', 'Wood'),
+(1003, 'Baltazar, Rico T', 'Owned', 'BAWADI', 'Water Sealed', 'Solar', 'Collected by Garbage Truck', 'Concrete'),
+(1004, 'Garcia, Ana C', 'Rented', 'BAWADI', 'Water Sealed', 'Solar', 'Recycling', 'Concrete'),
+(1005, 'Aquino, Dennis L', 'Owned', 'BAWADI', 'Water Sealed', 'BENECO', 'Collected by Garbage Truck', 'Concrete'),
+(1006, 'Bautista, Helen E', 'Rented', 'BAWADI', 'Water Sealed', 'Solar', 'Collected by Garbage Truck', 'Semi-Concrete'),
+(1007, NULL, 'Owned', 'BAWADI', 'Water Sealed', 'BENECO', 'Collected by Garbage Truck', 'Concrete'),
+(1008, NULL, 'Rented', 'BAWADI', 'Water Sealed', 'BENECO', 'Collected by Garbage Truck', 'Concrete');
 
 -- --------------------------------------------------------
 
@@ -208,7 +210,7 @@ CREATE TABLE IF NOT EXISTS `residents` (
   `children_count` int DEFAULT NULL,
   PRIMARY KEY (`person_id`),
   KEY `household_id` (`household_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2040 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2090 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `residents`
@@ -254,7 +256,57 @@ INSERT INTO `residents` (`person_id`, `household_id`, `first_name`, `middle_name
 (2036, 1001, 'Neil', 'R', 'Aguilar', NULL, 'M', '1990-11-17', 'Single', 'Filipino', 'Catholic', 2, '37 Quartz Road', '2015-12-05', 'College', 'Auditor', 0, 0, 'PhilHealth', 1, 0, 0),
 (2037, 1002, 'Jessa', 'S', 'Padilla', NULL, 'F', '2003-02-24', 'Single', 'Filipino', 'Catholic', 3, '8 Beryl Street', '2023-03-10', 'Senior High', 'Student', 0, 0, 'None', 1, 0, 0),
 (2038, 1003, 'Rico', 'T', 'Baltazar', NULL, 'M', '1971-07-31', 'Married', 'Filipino', 'Catholic', 4, '59 Citrine Avenue', '2006-08-16', 'High School', 'Worker', 0, 0, 'PhilHealth', 1, 0, 5),
-(2039, 1004, 'Elaine', 'U', 'Montes', NULL, 'F', '1996-04-19', 'Single', 'Filipino', 'Catholic', 5, '13 Peridot Street', '2019-05-27', 'College', 'Assistant', 0, 0, 'PhilHealth', 1, 0, 0);
+(2039, 1004, 'Elaine', 'U', 'Montes', NULL, 'F', '1996-04-19', 'Single', 'Filipino', 'Catholic', 5, '13 Peridot Street', '2019-05-27', 'College', 'Assistant', 0, 0, 'PhilHealth', 1, 0, 0),
+(2040, 1001, 'Manuel', 'A', 'Rivera', NULL, 'M', '1959-02-14', 'Married', 'Filipino', 'Catholic', 1, '12 Mabuhay Street', '2005-01-10', 'High School', 'Driver', 1, 0, 'PhilHealth', 1, 0, 4),
+(2041, 1002, 'Carmen', 'B', 'Delos Reyes', NULL, 'F', '1961-05-03', 'Widowed', 'Filipino', 'Catholic', 1, '45 Pagasa Road', '2003-06-22', 'Elementary', 'Vendor', 1, 0, 'PhilHealth', 1, 0, 5),
+(2042, 1003, 'Rodolfo', 'C', 'Mateo', NULL, 'M', '1957-11-19', 'Married', 'Filipino', 'Catholic', 1, '78 Liwanag Avenue', '2000-08-18', 'High School', 'Security', 1, 0, 'PhilHealth', 1, 0, 3),
+(2043, 1004, 'Jenny', 'D', 'Flores', NULL, 'F', '1994-06-21', 'Married', 'Filipino', 'Catholic', 1, '9 Maligaya Street', '2020-03-01', 'College', 'Housewife', 0, 0, 'PhilHealth', 1, 1, 1),
+(2044, 1005, 'Eduardo', 'E', 'Panganiban', NULL, 'M', '1956-09-08', 'Married', 'Filipino', 'Catholic', 1, '101 Sampaguita Lane', '1999-04-12', 'Elementary', 'Farmer', 1, 0, 'PhilHealth', 1, 0, 6),
+(2045, 1006, 'Lourdes', 'F', 'Cruz', NULL, 'F', '1963-12-02', 'Married', 'Filipino', 'Catholic', 1, '33 Rosal Street', '2006-07-14', 'High School', 'Vendor', 1, 0, 'PhilHealth', 1, 0, 4),
+(2046, 1001, 'Arnel', 'G', 'Villamor', NULL, 'M', '1987-01-25', 'Single', 'Filipino', 'Catholic', 1, '56 Narra Road', '2014-09-05', 'College', 'Technician', 0, 1, 'PhilHealth', 1, 0, 0),
+(2047, 1002, 'Melissa', 'H', 'Aquino', NULL, 'F', '1998-08-30', 'Married', 'Filipino', 'Catholic', 1, '18 Ilang-Ilang Street', '2021-02-11', 'College', 'None', 0, 0, 'PhilHealth', 1, 1, 0),
+(2048, 1003, 'Rolando', 'I', 'Abella', NULL, 'M', '1955-04-17', 'Married', 'Filipino', 'Catholic', 1, '72 Banaba Avenue', '1998-10-09', 'Elementary', 'Farmer', 1, 0, 'PhilHealth', 1, 0, 7),
+(2049, 1004, 'Estela', 'J', 'Moreno', NULL, 'F', '1962-07-29', 'Widowed', 'Filipino', 'Catholic', 1, '6 Mabini Road', '2004-11-20', 'High School', 'Seamstress', 1, 0, 'PhilHealth', 1, 0, 3),
+(2050, 1005, 'Ricardo', 'K', 'Soriano', NULL, 'M', '1958-03-12', 'Married', 'Filipino', 'Catholic', 1, '90 Rizal Avenue', '2001-05-06', 'High School', 'Guard', 1, 0, 'PhilHealth', 1, 0, 5),
+(2051, 1006, 'Aileen', 'L', 'Montoya', NULL, 'F', '1996-10-05', 'Single', 'Filipino', 'Catholic', 1, '14 Camia Street', '2019-08-14', 'College', 'None', 0, 1, 'PhilHealth', 1, 0, 0),
+(2052, 1001, 'Leonardo', 'M', 'Espino', NULL, 'M', '1960-06-01', 'Married', 'Filipino', 'Catholic', 1, '27 Acacia Road', '2002-09-17', 'High School', 'Driver', 1, 0, 'PhilHealth', 1, 0, 4),
+(2053, 1002, 'Rose', 'N', 'Fabian', NULL, 'F', '1993-02-18', 'Married', 'Filipino', 'Catholic', 1, '63 Gumamela Street', '2018-12-10', 'College', 'Clerk', 0, 0, 'PhilHealth', 1, 1, 2),
+(2054, 1003, 'Benjamin', 'O', 'Tolentino', NULL, 'M', '1954-11-11', 'Married', 'Filipino', 'Catholic', 1, '88 Molave Drive', '1997-03-22', 'Elementary', 'Vendor', 1, 0, 'PhilHealth', 1, 0, 6),
+(2055, 1004, 'Nancy', 'P', 'Robles', NULL, 'F', '1961-09-04', 'Widowed', 'Filipino', 'Catholic', 1, '41 Kamagong Road', '2005-01-30', 'High School', 'Vendor', 1, 0, 'PhilHealth', 1, 0, 4),
+(2056, 1005, 'Jerome', 'Q', 'Padua', NULL, 'M', '1989-05-26', 'Single', 'Filipino', 'Catholic', 1, '19 Talisay Street', '2016-06-11', 'College', 'Staff', 0, 1, 'PhilHealth', 1, 0, 0),
+(2057, 1006, 'Hazel', 'R', 'Santiago', NULL, 'F', '1997-12-19', 'Married', 'Filipino', 'Catholic', 1, '52 Orchid Street', '2020-09-09', 'College', 'None', 0, 0, 'PhilHealth', 1, 1, 1),
+(2058, 1001, 'Francisco', 'S', 'Lazaro', NULL, 'M', '1959-01-07', 'Married', 'Filipino', 'Catholic', 2, '7 Mango Street', '2003-02-15', 'High School', 'Carpenter', 1, 0, 'PhilHealth', 1, 0, 4),
+(2059, 1002, 'Irene', 'T', 'Quinto', NULL, 'F', '1964-04-22', 'Married', 'Filipino', 'Catholic', 2, '39 Santan Road', '2007-05-08', 'High School', 'Vendor', 1, 0, 'PhilHealth', 1, 0, 3),
+(2060, 1003, 'Alvin', 'U', 'Barrera', NULL, 'M', '1986-07-16', 'Single', 'Filipino', 'Catholic', 2, '81 Chico Avenue', '2013-10-20', 'College', 'Technician', 0, 1, 'PhilHealth', 1, 0, 0),
+(2061, 1004, 'Daisy', 'V', 'Medina', NULL, 'F', '1995-09-27', 'Married', 'Filipino', 'Catholic', 2, '22 Sampaloc Street', '2021-04-02', 'College', 'None', 0, 0, 'PhilHealth', 1, 1, 1),
+(2062, 1005, 'Teodoro', 'W', 'Ibañez', NULL, 'M', '1956-02-03', 'Married', 'Filipino', 'Catholic', 2, '64 Yakal Road', '1999-06-17', 'Elementary', 'Farmer', 1, 0, 'PhilHealth', 1, 0, 6),
+(2063, 1006, 'Marissa', 'X', 'Salcedo', NULL, 'F', '1960-08-14', 'Widowed', 'Filipino', 'Catholic', 2, '95 Avocado Lane', '2004-09-23', 'High School', 'Vendor', 1, 0, 'PhilHealth', 1, 0, 4),
+(2064, 1001, 'Paulo', 'Y', 'Nicolas', NULL, 'M', '1991-11-09', 'Single', 'Filipino', 'Catholic', 2, '16 Kamias Street', '2017-12-01', 'College', 'Staff', 0, 1, 'PhilHealth', 1, 0, 0),
+(2065, 1002, 'Rina', 'Z', 'Estrella', NULL, 'F', '1998-03-31', 'Married', 'Filipino', 'Catholic', 2, '53 Dahlia Road', '2022-02-18', 'College', 'None', 0, 0, 'PhilHealth', 1, 1, 0),
+(2066, 1003, 'Julio', 'A', 'Calderon', NULL, 'M', '1955-05-18', 'Married', 'Filipino', 'Catholic', 2, '77 Atis Avenue', '1998-08-06', 'Elementary', 'Farmer', 1, 0, 'PhilHealth', 1, 0, 7),
+(2067, 1004, 'Evelyn', 'B', 'Cordero', NULL, 'F', '1962-10-10', 'Married', 'Filipino', 'Catholic', 2, '28 Guyabano Street', '2006-11-11', 'High School', 'Vendor', 1, 0, 'PhilHealth', 1, 0, 3),
+(2068, 1005, 'Nestor', 'C', 'Barrios', NULL, 'M', '1984-01-24', 'Married', 'Filipino', 'Catholic', 2, '90 Bayabas Road', '2010-04-07', 'High School', 'Worker', 0, 1, 'PhilHealth', 1, 0, 2),
+(2069, 1006, 'Sheryl', 'D', 'Magno', NULL, 'F', '1992-06-13', 'Single', 'Filipino', 'Catholic', 2, '11 Calachuchi Street', '2018-07-19', 'College', 'Assistant', 0, 0, 'PhilHealth', 1, 1, 0),
+(2070, 1001, 'Ismael', 'E', 'Dizon', NULL, 'M', '1957-03-09', 'Married', 'Filipino', 'Catholic', 3, '14 Kamagong Street', '2001-01-15', 'High School', 'Farmer', 1, 0, 'PhilHealth', 1, 0, 5),
+(2071, 1002, 'Linda', 'F', 'Mercado', NULL, 'F', '1960-06-27', 'Widowed', 'Filipino', 'Catholic', 3, '62 Mahogany Road', '2004-03-18', 'Elementary', 'Vendor', 1, 0, 'PhilHealth', 1, 0, 4),
+(2072, 1003, 'Joel', 'G', 'Samson', NULL, 'M', '1988-10-02', 'Single', 'Filipino', 'Catholic', 3, '8 Narra Lane', '2015-09-11', 'College', 'Staff', 0, 1, 'PhilHealth', 1, 0, 0),
+(2073, 1004, 'Karen', 'H', 'Valencia', NULL, 'F', '1996-12-21', 'Married', 'Filipino', 'Catholic', 3, '71 Ilang-Ilang Road', '2021-07-03', 'College', 'None', 0, 0, 'PhilHealth', 1, 1, 1),
+(2074, 1005, 'Federico', 'I', 'Ramos', NULL, 'M', '1954-01-30', 'Married', 'Filipino', 'Catholic', 3, '93 Molave Avenue', '1996-02-09', 'Elementary', 'Farmer', 1, 0, 'PhilHealth', 1, 0, 6),
+(2075, 1006, 'Rosita', 'J', 'Campos', NULL, 'F', '1963-04-16', 'Widowed', 'Filipino', 'Catholic', 3, '25 Acacia Street', '2005-10-01', 'High School', 'Vendor', 1, 0, 'PhilHealth', 1, 0, 4),
+(2076, 1001, 'Dennis', 'K', 'Ong', NULL, 'M', '1990-07-14', 'Single', 'Filipino', 'Catholic', 3, '37 Banaba Road', '2016-11-22', 'College', 'Clerk', 0, 1, 'PhilHealth', 1, 0, 0),
+(2077, 1002, 'Marjorie', 'L', 'Yu', NULL, 'F', '1999-02-05', 'Married', 'Filipino', 'Catholic', 3, '54 Sampaguita Street', '2023-01-17', 'College', 'None', 0, 0, 'PhilHealth', 1, 1, 0),
+(2078, 1003, 'Rene', 'M', 'Tolosa', NULL, 'M', '1958-09-19', 'Married', 'Filipino', 'Catholic', 3, '69 Talisay Road', '2002-04-26', 'High School', 'Driver', 1, 0, 'PhilHealth', 1, 0, 3),
+(2079, 1004, 'Alma', 'N', 'Rosario', NULL, 'F', '1961-11-28', 'Widowed', 'Filipino', 'Catholic', 4, '10 Yakal Street', '2004-06-13', 'Elementary', 'Vendor', 1, 0, 'PhilHealth', 1, 0, 4),
+(2080, 1005, 'Rogelio', 'O', 'Macapagal', NULL, 'M', '1956-05-04', 'Married', 'Filipino', 'Catholic', 4, '82 Kamias Avenue', '1999-09-21', 'High School', 'Guard', 1, 0, 'PhilHealth', 1, 0, 5),
+(2081, 1006, 'Cynthia', 'P', 'Agustin', NULL, 'F', '1994-08-18', 'Married', 'Filipino', 'Catholic', 4, '47 Avocado Road', '2019-10-10', 'College', 'None', 0, 0, 'PhilHealth', 1, 1, 1),
+(2082, 1001, 'Edgar', 'Q', 'Manansala', NULL, 'M', '1985-12-09', 'Single', 'Filipino', 'Catholic', 4, '33 Santol Street', '2012-02-14', 'College', 'Staff', 0, 1, 'PhilHealth', 1, 0, 0),
+(2083, 1002, 'Milagros', 'R', 'Fajardo', NULL, 'F', '1962-03-22', 'Widowed', 'Filipino', 'Catholic', 4, '61 Calamansi Lane', '2006-05-19', 'High School', 'Vendor', 1, 0, 'PhilHealth', 1, 0, 4),
+(2084, 1003, 'Oscar', 'S', 'Lorenzo', NULL, 'M', '1957-07-07', 'Married', 'Filipino', 'Catholic', 4, '99 Banaba Drive', '2001-08-02', 'Elementary', 'Farmer', 1, 0, 'PhilHealth', 1, 0, 6),
+(2085, 1004, 'Lani', 'T', 'De Vera', NULL, 'F', '1997-01-13', 'Single', 'Filipino', 'Catholic', 4, '18 Chico Street', '2020-03-09', 'College', 'None', 0, 0, 'PhilHealth', 1, 1, 0),
+(2086, 1005, 'Gregorio', 'U', 'Peña', NULL, 'M', '1955-10-26', 'Married', 'Filipino', 'Catholic', 5, '5 Mabolo Road', '1998-11-14', 'Elementary', 'Farmer', 1, 0, 'PhilHealth', 1, 0, 7),
+(2087, 1006, 'Fe', 'V', 'Sarmiento', NULL, 'F', '1960-02-01', 'Widowed', 'Filipino', 'Catholic', 5, '42 Duhat Street', '2003-04-25', 'High School', 'Vendor', 1, 0, 'PhilHealth', 1, 0, 4),
+(2088, 1001, 'Allan', 'W', 'Go', NULL, 'M', '1989-09-15', 'Single', 'Filipino', 'Catholic', 5, '76 Lanzones Road', '2015-07-18', 'College', 'Staff', 0, 1, 'PhilHealth', 1, 0, 0),
+(2089, 1002, 'Joyce', 'X', 'Lim', NULL, 'F', '1995-05-28', 'Married', 'Filipino', 'Catholic', 5, '21 Mangosteen Lane', '2021-06-12', 'College', 'None', 0, 0, 'PhilHealth', 1, 1, 1);
 
 -- --------------------------------------------------------
 
