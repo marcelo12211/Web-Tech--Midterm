@@ -122,7 +122,7 @@ $logged_in_username = htmlspecialchars($_SESSION['user_name'] ?? 'Guest');
                 <ul>
                     <li><a href="admin_dashboard.php" class="active">Dashboard</a></li>
                     <li><a href="residents.php">Manage Residents</a></li>
-                    <li><a href="manage_users.php">Manage Users</a></li>
+                    <li><a href="users.php">Manage Users</a></li>
                     <li><a href="documents.php">Documents</a></li>
                 </ul>
             </nav>

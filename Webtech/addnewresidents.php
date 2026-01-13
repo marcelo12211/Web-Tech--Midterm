@@ -333,8 +333,8 @@ if(isset($error)) echo "<p style='color:red;'>$error</p>";
   <label>Sex</label>
 <select name="sex" required>
   <option value="">Select</option>
-  <option value="M" <?php if(($resData['sex'] ?? '')=='M') echo 'selected'; ?>>Male</option>
-  <option value="F" <?php if(($resData['sex'] ?? '')=='F') echo 'selected'; ?>>Female</option>
+  <option value="Male" <?php if(($resData['sex'] ?? '')=='Male') echo 'selected'; ?>>Male</option>
+  <option value="Female" <?php if(($resData['sex'] ?? '')=='Female') echo 'selected'; ?>>Female</option>
 </select>
 </div>
 
