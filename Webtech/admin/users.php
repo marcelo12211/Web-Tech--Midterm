@@ -531,6 +531,7 @@ th, td {
                 <li><a href="residents.php">Manage Residents</a></li>
                 <li><a href="users.php" class="active">Manage Users</a></li>
                 <li><a href="documents.php">Documents</a></li>
+                <li><a href="health_tracking.php">Health Tracking</a></li>
             </ul>
         </nav>
     </div>
