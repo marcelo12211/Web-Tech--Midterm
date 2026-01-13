@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jan 13, 2026 at 12:25 PM
+-- Generation Time: Jan 13, 2026 at 12:38 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -107,6 +107,24 @@ CREATE TABLE IF NOT EXISTS `documents` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `doc_number` (`doc_number`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `health_profiles`
+--
+
+DROP TABLE IF EXISTS `health_profiles`;
+CREATE TABLE IF NOT EXISTS `health_profiles` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `resident_id` int NOT NULL,
+  `medical_condition` varchar(255) DEFAULT NULL,
+  `maintenance_meds` varchar(255) DEFAULT NULL,
+  `last_checkup` date DEFAULT NULL,
+  `remarks` text,
+  PRIMARY KEY (`id`),
+  KEY `resident_id` (`resident_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -330,6 +348,24 @@ CREATE TABLE IF NOT EXISTS `user_log` (
   PRIMARY KEY (`log_id`),
   KEY `person_id` (`person_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `vaccinations`
+--
+
+DROP TABLE IF EXISTS `vaccinations`;
+CREATE TABLE IF NOT EXISTS `vaccinations` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `resident_id` int NOT NULL,
+  `vaccine_type` varchar(100) DEFAULT NULL,
+  `dose_number` int DEFAULT NULL,
+  `date_administered` date DEFAULT NULL,
+  `administered_by` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `resident_id` (`resident_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Constraints for dumped tables
