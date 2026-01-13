@@ -1,7 +1,7 @@
 <?php
 header('Cache-Control: no-cache, no-store, must-revalidate'); 
 header('Pragma: no-cache');   
-header('Expires: 0');         
+header('Expires: 0');          
 session_start();
 if (!isset($_SESSION['user_id'])) { 
     header("Location: login.php");
@@ -84,6 +84,42 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
         color: #6b7280;
         margin-top: 5px;
       }
+
+      .search-container {
+        position: relative;
+        width: 100%;
+      }
+
+      #searchResults {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ddd;
+        border-top: none;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border-radius: 0 0 4px 4px;
+      }
+
+      .search-item {
+        padding: 10px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+      }
+
+      .search-item:last-child {
+        border-bottom: none;
+      }
+
+      .search-item:hover {
+        background-color: #f3f4f6;
+      }
     </style>
   </head>
 
@@ -102,7 +138,7 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
                 <li><a href="staff_documents.php">Generate Certificates</a></li>
             </ul>
         </nav>
-    </aside>	
+    </aside>  
 
       <div class="main-content">
         <header class="topbar">
@@ -130,15 +166,17 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
               <h3>Upload Document</h3>
               <form action="upload_document.php" method="POST" enctype="multipart/form-data">
                 <div class="form-grid">
-                  <div class="input-group" style="grid-column: 1 / -1">
+                  <div class="input-group search-container" style="grid-column: 1 / -1">
                     <label for="residentSearch">Resident Name/ID</label>
                     <input
                       type="text"
                       id="residentSearch"
                       name="resident_name" 
                       placeholder="Search and Select Resident"
+                      autocomplete="off"
                       required
                     />
+                    <div id="searchResults"></div>
                   </div>
 
                   <div class="input-group">
@@ -244,12 +282,44 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
     </div>
 
     <script>
+      const residentSearch = document.getElementById('residentSearch');
+      const searchResults = document.getElementById('searchResults');
+
+      residentSearch.addEventListener('input', function() {
+          const query = this.value.trim();
+          if (query.length > 1) {
+              fetch(`search_residents.php?query=${encodeURIComponent(query)}`)
+                  .then(response => response.text())
+                  .then(data => {
+                      searchResults.innerHTML = data;
+                      searchResults.style.display = 'block';
+                  })
+                  .catch(err => console.error('Search error:', err));
+          } else {
+              searchResults.style.display = 'none';
+          }
+      });
+
+      function selectResident(name) {
+          residentSearch.value = name;
+          searchResults.style.display = 'none';
+      }
+
+      document.addEventListener('click', function(e) {
+          if (e.target !== residentSearch) {
+              searchResults.style.display = 'none';
+          }
+      });
+
       function setupLogout() {
         const logoutBtn = document.getElementById("logoutBtn");
-        logoutBtn.addEventListener("click", () => {
-          window.location.href = "logout.php";
-        });
+        if(logoutBtn) {
+            logoutBtn.addEventListener("click", () => {
+              window.location.href = "logout.php";
+            });
+        }
       }
+
       window.onload = function () {
         setupLogout();
       };
