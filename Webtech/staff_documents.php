@@ -171,6 +171,7 @@ $filteredDocuments = array_filter($_SESSION['all_documents'], function ($doc) us
             <li><a href="deaths.php">Deaths</a></li>
             <li><a href="documents.php">Documents</a></li>
             <li><a href="staff_documents.php" class="active">Generate Certificates</a></li>
+            <li><a href="health_tracking.php">Health Tracking</a></li>
           </ul>
         </nav>
       </aside>

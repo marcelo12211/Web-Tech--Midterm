@@ -140,6 +140,7 @@ unset($_SESSION['status_error']);
                     <li><a href="deaths.php" class="active">Deaths</a></li>
                     <li><a href="documents.php">Documents</a></li>
                     <li><a href="staff_documents.php">Generate Certificates</a></li>
+                    <li><a href="health_tracking.php">Health Tracking</a></li>
                 </ul>
             </nav>
         </aside>
