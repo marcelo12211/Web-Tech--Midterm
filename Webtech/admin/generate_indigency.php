@@ -69,7 +69,7 @@ $date = date("F d, Y");
         <div class="cert-footer">
             <p style="margin: 0; font-size: 1rem;">Prepared by:</p>
             <p class="signee">
-                HON. MERRY JANE SMITH
+                KENZO SORIANO
                 <br>
                 Punong Barangay
             </p>

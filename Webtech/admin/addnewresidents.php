@@ -295,18 +295,18 @@ a { text-decoration: none; }
 </head>
 <body>
 <div class="app-container">
-<aside class="sidebar">
-    <div class="logo">Happy Hallow<br />Barangay System</div>
-    <nav class="main-nav">
-        <ul>
-            <li><a href="admin_dashboard.php">Dashboard</a></li>
-            <li><a href="residents.php" class="active">Manage Residents</a></li>
-            <li><a href="manage_users.php">Manage Users</a></li>
-            <li><a href="documents.php">Documents</a></li>
-            <li><a href="logout.php">Logout</a></li>
-        </ul>
-    </nav>
-</aside>
+<div class="sidebar">
+            <div class="logo">Happy Hallow<br />Barangay System</div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="admin_dashboard.php">Dashboard</a></li>
+                    <li><a href="residents.php" class="active">Manage Residents</a></li>
+                    <li><a href="users.php">Manage Users</a></li>
+                    <li><a href="documents.php">Documents</a></li>
+                    <li><a href="health_tracking.php">Health Tracking</a></li>
+                </ul>
+            </nav>
+        </div>
 
 <div class="main-content">
 <header class="topbar">

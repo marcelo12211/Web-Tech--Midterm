@@ -120,7 +120,7 @@ function set_value($field, $default = '') {
 </head>
 <body>
 <div class="app-container">
-    <aside class="sidebar">
+    <div class="sidebar">
         <div class="logo">Happy Hallow<br />Barangay System</div>
         <nav class="main-nav">
             <ul>
@@ -128,10 +128,10 @@ function set_value($field, $default = '') {
                 <li><a href="residents.php">Manage Residents</a></li>
                 <li><a href="users.php" class="active">Manage Users</a></li>
                 <li><a href="documents.php">Documents</a></li>
-                <li><a href="logout.php">Logout</a></li>
+                <li><a href="health_tracking.php">Health Tracking</a></li>
             </ul>
         </nav>
-    </aside>
+    </div>
 
     <main class="main-content">
         <header class="topbar">
@@ -162,9 +162,8 @@ function set_value($field, $default = '') {
                     <div class="form-group">
                         <label>User Role</label>
                         <select name="role" required>
-                            <option value="staff" <?php echo (set_value('role') == 'staff' ? 'selected' : ''); ?>>Staff (Starts with 5)</option>
-                            <option value="clerk" <?php echo (set_value('role') == 'clerk' ? 'selected' : ''); ?>>Clerk (Starts with 5)</option>
-                            <option value="admin" <?php echo (set_value('role') == 'admin' ? 'selected' : ''); ?>>Administrator (Starts with 9)</option>
+                            <option value="staff" <?php echo (set_value('role') == 'staff' ? 'selected' : ''); ?>>Staff</option>
+                            <option value="admin" <?php echo (set_value('role') == 'admin' ? 'selected' : ''); ?>>Administrator</option>
                         </select>
                     </div>
                     
