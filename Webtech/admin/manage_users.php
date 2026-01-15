@@ -21,7 +21,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($user_name) || empty($username) || empty($password) || empty($user_role)) {
         $error = "Please fill in all required fields.";
     } else {
-        // 1. Check kung taken na ang username
         $sql_check = "SELECT user_id FROM users WHERE username = ?";
         $stmt_check = $conn->prepare($sql_check);
         $stmt_check->bind_param("s", $username);
@@ -33,34 +32,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_check->close();
         } else {
             $stmt_check->close();
-
-            // 2. CUSTOM ID GENERATION LOGIC
-            // Itakda ang starting number base sa role
             $prefix = ($user_role === 'Admin') ? '9' : '5';
-            
-            // Hanapin ang pinakamataas na ID sa database na nagsisimula sa prefix na ito
             $sql_max = "SELECT MAX(user_id) as max_id FROM users WHERE CAST(user_id AS CHAR) LIKE '$prefix%'";
             $result_max = $conn->query($sql_max);
             $row = $result_max->fetch_assoc();
             
             if ($row['max_id']) {
-                // Kung may nahanap na, dagdagan ng 1 (e.g., 50001 -> 50002)
                 $new_user_id = $row['max_id'] + 1;
             } else {
-                // Kung wala pang record, simulan sa base number
                 $new_user_id = ($user_role === 'Admin') ? 90001 : 50001;
             }
-
-            // 3. I-hash ang password (para sa security)
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-            // 4. INSERT process kasama ang manual na user_id
             $sql_insert = "INSERT INTO users (user_id, user_name, username, password, user_role, user_status) 
                            VALUES (?, ?, ?, ?, ?, ?)";
                            
             $stmt_insert = $conn->prepare($sql_insert);
             if ($stmt_insert) {
-                // "issssi" - i para sa integer (user_id), s para sa string, i para sa status
                 $stmt_insert->bind_param("issssi", $new_user_id, $user_name, $username, $hashed_password, $user_role, $user_status);
 
                 if ($stmt_insert->execute()) {

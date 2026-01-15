@@ -9,14 +9,13 @@ if (!isset($_SESSION['user_id'])) {
 }
 $logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User';
 
-include '../db_connect.php'; // Assuming db_connect.php is one level up
+include '../db_connect.php'; 
 
-$error = null; // Use a single error variable for simplicity
+$error = null; 
 $editMode = false;
 $residentId = isset($_GET['id']) ? intval($_GET['id']) : null;
 $resData = [];
 
-// --- Fetch Resident Data for Edit Mode ---
 if ($residentId) {
     $editMode = true;
     $stmt = $conn->prepare("SELECT * FROM residents WHERE person_id = ?");
@@ -31,10 +30,8 @@ if ($residentId) {
         exit();
     }
 }
-// Fetch household data for dropdown
 $householdResult = $conn->query("SELECT household_id, household_head FROM household ORDER BY household_id ASC");
 
-// Function to determine which special status is currently selected for drop down
 function getSelectedStatus($resData) {
     if (isset($resData['is_senior']) && $resData['is_senior']) return 'Senior Citizen';
     if (isset($resData['is_disabled']) && $resData['is_disabled']) return 'PWD';
@@ -46,7 +43,6 @@ function getSelectedStatus($resData) {
 }
 $current_status = getSelectedStatus($resData);
 
-// Re-fetch household data if needed, as the pointer might be at the end after POST logic
 if ($householdResult->num_rows > 0) {
     $householdResult->data_seek(0);
 }
@@ -60,7 +56,6 @@ if ($householdResult->num_rows > 0) {
 <title><?php echo $editMode ? "Edit" : "Add"; ?> Resident</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 <style>
-/* --- General Styles (Copied from users.php) --- */
 :root {
     --primary-color: #226b8dff;
     --primary-dark: #226b8dff;
@@ -89,8 +84,6 @@ a { text-decoration: none; }
     display: flex;
     min-height: 100vh;
 }
-
-/* Sidebar Styles */
 .sidebar {
     width: 250px;
     background: var(--sidebar-bg);
@@ -115,7 +108,6 @@ a { text-decoration: none; }
     color: white;
 }
 
-/* Main Content/Topbar Styles */
 .main-content { flex: 1; }
 .topbar {
     background: white;
@@ -155,7 +147,6 @@ a { text-decoration: none; }
     margin-bottom: 30px;
 }
 
-/* Alert Styles */
 .alert-error {
     padding: 15px;
     border-radius: 6px;
@@ -166,13 +157,12 @@ a { text-decoration: none; }
     border: 1px solid var(--danger-color);
 }
 
-/* --- Form Specific Styles (Based on users.php) --- */
 .form-card {
     background: var(--card-background);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     padding: 30px;
-    max-width: 900px; /* Mas malaki para sa resident form */
+    max-width: 900px; 
     margin: 0 auto; 
     position: relative;
 }
@@ -195,7 +185,7 @@ a { text-decoration: none; }
     gap: 20px;
 }
 .input-group {
-    margin-bottom: 0; /* Handled by grid gap */
+    margin-bottom: 0;
 }
 .input-group label {
     display: block;
@@ -223,20 +213,19 @@ a { text-decoration: none; }
     box-shadow: 0 0 0 3px rgba(34, 107, 141, 0.2); 
 }
 
-/* Specific Section Styles */
 .pwd-section, .senior-section {
     display: none;
-    grid-column: 1 / -1; /* Gawing full-width ang section */
+    grid-column: 1 / -1; 
     padding: 20px;
     border-radius: 8px;
     margin-top: 10px;
 }
 .pwd-section {
-    background: #fff3cd; /* Light warning color */
+    background: #fff3cd;
     border: 2px solid var(--warning-color);
 }
 .senior-section {
-    background: #d4edda; /* Light success color */
+    background: #d4edda; 
     border: 2px solid var(--success-color);
 }
 .pwd-section.show, .senior-section.show {

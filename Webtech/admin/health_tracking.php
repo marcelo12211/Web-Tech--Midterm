@@ -9,7 +9,6 @@ if (!isset($_SESSION['user_id'])) {
 
 $logged_in_username = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Admin';
 
-// --- 1. FETCH RESIDENTS FOR AUTOCOMPLETE ---
 $residents_list = [];
 $res_query = "SELECT surname, first_name, middle_name, suffix FROM residents ORDER BY surname ASC";
 $res_result = mysqli_query($conn, $res_query);
@@ -26,11 +25,9 @@ if ($res_result) {
     }
 }
 
-// --- 2. FETCH MAINTENANCE DATA ---
 $maintenance_query = "SELECT * FROM maintenance_profiles ORDER BY id DESC";
 $maintenance_result = mysqli_query($conn, $maintenance_query);
 
-// --- 3. FETCH VACCINATION DATA ---
 $vaccine_query = "SELECT * FROM vaccination_records ORDER BY id DESC";
 $vaccine_result = mysqli_query($conn, $vaccine_query);
 ?>
@@ -305,7 +302,6 @@ $vaccine_result = mysqli_query($conn, $vaccine_query);
 </datalist>
 
 <script>
-    // Tab switching logic
     document.querySelectorAll('.detail-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             const target = tab.getAttribute('data-tab');
@@ -316,12 +312,10 @@ $vaccine_result = mysqli_query($conn, $vaccine_query);
         });
     });
 
-    // Modal Control Functions
     function closeModals() {
         document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
     }
 
-    // --- MAINTENANCE LOGIC ---
     function prepareAddMaintenance() {
         document.getElementById('maintenanceModalTitle').innerText = "Add Maintenance Profile";
         document.getElementById('m_record_id').value = "";
@@ -343,7 +337,6 @@ $vaccine_result = mysqli_query($conn, $vaccine_query);
         document.getElementById('maintenanceModal').style.display = 'block';
     }
 
-    // --- VACCINE LOGIC ---
     function prepareAddVaccine() {
         document.getElementById('vaccineModalTitle').innerText = "Add Vaccination Record";
         document.getElementById('v_record_id').value = "";
@@ -365,7 +358,6 @@ $vaccine_result = mysqli_query($conn, $vaccine_query);
         document.getElementById('vaccineModal').style.display = 'block';
     }
 
-    // --- DELETE LOGIC ---
     function deleteRecord(id, type) {
         if (confirm("Are you sure you want to delete this record?")) {
             window.location.href = `save_health.php?delete_id=${id}&type=${type}`;

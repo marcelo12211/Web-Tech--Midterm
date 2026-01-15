@@ -6,7 +6,6 @@ if (!isset($_SESSION['user_id'])) {
     exit("Unauthorized");
 }
 
-// --- 1. HANDLE DELETE ---
 if (isset($_GET['delete_id']) && isset($_GET['type'])) {
     $id = intval($_GET['delete_id']);
     $type = $_GET['type'];
@@ -21,7 +20,6 @@ if (isset($_GET['delete_id']) && isset($_GET['type'])) {
     exit();
 }
 
-// --- 2. HANDLE SAVE/UPDATE ---
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $form_type = $_POST['form_type'];
     $record_id = $_POST['record_id'];
@@ -34,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $status = $_POST['status'];
 
         if (!empty($record_id)) {
-            // UPDATE
             $query = "UPDATE maintenance_profiles SET 
                       resident_name='$res_name', 
                       medical_condition='$condition', 
@@ -43,7 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                       status='$status' 
                       WHERE id=$record_id";
         } else {
-            // INSERT
             $query = "INSERT INTO maintenance_profiles (resident_name, medical_condition, medicine, last_checkup, status) 
                       VALUES ('$res_name', '$condition', '$medicine', '$checkup', '$status')";
         }
@@ -57,7 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $status = $_POST['status'];
 
         if (!empty($record_id)) {
-            // UPDATE
             $query = "UPDATE vaccination_records SET 
                       resident_name='$res_name', 
                       vaccine_type='$v_type', 
@@ -66,7 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                       status='$status' 
                       WHERE id=$record_id";
         } else {
-            // INSERT
             $query = "INSERT INTO vaccination_records (resident_name, vaccine_type, dose, date_administered, status) 
                       VALUES ('$res_name', '$v_type', '$dose', '$date', '$status')";
         }

@@ -17,15 +17,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
     $role = $_POST['role'] ?? 'staff';
-    
-    // Validations
     if (empty($fullname)) { $errors[] = "Full Name is required."; }
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) { $errors[] = "A valid Email is required."; }
     if (empty($password) || strlen($password) < 6) { $errors[] = "Password must be at least 6 characters."; }
     if ($password !== $confirm_password) { $errors[] = "Passwords do not match."; }
     
     if (empty($errors)) {
-        // 1. Check kung existing na ang email
         $check_stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ?");
         $check_stmt->bind_param("s", $email);
         $check_stmt->execute();
@@ -37,11 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     
     if (empty($errors)) {
-        // --- CUSTOM ID LOGIC ---
-        // Admin = 9, Staff/Clerk = 5
         $prefix = (strtolower($role) === 'admin') ? '9' : '5';
-        
-        // Hanapin ang MAX user_id na nagsisimula sa prefix
         $sql_max = "SELECT MAX(user_id) as max_id FROM users WHERE CAST(user_id AS CHAR) LIKE '$prefix%'";
         $result_max = $conn->query($sql_max);
         $row = $result_max->fetch_assoc();
@@ -49,20 +42,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($row['max_id']) {
             $new_user_id = $row['max_id'] + 1;
         } else {
-            // Starting point: 90001 (Admin) o 50001 (Others)
             $new_user_id = ($prefix === '9') ? 90001 : 50001;
         }
 
         $status = 'active'; 
-        
-        // INSERT statement (Plain Text Password)
         $sql = "INSERT INTO users (user_id, fullname, email, password, role, status) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
         
         if ($stmt === false) {
             $errors[] = "Database error: " . $conn->error;
         } else {
-            // Gagamitin ang $password nang direkta (no hashing)
             $stmt->bind_param("isssss", $new_user_id, $fullname, $email, $password, $role, $status); 
             
             if ($stmt->execute()) {

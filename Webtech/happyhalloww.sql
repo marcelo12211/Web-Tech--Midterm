@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jan 13, 2026 at 12:38 PM
+-- Generation Time: Jan 15, 2026 at 11:49 AM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -180,6 +180,31 @@ INSERT INTO `household` (`household_id`, `household_head`, `housing_ownership`, 
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `maintenance_profiles`
+--
+
+DROP TABLE IF EXISTS `maintenance_profiles`;
+CREATE TABLE IF NOT EXISTS `maintenance_profiles` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `resident_name` varchar(255) NOT NULL,
+  `medical_condition` varchar(255) DEFAULT NULL,
+  `medicine` varchar(255) DEFAULT NULL,
+  `last_checkup` date DEFAULT NULL,
+  `status` enum('Active Intake','For Refill','Completed') DEFAULT 'Active Intake',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `maintenance_profiles`
+--
+
+INSERT INTO `maintenance_profiles` (`id`, `resident_name`, `medical_condition`, `medicine`, `last_checkup`, `status`, `created_at`) VALUES
+(2, 'Alcasid, Regine V.', 'secret', 'biogesic', '2026-01-02', 'Active Intake', '2026-01-15 11:43:33');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `migration`
 --
 
@@ -227,7 +252,7 @@ CREATE TABLE IF NOT EXISTS `residents` (
   `children_count` int DEFAULT NULL,
   PRIMARY KEY (`person_id`),
   KEY `household_id` (`household_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2093 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2094 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `residents`
@@ -283,7 +308,8 @@ INSERT INTO `residents` (`person_id`, `household_id`, `first_name`, `middle_name
 (2086, 0, 'Gerald', 'Anderson', 'Randolph', '', 'Male', '1989-03-07', 'Single', 'Filipino', 'Catholic', 0, 'PBB House', '2006-01-01', 'High School', 'Actor', 0, 0, 'PhilHealth', 0, 0, 0),
 (2087, 0, 'Enchong', 'Dee', 'Sebastian', '', 'Male', '1988-11-05', 'Single', 'Filipino', 'Catholic', 0, 'Pool Side', '2006-01-01', 'College Graduate', 'Swimmer', 0, 0, 'PhilHealth', 0, 0, 0),
 (2088, 0, 'Maja', 'Salvador', 'Ross', '', 'Female', '1988-10-05', 'Married', 'Filipino', 'Catholic', 0, 'Dance Floor', '2003-01-01', 'High School', 'Dancer', 0, 0, 'PhilHealth', 0, 0, 0),
-(2092, 1005, 'qqweqwe', '', 'qweqwe', '', 'Male', '2026-01-14', 'Single', 'Filipino', '', 5, 'asdasd', '2026-01-11', 'College', 'Student', 0, 0, 'N/A', 0, 0, 0);
+(2092, 1005, 'qqweqwe', '', 'qweqwe', '', 'Male', '2026-01-14', 'Single', 'Filipino', '', 5, 'asdasd', '2026-01-11', 'College', 'Student', 0, 0, 'N/A', 0, 0, 0),
+(2093, 1005, 'jerald', '', 'fajardo', '', 'Male', '2000-02-02', 'Single', 'Filipino', NULL, 4, 'asdasd', NULL, 'College', 'Student', 1, 0, NULL, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -302,7 +328,14 @@ CREATE TABLE IF NOT EXISTS `senior_citizens` (
   `remarks` text,
   PRIMARY KEY (`senior_id`),
   KEY `fk_senior_resident` (`resident_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `senior_citizens`
+--
+
+INSERT INTO `senior_citizens` (`senior_id`, `resident_id`, `senior_gov_id`, `id_picture_path`, `date_registered`, `status`, `remarks`) VALUES
+(1, 2093, '', NULL, '2026-01-14', 'Active', NULL);
 
 -- --------------------------------------------------------
 
@@ -352,20 +385,27 @@ CREATE TABLE IF NOT EXISTS `user_log` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `vaccinations`
+-- Table structure for table `vaccination_records`
 --
 
-DROP TABLE IF EXISTS `vaccinations`;
-CREATE TABLE IF NOT EXISTS `vaccinations` (
+DROP TABLE IF EXISTS `vaccination_records`;
+CREATE TABLE IF NOT EXISTS `vaccination_records` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `resident_id` int NOT NULL,
-  `vaccine_type` varchar(100) DEFAULT NULL,
-  `dose_number` int DEFAULT NULL,
+  `resident_name` varchar(255) NOT NULL,
+  `vaccine_type` varchar(255) DEFAULT NULL,
+  `dose` varchar(50) DEFAULT NULL,
   `date_administered` date DEFAULT NULL,
-  `administered_by` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `resident_id` (`resident_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `status` enum('Completed','Pending') DEFAULT 'Completed',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `vaccination_records`
+--
+
+INSERT INTO `vaccination_records` (`id`, `resident_name`, `vaccine_type`, `dose`, `date_administered`, `status`, `created_at`) VALUES
+(1, 'Alexis, Nadine L.', 'vax', '1st dose', '2026-01-09', 'Pending', '2026-01-15 11:43:56');
 
 --
 -- Constraints for dumped tables
