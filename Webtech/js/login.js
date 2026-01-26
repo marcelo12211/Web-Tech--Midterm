@@ -1,4 +1,3 @@
-// Role switching
 const roleInput = document.getElementById("roleInput");
 const clientBtn = document.getElementById("clientBtn");
 const adminBtn = document.getElementById("adminBtn");

@@ -131,8 +131,6 @@ $result = $conn->query($sql);
           <button id="logoutBtn" class="btn logout-btn">Logout</button>
         </div>
       </header>
-
-      <!-- Success/Error Messages -->
       <?php if ($update_success): ?>
           <div class="alert success">✓ Household updated successfully!</div>
       <?php endif; ?>

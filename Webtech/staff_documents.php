@@ -1,8 +1,5 @@
 <?php
 session_start();
-
-// 1. SESSION-BASED DATA SIMULATION
-// Ginagawa natin ito para "gumana" ang delete kahit walang database.
 if (!isset($_SESSION['all_documents'])) {
     $_SESSION['all_documents'] = [
         [

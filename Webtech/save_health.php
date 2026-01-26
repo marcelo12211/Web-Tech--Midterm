@@ -1,13 +1,12 @@
 <?php
 session_start();
-include '../db_connect.php'; // Siguraduhin na tama ang path sa db_connect mo
+include '../db_connect.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
-// --- DELETE LOGIC ---
 if (isset($_GET['delete_id']) && isset($_GET['type'])) {
     $id = intval($_GET['delete_id']);
     $type = $_GET['type'];
@@ -26,7 +25,6 @@ if (isset($_GET['delete_id']) && isset($_GET['type'])) {
     exit();
 }
 
-// --- SAVE / UPDATE LOGIC ---
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $form_type = $_POST['form_type'];
     $record_id = $_POST['record_id'];
@@ -39,10 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $last_checkup = $_POST['last_checkup'];
 
         if (!empty($record_id)) {
-            // Update existing
             $query = "UPDATE maintenance_profiles SET resident_name='$resident_name', medical_condition='$condition', medicine='$medicine', last_checkup='$last_checkup', status='$status' WHERE id=$record_id";
         } else {
-            // Insert new
             $query = "INSERT INTO maintenance_profiles (resident_name, medical_condition, medicine, last_checkup, status) VALUES ('$resident_name', '$condition', '$medicine', '$last_checkup', '$status')";
         }
     } else {
@@ -51,10 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $date_administered = $_POST['date_administered'];
 
         if (!empty($record_id)) {
-            // Update existing
             $query = "UPDATE vaccination_records SET resident_name='$resident_name', vaccine_type='$vaccine_type', dose='$dose', date_administered='$date_administered', status='$status' WHERE id=$record_id";
         } else {
-            // Insert new
             $query = "INSERT INTO vaccination_records (resident_name, vaccine_type, dose, date_administered, status) VALUES ('$resident_name', '$vaccine_type', '$dose', '$date_administered', '$status')";
         }
     }

@@ -13,8 +13,6 @@ $logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : '
 
 include 'db_connect.php';
 
-// --- DATA PROCESSING START ---
-
 $filter_name = $_GET['filterName'] ?? '';
 $filter_year = $_GET['filterYear'] ?? '';
 
@@ -74,8 +72,6 @@ if ($stmt) {
     $stmt->close();
 }
 
-// --- AJAX HANDLER ---
-// Ito ang sasagot sa JavaScript search nang hindi nire-refresh ang buong page
 if (isset($_GET['ajax'])) {
     if (!empty($death_records)) {
         foreach ($death_records as $record) {
@@ -94,10 +90,9 @@ if (isset($_GET['ajax'])) {
     } else {
         echo "<tr><td colspan='5' style='text-align:center;'>No death records found.</td></tr>";
     }
-    exit; // Itigil ang script dito kapag AJAX request
+    exit; 
 }
 
-// Statistics (Para sa Dashboard Cards)
 $total_deaths = 0;
 $result_total = $conn->query("SELECT COUNT(*) AS total FROM deaths");
 if ($result_total && $row_total = $result_total->fetch_assoc()) {
@@ -287,13 +282,9 @@ unset($_SESSION['status_error']);
         const filterYear = document.getElementById('filterYear');
         const tableBody = document.getElementById('deathRecordTable');
         const clearBtn = document.getElementById('clearBtn');
-
-        // Function para sa AJAX Search
         async function performSearch() {
             const nameValue = filterName.value;
             const yearValue = filterYear.value;
-
-            // Bubuo ng URL para sa AJAX request
             const params = new URLSearchParams({
                 filterName: nameValue,
                 filterYear: yearValue,
@@ -308,19 +299,13 @@ unset($_SESSION['status_error']);
                 console.error('Search Error:', error);
             }
         }
-
-        // Event Listeners para sa typing (Live Search)
         filterName.addEventListener('input', performSearch);
         filterYear.addEventListener('input', performSearch);
-
-        // Clear button logic
         clearBtn.addEventListener('click', () => {
             filterName.value = '';
             filterYear.value = '';
             performSearch();
         });
-
-        // Functions for Modal & Actions
         function openDeathRecordModal() { document.getElementById("deathRecordModal").classList.add("show"); }
         function closeModal(id) { document.getElementById(id).classList.remove("show"); }
         function editDeath(id) { window.location.href = `edit_deaths.php?id=${id}`; }

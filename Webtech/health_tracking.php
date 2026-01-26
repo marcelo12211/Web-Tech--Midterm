@@ -3,14 +3,10 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Pragma: no-cache'); 
 header('Expires: 0'); 
 session_start();
-
-// I-check kung naka-login. Kung hindi, balik sa login page.
 if (!isset($_SESSION['user_id'])) { 
     header("Location: login.php");
     exit();
 }
-
-// Kunin ang pangalan ng user mula sa session para sa "Welcome" message
 $logged_in_username = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'User';
 
 include 'db_connect.php'; 
@@ -27,7 +23,6 @@ if (isset($_GET['delete_id']) && isset($_GET['type'])) {
     }
 }
 
-// --- SAVE / UPDATE LOGIC ---
 if (isset($_POST['save_record'])) {
     $type = $_POST['record_type'];
     $name = $_POST['resident_name'];
@@ -83,8 +78,6 @@ $vaccine_result = $conn->query("SELECT * FROM vaccination_records ORDER BY id DE
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .page-content { padding: 30px; flex: 1; overflow-y: auto; }
         .card { background: #fff; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); padding: 30px; margin-bottom: 25px; }
-        
-        /* UPDATED LOGOUT BUTTON - Plain Text Style */
         .logout-btn { 
             background: transparent; 
             color: #333 !important; 
@@ -94,12 +87,8 @@ $vaccine_result = $conn->query("SELECT * FROM vaccination_records ORDER BY id DE
             font-size: 14px;
         }
         .logout-btn:hover { color: #000 !important; }
-
-        /* BLUE ADD BUTTONS - Preserved */
         .add-btn { background-color: var(--primary-blue); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; }
         .add-btn:hover { background-color: var(--hover-blue); }
-
-        /* Table Styles */
         .data-table-container { border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); margin-top: 15px; }
         table { width: 100%; border-collapse: collapse; background: white; }
         thead th { background-color: #fcfcfc; color: #666; font-size: 12px; padding: 18px 15px; border-bottom: 2px solid var(--border-color); text-align: left; text-transform: uppercase; }
@@ -112,8 +101,6 @@ $vaccine_result = $conn->query("SELECT * FROM vaccination_records ORDER BY id DE
         .action-icon { border:none; background:none; cursor:pointer; font-size: 16px; transition: 0.2s; text-decoration: none; }
         .edit-icon { color: #007bff; }
         .delete-icon { color: #dc3545; margin-left: 10px; }
-
-        /* Modal Styles */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
         .modal-content { background-color: #fff; margin: 2% auto; padding: 25px; border-radius: 12px; width: 450px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .form-group { margin-bottom: 15px; }

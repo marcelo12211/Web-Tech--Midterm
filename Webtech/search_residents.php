@@ -3,8 +3,6 @@ include 'db_connect.php';
 
 if (isset($_GET['query'])) {
     $search = "%" . $_GET['query'] . "%";
-    
-    // Updated to use 'surname' instead of 'last_name' based on your DB schema
     $sql = "SELECT first_name, surname FROM residents 
             WHERE CONCAT(first_name, ' ', surname) LIKE ? 
             OR first_name LIKE ? 
@@ -20,7 +18,6 @@ if (isset($_GET['query'])) {
 
         if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
-                // Combine first_name and surname
                 $fullName = $row['first_name'] . ' ' . $row['surname'];
                 echo "<div class='search-item' onclick='selectResident(\"" . htmlspecialchars($fullName) . "\")'>" . htmlspecialchars($fullName) . "</div>";
             }
