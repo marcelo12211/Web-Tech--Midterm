@@ -1,10 +1,42 @@
 <?php
 session_start();
+include '../db_connect.php'; 
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
+
 $logged_in_username = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Admin';
+$total_res_query = "SELECT COUNT(*) as total FROM residents";
+$total_res_result = mysqli_query($conn, $total_res_query);
+$total_residents = mysqli_fetch_assoc($total_res_result)['total'] ?? 0;
+$senior_query = "SELECT COUNT(*) as total FROM residents WHERE TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) >= 60";
+$senior_result = mysqli_query($conn, $senior_query);
+$total_seniors = mysqli_fetch_assoc($senior_result)['total'] ?? 0;
+$pwd_check = mysqli_query($conn, "SHOW COLUMNS FROM residents LIKE 'pwd_status'");
+$total_pwd = 0;
+if (mysqli_num_rows($pwd_check) > 0) {
+    $pwd_query = "SELECT COUNT(*) as total FROM residents WHERE pwd_status = 'Yes' OR pwd_status = '1'";
+    $pwd_res = mysqli_query($conn, $pwd_query);
+    $total_pwd = mysqli_fetch_assoc($pwd_res)['total'];
+}
+$health_check = mysqli_query($conn, "SHOW TABLES LIKE 'health_tracking'");
+$health_cases = 0;
+if (mysqli_num_rows($health_check) > 0) {
+    $health_query = "SELECT COUNT(*) as total FROM health_tracking";
+    $health_res = mysqli_query($conn, $health_query);
+    $health_cases = mysqli_fetch_assoc($health_res)['total'];
+}
+
+$age_sql = "SELECT 
+    SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) BETWEEN 0 AND 12 THEN 1 ELSE 0 END) as kids,
+    SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) BETWEEN 13 AND 19 THEN 1 ELSE 0 END) as teens,
+    SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) BETWEEN 20 AND 59 THEN 1 ELSE 0 END) as adults,
+    SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) >= 60 THEN 1 ELSE 0 END) as seniors
+    FROM residents";
+$age_res = mysqli_query($conn, $age_sql);
+$age_data = mysqli_fetch_assoc($age_res);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -16,7 +48,7 @@ $logged_in_username = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION
     <style>
         :root {
             --primary-color: #226b8dff;
-            --primary-dark: #226b8dff;
+            --primary-dark: #1a526b;
             --secondary-color: #5f6368;
             --warning-color: #fbbc04;
             --danger-color: #ea4335;
@@ -40,8 +72,8 @@ $logged_in_username = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION
         .sidebar { width: 250px; background: var(--sidebar-bg); color: white; }
         .logo { padding: 25px; text-align: center; font-weight: 700; font-size: 1.15rem; line-height: 1.3; }
         .main-nav ul { list-style: none; padding: 0; margin: 0; }
-        .main-nav a { display: block; padding: 14px 20px; color: #bdc1c6; text-decoration: none; }
-        .main-nav a:hover, .main-nav a.active { background: var(--primary-dark); color: white; }
+        .main-nav a { display: block; padding: 14px 20px; color: #bdc1c6; text-decoration: none; transition: 0.2s; }
+        .main-nav a:hover, .main-nav a.active { background: var(--primary-color); color: white; }
         
         .main-content { flex: 1; }
         .topbar {
@@ -61,6 +93,7 @@ $logged_in_username = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION
             font-size: 0.9rem;
             border-radius: 6px;
             font-weight: 500;
+            text-decoration: none;
         }
 
         .page-content { padding: 30px; }
@@ -79,9 +112,11 @@ $logged_in_username = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION
         }
         .stat-label { font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; }
         .stat-value { font-size: 2rem; font-weight: 700; margin-top: 5px; }
+        
         .stat-card.total { border-left-color: var(--primary-color); }
         .stat-card.senior { border-left-color: var(--warning-color); }
         .stat-card.pwd { border-left-color: var(--danger-color); }
+
         .charts-main-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -121,10 +156,22 @@ $logged_in_username = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION
         <div class="page-content">
             <h2 style="margin-bottom: 25px;">Dashboard Overview</h2>
             <div class="dashboard-grid">
-                <div class="stat-card total"><div class="stat-label">Total Residents</div><div class="stat-value">1,240</div></div>
-                <div class="stat-card senior"><div class="stat-label">Seniors</div><div class="stat-value">158</div></div>
-                <div class="stat-card pwd"><div class="stat-label">PWD</div><div class="stat-value">42</div></div>
-                <div class="stat-card" style="border-left-color: #26c6da;"><div class="stat-label">Health Cases</div><div class="stat-value">28</div></div>
+                <div class="stat-card total">
+                    <div class="stat-label">Total Residents</div>
+                    <div class="stat-value"><?php echo number_format($total_residents); ?></div>
+                </div>
+                <div class="stat-card senior">
+                    <div class="stat-label">Seniors</div>
+                    <div class="stat-value"><?php echo number_format($total_seniors); ?></div>
+                </div>
+                <div class="stat-card pwd">
+                    <div class="stat-label">PWD</div>
+                    <div class="stat-value"><?php echo number_format($total_pwd); ?></div>
+                </div>
+                <div class="stat-card" style="border-left-color: #26c6da;">
+                    <div class="stat-label">Health Cases</div>
+                    <div class="stat-value"><?php echo number_format($health_cases); ?></div>
+                </div>
             </div>
 
             <div class="charts-main-grid">
@@ -133,22 +180,45 @@ $logged_in_username = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION
                     <canvas id="ageChart"></canvas>
                 </div>
                 <div class="chart-box">
-                    <div class="chart-title">Health Conditions</div>
+                    <div class="chart-title">Health Condition Overview</div>
                     <canvas id="healthChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     new Chart(document.getElementById('ageChart'), {
         type: 'bar',
-        data: { labels: ['0-12', '13-19', '20-59', '60+'], datasets: [{ label: 'Residents', data: [200, 150, 600, 158], backgroundColor: '#226b8dff' }] }
+        data: { 
+            labels: ['0-12', '13-19', '20-59', '60+'], 
+            datasets: [{ 
+                label: 'Residents', 
+                data: [
+                    <?php echo (int)$age_data['kids']; ?>, 
+                    <?php echo (int)$age_data['teens']; ?>, 
+                    <?php echo (int)$age_data['adults']; ?>, 
+                    <?php echo (int)$age_data['seniors']; ?>
+                ], 
+                backgroundColor: '#226b8dff' 
+            }] 
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true } }
+        }
     });
     new Chart(document.getElementById('healthChart'), {
         type: 'doughnut',
-        data: { labels: ['Hypertension', 'Diabetes', 'Asthma'], datasets: [{ data: [15, 10, 5], backgroundColor: ['#ea4335', '#fbbc04', '#226b8dff'] }] }
+        data: { 
+            labels: ['Hypertension', 'Diabetes', 'Asthma'], 
+            datasets: [{ 
+                data: [15, 10, 5],
+                backgroundColor: ['#ea4335', '#fbbc04', '#226b8dff'] 
+            }] 
+        }
     });
 </script>
 </body>
