@@ -475,7 +475,7 @@ function formatDate(dateString) {
             purok: purokSelect.value
         });
 
-        fetch(`http://127.0.0.1:5000/admin/residents?${params.toString()}`)
+        fetch(`http://${window.location.hostname}:5000/admin/residents?${params.toString()}`)
             .then(response => {
                 if (!response.ok) {
                     return response.text().then(text => { throw new Error(text); });

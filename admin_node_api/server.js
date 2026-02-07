@@ -135,8 +135,8 @@ app.get("/admin/residents", async (req, res) => {
     const [rows] = await pool.query(sql, params);
     res.json(rows);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch residents" });
+    console.error("Error fetching residents:", err.message);
+    res.status(500).json({ error: "Failed to fetch residents", details: err.message });
   }
 });
 
