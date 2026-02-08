@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jan 15, 2026 at 11:49 AM
+-- Generation Time: Feb 08, 2026 at 04:39 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS `deaths` (
   `place_of_death` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `record_number` (`record_number`)
-) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `deaths`
@@ -66,7 +66,8 @@ INSERT INTO `deaths` (`id`, `record_number`, `name`, `age`, `date_of_death`, `ca
 (17, 'D-012', 'Michael Tan', 30, '2024-05-18', 'Other', 'no', 'no', NULL, NULL, NULL, '2025-12-11 18:17:35', 12, NULL),
 (18, 'D-013', 'Sophia Cruz', 90, '2024-06-03', 'Old Age (Natural)', 'yes', 'yes', 'PWD-5002', 'OSCA-1004', 'NCSC-9804', '2025-12-11 18:17:35', 13, NULL),
 (19, 'D-014', 'Ramon Garcia', 68, '2024-06-25', 'Kidney Failure', 'no', 'yes', NULL, 'OSCA-1005', 'NCSC-9805', '2025-12-11 18:17:35', 14, NULL),
-(20, 'D-015', 'Nena Lim', 50, '2024-07-12', 'Heart Attack', 'no', 'no', NULL, NULL, NULL, '2025-12-11 18:17:35', 15, NULL);
+(20, 'D-015', 'Nena Lim', 50, '2024-07-12', 'Heart Attack', 'no', 'no', NULL, NULL, NULL, '2025-12-11 18:17:35', 15, NULL),
+(22, 'D-016', 'Fajardo, jeje J.', 50, '2026-01-01', 'Old Age (Natural)', 'no', 'no', '', '', '', '2026-01-22 07:04:23', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -193,14 +194,14 @@ CREATE TABLE IF NOT EXISTS `maintenance_profiles` (
   `status` enum('Active Intake','For Refill','Completed') DEFAULT 'Active Intake',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `maintenance_profiles`
 --
 
 INSERT INTO `maintenance_profiles` (`id`, `resident_name`, `medical_condition`, `medicine`, `last_checkup`, `status`, `created_at`) VALUES
-(2, 'Alcasid, Regine V.', 'secret', 'biogesic', '2026-01-02', 'Active Intake', '2026-01-15 11:43:33');
+(9, 'Fajardo, jeje J.', 'Sick', 'Biogesic', '2026-01-06', 'Active Intake', '2026-01-22 06:55:41');
 
 -- --------------------------------------------------------
 
@@ -252,64 +253,96 @@ CREATE TABLE IF NOT EXISTS `residents` (
   `children_count` int DEFAULT NULL,
   PRIMARY KEY (`person_id`),
   KEY `household_id` (`household_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2094 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2095 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `residents`
 --
 
 INSERT INTO `residents` (`person_id`, `household_id`, `first_name`, `middle_name`, `surname`, `suffix`, `sex`, `birthdate`, `civil_status`, `nationality`, `religion`, `purok`, `address`, `residency_start_date`, `education_level`, `occupation`, `is_senior`, `is_disabled`, `health_insurance`, `vaccination`, `is_pregnant`, `children_count`) VALUES
-(2039, 0, 'Juan', 'Perez', 'Dela Cruz', '', 'Male', '1990-05-15', 'Married', 'Filipino', 'Catholic', 0, '123 Main St', '2010-01-01', 'College Graduate', 'Engineer', 0, 0, 'PhilHealth', 0, 0, 2),
-(2040, 0, 'Maria', 'Santos', 'Reyes', '', 'Female', '1985-08-20', 'Single', 'Filipino', 'Catholic', 0, '456 Side St', '2015-03-12', 'High School', 'Vendor', 0, 0, 'PhilHealth', 0, 0, 0),
-(2041, 0, 'Jose', 'Rizal', 'Protacio', '', 'Male', '1955-06-19', 'Widowed', 'Filipino', 'Catholic', 0, '789 Old Rd', '1980-11-20', 'Elementary', 'Retired', 1, 0, 'None', 0, 0, 5),
-(2042, 0, 'Elena', 'Gomez', 'Salvador', '', 'Female', '1998-12-01', 'Single', 'Filipino', 'Iglesia ni Cristo', 0, '321 New St', '2020-05-05', 'College Level', 'Student', 0, 0, 'PhilHealth', 1, 0, 0),
-(2043, 0, 'Ricardo', 'Dalisay', 'Cardo', '', 'Male', '1982-11-11', 'Married', 'Filipino', 'Catholic', 0, '001 Action Ave', '2018-09-30', 'Vocational', 'Police', 0, 0, 'PhilHealth', 0, 0, 1),
-(2044, 0, 'Liza', 'Soberano', 'Hope', '', 'Female', '1998-01-04', 'Single', 'Filipino', 'Catholic', 0, '222 Star Blvd', '2021-01-15', 'College Graduate', 'Actress', 0, 0, 'HMO', 0, 0, 0),
-(2045, 0, 'Benny', 'Abante', 'Santos', 'Jr', 'Male', '1970-02-25', 'Married', 'Filipino', 'Catholic', 0, '555 Hills Dr', '1995-06-10', 'High School', 'Driver', 0, 1, 'PhilHealth', 0, 0, 4),
-(2046, 0, 'Ana', 'Marie', 'Cruz', '', 'Female', '1960-04-10', 'Married', 'Filipino', 'Catholic', 0, '999 Garden St', '1985-12-01', 'Elementary', 'Housewife', 1, 0, 'PhilHealth', 0, 0, 3),
-(2047, 0, 'Kenzo', 'Morales', 'Soriano', '', 'Male', '2000-09-15', 'Single', 'Filipino', 'Other', 0, '101 Tech Way', '2022-03-01', 'College Graduate', 'IT Specialist', 0, 0, 'HMO', 0, 0, 0),
-(2048, 0, 'Enrique', 'Gil', 'Moran', '', 'Male', '1992-03-30', 'Single', 'Filipino', 'Catholic', 0, '333 Talent Ln', '2019-10-10', 'College Level', 'Staff', 0, 0, 'PhilHealth', 0, 0, 0),
-(2049, 0, 'Gardo', 'Versoza', 'Cupido', '', 'Male', '1969-11-08', 'Married', 'Filipino', 'Catholic', 0, '444 Gym Rd', '2005-01-01', 'High School', 'Fitness Coach', 0, 0, 'None', 0, 0, 2),
-(2051, 0, 'Tirso', 'Cruz', 'Pimentel', 'III', 'Male', '1952-04-01', 'Married', 'Filipino', 'Catholic', 0, '888 Stage Rd', '1980-05-05', 'College Graduate', 'Retired', 1, 0, 'PhilHealth', 0, 0, 3),
-(2052, 0, 'Vilma', 'Santos', 'Recto', '', 'Female', '1953-11-03', 'Married', 'Filipino', 'Catholic', 0, '222 Gov St', '1990-01-01', 'College Graduate', 'Politician', 1, 0, 'PhilHealth', 0, 0, 2),
-(2053, 0, 'Piolo', 'Pascual', 'Jose', '', 'Male', '1977-01-12', 'Single', 'Filipino', 'Born Again', 0, '111 Heart Ave', '2000-01-01', 'College Graduate', 'Actor', 0, 0, 'HMO', 0, 0, 0),
-(2054, 0, 'Bea', 'Alonzo', 'Phylbert', '', 'Female', '1987-10-17', 'Single', 'Filipino', 'Catholic', 0, '555 Movie Ln', '2010-01-01', 'High School', 'Businesswoman', 0, 0, 'HMO', 0, 0, 0),
-(2055, 0, 'John', 'Lloyd', 'Cruz', '', 'Male', '1983-06-24', 'Single', 'Filipino', 'Catholic', 0, '444 Acting Way', '2005-01-01', 'High School', 'Freelancer', 0, 0, 'PhilHealth', 0, 0, 1),
-(2056, 0, 'Angel', 'Locsin', 'Colmenares', '', 'Female', '1985-04-23', 'Married', 'Filipino', 'Catholic', 0, '777 Hero Rd', '2015-01-01', 'College Level', 'Volunteer', 0, 0, 'PhilHealth', 0, 0, 0),
-(2057, 0, 'Dingdong', 'Dantes', 'Jose', '', 'Male', '1980-08-02', 'Married', 'Filipino', 'Catholic', 0, '999 Primetime St', '2014-01-01', 'College Graduate', 'Director', 0, 0, 'HMO', 0, 0, 2),
-(2058, 0, 'Marian', 'Rivera', 'Gracia', '', 'Female', '1984-08-12', 'Married', 'Filipino', 'Catholic', 0, '999 Primetime St', '2014-01-01', 'College Graduate', 'Model', 0, 0, 'HMO', 0, 0, 2),
-(2059, 0, 'Vic', 'Sotto', 'Magno', '', 'Male', '1954-04-28', 'Married', 'Filipino', 'Catholic', 0, '123 Eat Bldg', '1979-01-01', 'College Graduate', 'Host', 1, 0, 'PhilHealth', 0, 0, 5),
-(2060, 0, 'Joey', 'De Leon', 'Rodriguez', '', 'Male', '1946-10-14', 'Married', 'Filipino', 'Catholic', 0, '123 Eat Bldg', '1979-01-01', 'College Graduate', 'Comedian', 1, 0, 'PhilHealth', 0, 0, 5),
-(2061, 0, 'Tito', 'Sotto', 'Castelo', '', 'Male', '1948-08-24', 'Married', 'Filipino', 'Catholic', 0, '123 Eat Bldg', '1979-01-01', 'College Graduate', 'Retired', 1, 0, 'PhilHealth', 0, 0, 4),
-(2062, 0, 'Catriona', 'Gray', 'Magnayon', '', 'Female', '1994-01-06', 'Single', 'Filipino', 'Christian', 0, '1 Miss Universe', '2018-01-01', 'College Graduate', 'Singer', 0, 0, 'HMO', 0, 0, 0),
-(2063, 0, 'Pia', 'Wurtzbach', 'Alonzo', '', 'Female', '1989-09-24', 'Married', 'Filipino', 'Catholic', 0, '2 Miss Universe', '2015-01-01', 'College Graduate', 'Influencer', 0, 0, 'HMO', 0, 0, 0),
-(2064, 0, 'Gloria', 'Diaz', 'Aspillera', '', 'Female', '1951-03-10', 'Widowed', 'Filipino', 'Catholic', 0, '3 Miss Universe', '1969-01-01', 'College Graduate', 'Actress', 1, 0, 'PhilHealth', 0, 0, 3),
-(2065, 0, 'Manny', 'Pacquiao', 'Dapidran', '', 'Male', '1978-12-17', 'Married', 'Filipino', 'Evangelical', 0, '888 Boxing St', '1995-01-01', 'College Graduate', 'Athlete', 0, 0, 'PhilHealth', 0, 0, 5),
-(2066, 0, 'Jinkee', 'Pacquiao', 'Jamora', '', 'Female', '1979-01-12', 'Married', 'Filipino', 'Evangelical', 0, '888 Boxing St', '1995-01-01', 'College Level', 'Businesswoman', 0, 0, 'PhilHealth', 0, 0, 5),
-(2067, 0, 'Bamboo', 'Mañalac', 'Francisco', '', 'Male', '1976-03-21', 'Single', 'Filipino', 'Catholic', 0, '456 Rock Rd', '2000-01-01', 'College Level', 'Musician', 0, 0, 'None', 0, 0, 0),
-(2068, 0, 'Lea', 'Salonga', 'Chiongbian', '', 'Female', '1971-02-22', 'Married', 'Filipino', 'Catholic', 0, 'Broadway Ave', '1980-01-01', 'College Graduate', 'Singer', 0, 0, 'HMO', 0, 0, 1),
-(2069, 0, 'Vice', 'Ganda', 'Viceral', '', 'Male', '1976-03-31', 'Married', 'Filipino', 'Catholic', 0, 'Showtime St', '2009-01-01', 'College Level', 'Host', 0, 0, 'HMO', 0, 0, 0),
-(2070, 0, 'Anne', 'Curtis', 'Smith', '', 'Female', '1985-02-17', 'Married', 'Filipino', 'Catholic', 0, 'Showtime St', '2000-01-01', 'College Level', 'Host', 0, 0, 'HMO', 0, 0, 1),
-(2071, 0, 'Vhong', 'Navarro', 'Perez', '', 'Male', '1977-01-04', 'Married', 'Filipino', 'Catholic', 0, 'Showtime St', '1995-01-01', 'High School', 'Host', 0, 0, 'PhilHealth', 0, 0, 2),
-(2072, 0, 'Gary', 'Valenciano', 'Santiago', '', 'Male', '1964-08-06', 'Married', 'Filipino', 'Christian', 0, 'Pure Energy Ln', '1983-01-01', 'College Level', 'Singer', 1, 0, 'HMO', 0, 0, 3),
-(2073, 0, 'Martin', 'Nievera', 'Ramirez', '', 'Male', '1962-02-05', 'Single', 'Filipino', 'Catholic', 0, 'Concert Dr', '1982-01-01', 'College Level', 'Singer', 1, 0, 'HMO', 0, 0, 2),
-(2074, 0, 'Regine', 'Velasquez', 'Alcasid', '', 'Female', '1970-04-22', 'Married', 'Filipino', 'Catholic', 0, 'Songbird Way', '1986-01-01', 'High School', 'Singer', 0, 0, 'PhilHealth', 0, 0, 1),
-(2075, 0, 'Ogie', 'Alcasid', 'Herminio', '', 'Male', '1967-08-27', 'Married', 'Filipino', 'Catholic', 0, 'Songbird Way', '2010-01-01', 'College Graduate', 'Singer', 0, 0, 'PhilHealth', 0, 0, 3),
-(2076, 0, 'Daniel', 'Padilla', 'Ford', '', 'Male', '1995-04-26', 'Single', 'Filipino', 'Catholic', 0, 'Kathniel St', '2011-01-01', 'High School', 'Actor', 0, 0, 'PhilHealth', 0, 0, 0),
-(2077, 0, 'Kathryn', 'Bernardo', 'Chandria', '', 'Female', '1996-03-26', 'Single', 'Filipino', 'Catholic', 0, 'Kathniel St', '2003-01-01', 'College Graduate', 'Actress', 0, 0, 'HMO', 0, 0, 0),
-(2078, 0, 'James', 'Reid', 'Robert', '', 'Male', '1993-05-11', 'Single', 'Filipino', 'Catholic', 0, 'Careless Ave', '2010-01-01', 'High School', 'Singer', 0, 0, 'None', 0, 0, 0),
-(2079, 0, 'Nadine', 'Lustre', 'Alexis', '', 'Female', '1993-10-31', 'Single', 'Filipino', 'Catholic', 0, 'Island Rd', '2005-01-01', 'High School', 'Actress', 0, 0, 'None', 0, 0, 0),
-(2080, 0, 'Alden', 'Richards', 'Faulkerson', '', 'Male', '1992-01-02', 'Single', 'Filipino', 'Catholic', 0, 'AlDub Ln', '2010-01-01', 'College Level', 'Actor', 0, 0, 'PhilHealth', 0, 0, 0),
-(2081, 0, 'Maine', 'Mendoza', 'Capili', '', 'Female', '1995-03-03', 'Married', 'Filipino', 'Catholic', 0, 'AlDub Ln', '2015-01-01', 'College Graduate', 'Actress', 0, 0, 'PhilHealth', 0, 0, 0),
-(2082, 0, 'Coco', 'Martin', 'Nacianceno', '', 'Male', '1981-11-01', 'Single', 'Filipino', 'Catholic', 0, 'Probinsyano St', '2005-01-01', 'College Graduate', 'Actor', 0, 0, 'PhilHealth', 0, 0, 0),
-(2083, 0, 'Judy', 'Ann', 'Santos', '', 'Female', '1978-05-11', 'Married', 'Filipino', 'Catholic', 0, 'Kitchen Ave', '1986-01-01', 'High School', 'Chef', 0, 0, 'HMO', 0, 0, 3),
-(2084, 0, 'Ryan', 'Agoncillo', 'Quinto', '', 'Male', '1979-04-10', 'Married', 'Filipino', 'Catholic', 0, 'Kitchen Ave', '2000-01-01', 'College Graduate', 'Host', 0, 0, 'HMO', 0, 0, 3),
-(2085, 0, 'Kim', 'Chiu', 'Luy', '', 'Female', '1990-04-19', 'Single', 'Filipino', 'Catholic', 0, 'PBB House', '2006-01-01', 'College Level', 'Actress', 0, 0, 'PhilHealth', 0, 0, 0),
-(2086, 0, 'Gerald', 'Anderson', 'Randolph', '', 'Male', '1989-03-07', 'Single', 'Filipino', 'Catholic', 0, 'PBB House', '2006-01-01', 'High School', 'Actor', 0, 0, 'PhilHealth', 0, 0, 0),
-(2087, 0, 'Enchong', 'Dee', 'Sebastian', '', 'Male', '1988-11-05', 'Single', 'Filipino', 'Catholic', 0, 'Pool Side', '2006-01-01', 'College Graduate', 'Swimmer', 0, 0, 'PhilHealth', 0, 0, 0),
-(2088, 0, 'Maja', 'Salvador', 'Ross', '', 'Female', '1988-10-05', 'Married', 'Filipino', 'Catholic', 0, 'Dance Floor', '2003-01-01', 'High School', 'Dancer', 0, 0, 'PhilHealth', 0, 0, 0),
-(2092, 1005, 'qqweqwe', '', 'qweqwe', '', 'Male', '2026-01-14', 'Single', 'Filipino', '', 5, 'asdasd', '2026-01-11', 'College', 'Student', 0, 0, 'N/A', 0, 0, 0),
-(2093, 1005, 'jerald', '', 'fajardo', '', 'Male', '2000-02-02', 'Single', 'Filipino', NULL, 4, 'asdasd', NULL, 'College', 'Student', 1, 0, NULL, 0, 0, 0);
+(18, 301, 'Ricardo', 'Dalisay', 'Dalisay', NULL, 'Male', '1985-04-12', 'Married', 'Filipino', 'Catholic', 3, 'Poblacion', '2010-05-20', 'College Graduate', 'Police Officer', 0, 0, 'PhilHealth', 0, 0, 2),
+(19, 301, 'Alyana', 'Arevalo', 'Dalisay', NULL, 'Female', '1988-11-25', 'Married', 'Filipino', 'Catholic', 3, 'Poblacion', '2012-08-15', 'College Graduate', 'Reporter', 0, 0, 'HMO', 0, 1, 2),
+(20, 302, 'Teresita', 'Cruz', 'Magbanua', NULL, 'Female', '1952-01-30', 'Widowed', 'Filipino', 'Christian', 1, '14 Old Road', '1975-02-10', 'Elementary Graduate', 'Retired', 1, 0, 'PhilHealth', 0, 0, 5),
+(21, 303, 'Mark', 'Anthony', 'Fernandez', 'Jr.', 'Male', '1995-06-14', 'Single', 'Filipino', 'Catholic', 5, '99 Riverside', '2018-01-05', 'Vocational', 'Mechanic', 0, 0, 'None', 0, 0, 0),
+(22, 304, 'Luzviminda', 'Santos', 'Reyes', NULL, 'Female', '1970-05-22', 'Married', 'Filipino', 'Catholic', 2, '45 Malaya St.', '1995-12-01', 'High School Graduate', 'Vendor', 0, 0, 'PhilHealth', 0, 0, 3),
+(23, 305, 'Esteban', 'Gomez', 'Quinto', NULL, 'Male', '1948-12-03', 'Married', 'Filipino', 'Catholic', 4, 'Sec 2 Lot 9', '1980-11-12', 'High School Graduate', 'Farmer', 1, 1, 'PhilHealth', 0, 0, 4),
+(24, 306, 'Samantha', 'Lee', 'Tan', NULL, 'Female', '1992-09-08', 'Single', 'Filipino-Chinese', 'Buddhist', 1, '12 Orchid Lane', '2015-04-20', 'Post-Graduate', 'Accountant', 0, 0, 'Private', 0, 0, 0),
+(25, 307, 'Rodrigo', 'Duterte', 'Roa', NULL, 'Male', '1945-03-28', 'Separated', 'Filipino', 'Catholic', 5, 'Davao St.', '2020-01-01', 'College Graduate', 'Public Servant', 1, 0, 'PhilHealth', 0, 0, 4),
+(26, 308, 'Maria', 'Clara', 'Ibarra', NULL, 'Female', '2001-02-14', 'Single', 'Filipino', 'Catholic', 2, '77 History Ave.', '2001-02-14', 'College Student', 'Student', 0, 0, 'Private', 0, 0, 0),
+(27, 309, 'Jonathan', 'Wick', 'Mendoza', NULL, 'Male', '1980-07-07', 'Widowed', 'Filipino', 'None', 4, 'Hidden Valley', '2019-03-15', 'College Graduate', 'Security', 0, 0, 'HMO', 0, 0, 0),
+(28, 310, 'Gabriela', 'Silang', 'Estrada', NULL, 'Female', '1994-10-10', 'Married', 'Filipino', 'Catholic', 3, 'Freedom St.', '2016-05-10', 'College Graduate', 'Teacher', 0, 0, 'PhilHealth', 0, 0, 1),
+(29, 311, 'Fernando', 'Poe', 'Agila', 'III', 'Male', '1965-08-20', 'Married', 'Filipino', 'Catholic', 1, 'Film St.', '1990-10-12', 'High School Graduate', 'Driver', 0, 0, 'PhilHealth', 0, 0, 3),
+(30, 312, 'Catriona', 'Magnayon', 'Gray', NULL, 'Female', '1994-01-06', 'Single', 'Filipino', 'Christian', 5, 'Lava Walk', '2018-02-14', 'College Graduate', 'Model', 0, 0, 'Private', 0, 0, 0),
+(31, 313, 'Emilio', 'Aguinaldo', 'Famy', NULL, 'Male', '1950-03-22', 'Married', 'Filipino', 'Catholic', 2, 'Kawit Road', '1970-11-20', 'High School Graduate', 'Retired Clerk', 1, 0, 'PhilHealth', 0, 0, 6),
+(32, 314, 'Leonor', 'Rivera', 'Mercado', NULL, 'Female', '1990-04-11', 'Single', 'Filipino', 'Catholic', 4, 'Calamba St.', '2012-01-10', 'College Graduate', 'Nurse', 0, 0, 'HMO', 0, 0, 0),
+(33, 315, 'Andres', 'Bonifacio', 'Castro', NULL, 'Male', '1983-11-30', 'Married', 'Filipino', 'Catholic', 3, 'Tondo Ave.', '2005-05-05', 'Vocational', 'Laborer', 0, 0, 'None', 0, 0, 2),
+(34, 316, 'Melchora', 'Aquino', 'Ramos', NULL, 'Female', '1935-01-06', 'Widowed', 'Filipino', 'Catholic', 1, 'Banlat Rd.', '1960-09-09', 'None', 'Retired Vendor', 1, 1, 'PhilHealth', 0, 0, 7),
+(35, 317, 'Jose', 'Protacio', 'Rizal', NULL, 'Male', '1988-06-19', 'Single', 'Filipino', 'Catholic', 5, 'Bagumbayan', '2015-04-12', 'Post-Graduate', 'Doctor', 0, 0, 'Private', 0, 0, 0),
+(36, 318, 'Pia', 'Alonzo', 'Wurtzbach', NULL, 'Female', '1989-09-24', 'Married', 'Filipino', 'Catholic', 2, 'Stuttgart St.', '2023-06-20', 'College Graduate', 'Influencer', 0, 0, 'Private', 0, 0, 0),
+(37, 319, 'Vicente', 'Sotto', 'Tito', 'IV', 'Male', '1970-08-24', 'Married', 'Filipino', 'Catholic', 4, 'White Plains', '1998-02-28', 'College Graduate', 'Musician', 0, 0, 'HMO', 0, 0, 4),
+(38, 320, 'Leni', 'Gerona', 'Robredo', NULL, 'Female', '1965-04-23', 'Widowed', 'Filipino', 'Catholic', 3, 'Naga Lane', '2022-01-01', 'Post-Graduate', 'Lawyer', 0, 0, 'PhilHealth', 0, 0, 3),
+(39, 321, 'Ramon', 'Magsaysay', 'Del Fierro', NULL, 'Male', '1953-08-31', 'Married', 'Filipino', 'Christian', 1, 'Zambales Dr.', '1985-03-10', 'College Graduate', 'Mechanic', 1, 0, 'PhilHealth', 0, 0, 3),
+(40, 322, 'Corazon', 'Cojuangco', 'Aquino', NULL, 'Female', '1933-01-25', 'Widowed', 'Filipino', 'Catholic', 5, 'Times St.', '1960-12-14', 'College Graduate', 'Retired', 1, 0, 'Private', 0, 0, 5),
+(41, 323, 'Benigno', 'Simeon', 'Aquino', 'III', 'Male', '1960-02-08', 'Single', 'Filipino', 'Catholic', 2, 'Times St.', '1985-06-01', 'College Graduate', 'Economist', 0, 0, 'Private', 0, 0, 0),
+(42, 324, 'Gloria', 'Macapagal', 'Arroyo', NULL, 'Female', '1947-04-05', 'Married', 'Filipino', 'Catholic', 4, 'Pampanga Rd.', '1998-04-28', 'Post-Graduate', 'Economist', 1, 0, 'HMO', 0, 0, 3),
+(43, 325, 'Joseph', 'Ejercito', 'Estrada', NULL, 'Male', '1937-04-19', 'Married', 'Filipino', 'Catholic', 1, 'San Juan St.', '2014-12-30', 'College Undergraduat', 'Actor', 1, 0, 'PhilHealth', 0, 0, 3),
+(44, 326, 'Imelda', 'Remedios', 'Marcos', NULL, 'Female', '1929-07-02', 'Widowed', 'Filipino', 'Catholic', 3, 'Leyte Dr.', '2014-12-30', 'College Graduate', 'Retired', 1, 0, 'Private', 0, 0, 3),
+(45, 327, 'Ferdinand', 'Emmanuel', 'Marcos', 'Jr.', 'Male', '1957-09-13', 'Married', 'Filipino', 'Catholic', 5, 'Ilocos St.', '2022-06-30', 'Post-Graduate', 'President', 1, 0, 'PhilHealth', 0, 0, 3),
+(46, 328, 'Sara', 'Zimmerman', 'Duterte', NULL, 'Female', '1978-05-31', 'Married', 'Filipino', 'Christian', 2, 'Davao Central', '2022-06-30', 'Post-Graduate', 'Lawyer', 0, 0, 'PhilHealth', 0, 0, 3),
+(47, 329, 'Manny', 'Dapidran', 'Pacquiao', NULL, 'Male', '1978-12-17', 'Married', 'Filipino', 'Christian', 4, 'GenSan', '2000-01-01', 'College Graduate', 'Athlete', 0, 0, 'Private', 0, 0, 5),
+(48, 330, 'Isabel', 'Daza', 'Semblat', NULL, 'Female', '1988-03-06', 'Married', 'Filipino', 'Catholic', 1, 'Makati', '2015-08-07', 'College Graduate', 'Businesswoman', 0, 0, 'Private', 0, 0, 2),
+(49, 331, 'Robin', 'Cariño', 'Padilla', NULL, 'Male', '1969-11-23', 'Married', 'Filipino', 'Islam', 5, 'Fairview', '2018-05-15', 'High School Graduate', 'Senator', 0, 0, 'None', 0, 0, 4),
+(50, 332, 'Risa', 'Baraquel', 'Hontiveros', NULL, 'Female', '1966-02-24', 'Widowed', 'Filipino', 'Catholic', 3, 'Pasig', '2010-01-10', 'College Graduate', 'Senator', 0, 0, 'HMO', 0, 0, 4),
+(51, 333, 'Vico', 'Nubla', 'Sotto', NULL, 'Male', '1989-06-17', 'Single', 'Filipino', 'Catholic', 2, 'Pasig City Hall', '2019-01-01', 'Post-Graduate', 'Mayor', 0, 0, 'PhilHealth', 0, 0, 0),
+(52, 334, 'Hidilyn', 'Francisco', 'Diaz', NULL, 'Female', '1991-02-20', 'Married', 'Filipino', 'Catholic', 4, 'Zamboanga', '2021-05-20', 'College Graduate', 'Military', 0, 0, 'Private', 0, 0, 0),
+(53, 335, 'Bambam', 'Pineda', 'Sotto', NULL, 'Male', '2015-05-05', 'Single', 'Filipino', 'Christian', 1, 'Mandaluyong', '2015-06-12', 'Elementary Student', 'None', 0, 0, 'PhilHealth', 0, 0, 0),
+(54, 336, 'Maria', 'Leonora', 'Theresa', NULL, 'Female', '2022-12-25', 'Single', 'Filipino', 'Catholic', 5, 'New Birth Rd.', '2022-12-25', 'Infant', 'None', 0, 0, 'PhilHealth', 0, 0, 0),
+(55, 337, 'Juan', 'Luna', 'Novicio', NULL, 'Male', '1975-10-23', 'Married', 'Filipino', 'Catholic', 2, 'Spoliarium St.', '2010-11-12', 'College Graduate', 'Painter', 0, 0, 'HMO', 0, 0, 2),
+(56, 338, 'Melanie', 'Marquez', 'Lawyer', NULL, 'Female', '1964-07-16', 'Married', 'Filipino', 'Christian', 4, 'Beauty St.', '2000-11-12', 'High School Graduate', 'Trainer', 0, 0, 'Private', 0, 0, 6),
+(57, 339, 'Efren', 'Bata', 'Reyes', NULL, 'Male', '1954-08-26', 'Married', 'Filipino', 'Catholic', 3, 'Cue Road', '1980-01-01', 'High School Graduate', 'Professional', 1, 0, 'HMO', 0, 0, 3),
+(58, 340, 'Miriam', 'Defensor', 'Santiago', NULL, 'Female', '1945-06-15', 'Married', 'Filipino', 'Catholic', 1, 'Quezon City', '1970-01-01', 'Post-Graduate', 'Judge', 1, 0, 'Private', 0, 0, 2),
+(59, 341, 'Paolo', 'Ballesteros', 'Ty', NULL, 'Male', '1982-11-29', 'Single', 'Filipino', 'Catholic', 5, 'Antipolo', '2005-01-01', 'College Graduate', 'Artist', 0, 0, 'Private', 0, 0, 1),
+(60, 342, 'Maine', 'Mendoza', 'Mendoza', NULL, 'Female', '1995-03-03', 'Married', 'Filipino', 'Catholic', 2, 'Bulacan', '2015-07-04', 'College Graduate', 'Host', 0, 0, 'Private', 0, 0, 0),
+(61, 343, 'Arjo', 'Atayde', 'Atayde', NULL, 'Male', '1990-11-05', 'Married', 'Filipino', 'Catholic', 4, 'Quezon City', '2023-07-28', 'College Graduate', 'Politician', 0, 0, 'Private', 0, 0, 0),
+(62, 344, 'Coco', 'Martin', 'Martin', NULL, 'Male', '1981-11-01', 'Single', 'Filipino', 'Catholic', 3, 'Fairview', '2005-01-01', 'College Graduate', 'Actor', 0, 0, 'HMO', 0, 0, 0),
+(63, 345, 'Vice', 'Ganda', 'Viceral', NULL, 'Male', '1976-03-31', 'Married', 'Filipino', 'Catholic', 1, 'Quezon City', '2000-01-01', 'College Graduate', 'Host', 0, 0, 'Private', 0, 0, 0),
+(64, 346, 'Anne', 'Curtis', 'Smith', NULL, 'Female', '1985-02-17', 'Married', 'Filipino', 'Catholic', 5, 'Makati', '2010-01-01', 'College Graduate', 'Endorser', 0, 0, 'Private', 0, 0, 1),
+(65, 347, 'Billy', 'Crawford', 'Crawford', NULL, 'Male', '1982-05-16', 'Married', 'Filipino', 'Christian', 2, 'Laguna', '2018-01-01', 'High School Graduate', 'Singer', 0, 0, 'Private', 0, 0, 1),
+(66, 348, 'Coleen', 'Garcia', 'Crawford', NULL, 'Female', '1992-09-24', 'Married', 'Filipino', 'Christian', 4, 'Laguna', '2018-09-24', 'College Graduate', 'Actress', 0, 0, 'Private', 0, 0, 1),
+(67, 349, 'Vhong', 'Navarro', 'Navarro', NULL, 'Male', '1977-01-04', 'Married', 'Filipino', 'Catholic', 3, 'Quezon City', '2000-01-01', 'High School Graduate', 'Dancer', 0, 0, 'HMO', 0, 0, 2),
+(68, 350, 'Kim', 'Chiu', 'Chiu', NULL, 'Female', '1990-04-19', 'Single', 'Filipino', 'Catholic', 1, 'Cebu', '2006-01-01', 'College Graduate', 'Actress', 0, 0, 'Private', 0, 0, 0),
+(69, 351, 'Xian', 'Lim', 'Lim', NULL, 'Male', '1989-07-12', 'Single', 'Filipino', 'Christian', 5, 'Pasig', '2010-01-01', 'College Graduate', 'Actor', 0, 0, 'HMO', 0, 0, 0),
+(70, 352, 'Judy', 'Ann', 'Santos', NULL, 'Female', '1978-05-11', 'Married', 'Filipino', 'Catholic', 2, 'Antipolo', '2009-04-28', 'College Graduate', 'Chef', 0, 0, 'Private', 0, 0, 3),
+(71, 353, 'Ryan', 'Agoncillo', 'Agoncillo', NULL, 'Male', '1979-04-10', 'Married', 'Filipino', 'Catholic', 4, 'Antipolo', '2009-04-28', 'College Graduate', 'Host', 0, 0, 'Private', 0, 0, 3),
+(72, 354, 'Piolo', 'Pascual', 'Pascual', NULL, 'Male', '1977-01-12', 'Single', 'Filipino', 'Christian', 3, 'Batangas', '2000-01-01', 'College Graduate', 'Singer', 0, 0, 'HMO', 0, 0, 1),
+(73, 355, 'Angel', 'Locsin', 'Arce', NULL, 'Female', '1985-04-23', 'Married', 'Filipino', 'Catholic', 1, 'Bukidnon', '2021-08-07', 'College Graduate', 'Activist', 0, 0, 'Private', 0, 0, 0),
+(74, 356, 'John', 'Lloyd', 'Cruz', NULL, 'Male', '1983-06-24', 'Single', 'Filipino', 'Catholic', 5, 'Cebu', '2018-05-15', 'High School Graduate', 'Actor', 0, 0, 'None', 0, 0, 1),
+(75, 357, 'Bea', 'Alonzo', 'Alonzo', NULL, 'Female', '1987-10-17', 'Single', 'Filipino', 'Catholic', 2, 'Zambales', '2020-01-10', 'College Graduate', 'Vlogger', 0, 0, 'HMO', 0, 0, 0),
+(76, 358, 'Daniel', 'Padilla', 'Padilla', NULL, 'Male', '1995-04-26', 'Single', 'Filipino', 'Catholic', 4, 'Fairview', '2010-01-01', 'High School Graduate', 'Actor', 0, 0, 'HMO', 0, 0, 0),
+(77, 359, 'Kathryn', 'Bernardo', 'Bernardo', NULL, 'Female', '1996-03-26', 'Single', 'Filipino', 'Catholic', 3, 'Quezon City', '2012-05-20', 'College Graduate', 'Business', 0, 0, 'Private', 0, 0, 0),
+(78, 360, 'Toni', 'Gonzaga', 'Soriano', NULL, 'Female', '1984-01-20', 'Married', 'Filipino', 'Christian', 1, 'Taytay', '2015-06-12', 'College Graduate', 'Producer', 0, 0, 'Private', 0, 0, 2),
+(79, 360, 'Paul', 'Soriano', 'Soriano', NULL, 'Male', '1981-10-17', 'Married', 'Filipino', 'Christian', 1, 'Taytay', '2015-06-12', 'Post-Graduate', 'Director', 0, 0, 'Private', 0, 0, 2),
+(80, 361, 'Isko', 'Moreno', 'Domagoso', NULL, 'Male', '1974-10-24', 'Married', 'Filipino', 'Catholic', 5, 'Tondo', '1974-10-24', 'Post-Graduate', 'Public Servant', 0, 0, 'PhilHealth', 0, 0, 5),
+(81, 362, 'Mel', 'Tiangco', 'Tiangco', NULL, 'Female', '1955-08-10', 'Single', 'Filipino', 'Catholic', 2, 'GMA', '1980-05-20', 'College Graduate', 'Anchor', 1, 0, 'Private', 0, 0, 0),
+(82, 363, 'Jessica', 'Soho', 'Soho', NULL, 'Female', '1964-03-27', 'Single', 'Filipino', 'Catholic', 4, 'La Union', '1985-01-01', 'College Graduate', 'Broadcaster', 1, 0, 'Private', 0, 0, 0),
+(83, 364, 'Kara', 'David', 'David', NULL, 'Female', '1973-09-12', 'Married', 'Filipino', 'Christian', 3, 'UP', '1995-03-15', 'Post-Graduate', 'Professor', 0, 0, 'PhilHealth', 0, 0, 1),
+(84, 365, 'Atom', 'Araullo', 'Araullo', NULL, 'Male', '1982-10-19', 'Single', 'Filipino', 'Catholic', 1, 'Loyola', '1982-10-19', 'College Graduate', 'Journalist', 0, 0, 'HMO', 0, 0, 0),
+(85, 366, 'Karen', 'Davila', 'Davila', NULL, 'Female', '1970-11-21', 'Married', 'Filipino', 'Christian', 5, 'Forbes', '1995-08-10', 'College Graduate', 'Broadcaster', 0, 0, 'Private', 0, 0, 2),
+(86, 367, 'Korina', 'Sanchez', 'Roxas', NULL, 'Female', '1964-10-05', 'Married', 'Filipino', 'Catholic', 2, 'Araneta', '2009-10-27', 'College Graduate', 'Host', 1, 0, 'HMO', 0, 0, 2),
+(87, 368, 'Noli', 'De Castro', 'De Castro', NULL, 'Male', '1949-07-06', 'Widowed', 'Filipino', 'Catholic', 4, 'Mindoro', '1970-01-01', 'College Graduate', 'Commentator', 1, 0, 'PhilHealth', 0, 0, 3),
+(88, 369, 'Bong', 'Revilla', 'Revilla', 'Jr.', 'Male', '1966-09-25', 'Married', 'Filipino', 'Catholic', 3, 'Cavite', '1966-09-25', 'High School Graduate', 'Senator', 0, 0, 'Private', 0, 0, 6),
+(89, 370, 'Jinggoy', 'Estrada', 'Estrada', NULL, 'Male', '1963-02-17', 'Married', 'Filipino', 'Catholic', 1, 'Greenhills', '1980-01-01', 'College Graduate', 'Senator', 1, 0, 'PhilHealth', 0, 0, 4),
+(90, 371, 'Bong', 'Go', 'Go', NULL, 'Male', '1974-06-14', 'Married', 'Filipino', 'Christian', 5, 'Davao', '1990-01-01', 'College Graduate', 'Senator', 0, 0, 'Private', 0, 0, 3),
+(91, 372, 'Bato', 'Dela Rosa', 'Dela Rosa', NULL, 'Male', '1962-01-21', 'Married', 'Filipino', 'Catholic', 2, 'Davao', '1980-01-01', 'Post-Graduate', 'Senator', 1, 0, 'PhilHealth', 0, 0, 3),
+(92, 373, 'Cynthia', 'Villar', 'Villar', NULL, 'Female', '1950-07-29', 'Married', 'Filipino', 'Catholic', 4, 'Las Piñas', '1975-01-01', 'Post-Graduate', 'Senator', 1, 0, 'Private', 0, 0, 3),
+(93, 374, 'Raffy', 'Tulfo', 'Tulfo', NULL, 'Male', '1960-03-12', 'Married', 'Filipino', 'Christian', 3, 'TV5', '1990-01-01', 'College Graduate', 'Senator', 1, 0, 'Private', 0, 0, 5),
+(94, 375, 'Imee', 'Marcos', 'Marcos', NULL, 'Female', '1955-11-12', 'Single', 'Filipino', 'Catholic', 1, 'Ilocos', '1955-11-12', 'Post-Graduate', 'Senator', 1, 0, 'PhilHealth', 0, 0, 3),
+(95, 376, 'Joel', 'Villanueva', 'Villanueva', NULL, 'Male', '1975-08-02', 'Married', 'Filipino', 'Christian', 5, 'Bulacan', '1975-08-02', 'Post-Graduate', 'Senator', 0, 0, 'Private', 0, 0, 2),
+(96, 377, 'Mark', 'Villar', 'Villar', NULL, 'Male', '1978-08-14', 'Married', 'Filipino', 'Catholic', 2, 'Vista', '2000-01-01', 'Post-Graduate', 'Senator', 0, 0, 'Private', 0, 0, 1),
+(97, 378, 'Win', 'Gatchalian', 'Gatchalian', NULL, 'Male', '1974-04-06', 'Single', 'Filipino', 'Christian', 4, 'Valenzuela', '1990-01-01', 'College Graduate', 'Senator', 0, 0, 'Private', 0, 0, 0),
+(98, 379, 'Nancy', 'Binay', 'Binay', NULL, 'Female', '1973-05-12', 'Married', 'Filipino', 'Catholic', 3, 'Makati', '1973-05-12', 'College Graduate', 'Senator', 0, 0, 'PhilHealth', 0, 0, 4),
+(99, 380, 'Koko', 'Pimentel', 'Pimentel', NULL, 'Male', '1964-01-20', 'Married', 'Filipino', 'Catholic', 1, 'CDO', '1985-01-01', 'Post-Graduate', 'Senator', 1, 0, 'PhilHealth', 0, 0, 2),
+(100, 381, 'Migz', 'Zubiri', 'Zubiri', NULL, 'Male', '1969-04-13', 'Married', 'Filipino', 'Catholic', 5, 'Bukidnon', '1985-01-01', 'Post-Graduate', 'Senator', 0, 0, 'Private', 0, 0, 3);
 
 -- --------------------------------------------------------
 
@@ -362,7 +395,7 @@ INSERT INTO `users` (`user_id`, `fullname`, `email`, `password`, `role`, `status
 (5002, 'Enrique Moran', 'Enriquemoran@gmail.com', 'password123', 'staff', 'active'),
 (5003, 'Kenzo Soriano', 'Kenzosoriano@gmail.com', 'password123', 'staff', 'active'),
 (9005, 'LJ De Guzman', 'LJDeGuzman@gmail.com', 'password123', 'admin', 'active'),
-(9006, 'Jerald Fajardo', 'Jeraldfajardo@gmail.com', 'password123', 'admin', 'active');
+(9006, 'Jerald J. Fajardo', 'Jeraldfajardo@gmail.com', 'password123', 'admin', 'active');
 
 -- --------------------------------------------------------
 
@@ -398,14 +431,14 @@ CREATE TABLE IF NOT EXISTS `vaccination_records` (
   `status` enum('Completed','Pending') DEFAULT 'Completed',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `vaccination_records`
 --
 
 INSERT INTO `vaccination_records` (`id`, `resident_name`, `vaccine_type`, `dose`, `date_administered`, `status`, `created_at`) VALUES
-(1, 'Alexis, Nadine L.', 'vax', '1st dose', '2026-01-09', 'Pending', '2026-01-15 11:43:56');
+(2, 'Tito Sotto Castelo', 'covid', '1st dose', '2026-01-08', 'Pending', '2026-01-15 13:39:23');
 
 --
 -- Constraints for dumped tables
