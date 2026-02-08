@@ -546,8 +546,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const residentId = data.person_id;
 
     try {
-      const res = await fetch(
-        `http://127.0.0.1:5000/admin/residents/${residentId}`,
+      const res = await fetch("http://" + window.location.hostname + ":5000/admin/residents/" + residentId,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
